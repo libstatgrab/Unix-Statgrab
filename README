@@ -1,0 +1,38 @@
+Unix-Statgrab version 0.01
+==========================
+
+Unix::Statgrab is a wrapper for libstatgrab, as available from
+http://www.i-scream.org/libstatgrab/. It is a reasonably portable 
+attempt to query interesting stats about your computer. It covers 
+information on the operating system, CPU, memory usage, network 
+interfaces, hard-disks etc.
+
+INSTALLATION
+
+To install this module type the following:
+
+   perl Makefile.PL
+   make
+   make test
+   make install
+
+DEPENDENCIES
+
+This module requires these other modules and libraries:
+
+    libstatgrab from http://www.i-scream.org/libstatgrab/
+
+If you have installed libstatgrab in a non-standard location,
+you have to tell Makefile.PL about it:
+
+    perl Makefile.PL LIBS="-L/path/to/location -lstatgrab" INC="-I/path/to/includes"
+
+COPYRIGHT AND LICENCE
+
+Copyright (C) 2004 by Tassilo von Parseval
+
+This library is free software; you can redistribute it and/or modify it under
+the terms of the GNU Lesser General Public License as published by the Free
+Software Foundation; either version 2.1 of the License, or (at your option) any
+later version.
+
