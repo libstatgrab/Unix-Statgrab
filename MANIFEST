@@ -5,6 +5,8 @@ check.c
 ppport.h
 README
 Statgrab.xs
+t/0_pod.t
+t/0_pod_coverage.t
 t/Unix-Statgrab.t
 fallback/const-c.inc
 fallback/const-xs.inc

@@ -1,4 +1,4 @@
-Unix-Statgrab version 0.02
+Unix-Statgrab version 0.03
 ==========================
 
 Unix::Statgrab is a wrapper for libstatgrab, as available from
@@ -29,7 +29,7 @@ you have to tell Makefile.PL about it:
 
 COPYRIGHT AND LICENCE
 
-Copyright (C) 2004 by Tassilo von Parseval
+Copyright (C) 2004-2005 by Tassilo von Parseval
 
 This library is free software; you can redistribute it and/or modify it under
 the terms of the GNU Lesser General Public License as published by the Free

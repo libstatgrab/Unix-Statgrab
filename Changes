@@ -1,5 +1,8 @@
 Revision history for Perl extension Unix::Statgrab.
 
+0.03  Sun Apr  3 07:38:20 CEST 2005
+    - POD- and POD-coverage-tests
+
 0.02  Mon Jun 21 07:05:16 CEST 2004
 	- running Makefile.PL could nuke /dev/null. Fixed.
 	  (Tim Bishop <tim AT bishnet DOT net>)

@@ -150,7 +150,7 @@ use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $AUTOLOAD);
 	SG_PROCESS_STATE_ZOMBIE
 );
 
-$VERSION = '0.02';
+$VERSION = '0.03';
 
 if ($] >= 5.006) {
     *sort_procs_by_name = \&_sort_procs_by_name;
@@ -301,7 +301,7 @@ If C<cpu_get_stats_diff> is called for the first time (and C<get_cpu_stats> wasn
 
 Its return value supports the same methods as C<get_cpu_stats>. C<systime> then will be the seconds since the last call of this function.
 
-=head2 get_cpu_percent
+=head2 get_cpu_percents
 
 Calls C<get_cpu_stats_diff> under the hood but instead of returning ticks, it returns percentages. Its return value provides the same methods as C<get_cpu_stats> and C<get_cpu_stats_diff>.
 
@@ -721,7 +721,7 @@ Tassilo von Parseval, E<lt>tassilo.von.parseval@rwth-aachen.deE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2004 by Tassilo von Parseval
+Copyright (C) 2004-2005 by Tassilo von Parseval
 
 This library is free software; you can redistribute it and/or modify it under
 the terms of the GNU Lesser General Public License as published by the Free
