@@ -1,5 +1,5 @@
 use Test;
-BEGIN { plan tests => 18 };
+BEGIN { plan tests => 22 };
 
 use Unix::Statgrab;
 ok(1); # If we made it this far, we're ok.
@@ -67,3 +67,47 @@ while (my ($func, $methods) = each %funcs) {
     }
     ok(1);
 }
+
+my $p = get_process_stats;
+my @p;
+if ($p) {
+    $p->sort_by("name");
+    ok(1);
+    @p = $p->all_procs;
+    ok(1);
+} else {
+    # yes, I know, it's insane
+    ok(1) for 1 .. 2;
+}
+
+my $pr = $p[0];
+if ($pr) {
+    $pr->proc_name;
+    $pr->proc_title;
+    $pr->pid;
+    $pr->parent_pid;
+    $pr->pgid;
+    $pr->uid;
+    $pr->euid;
+    $pr->gid;
+    $pr->egid;
+    $pr->proc_size;
+    $pr->proc_resident;
+    $pr->time_spent;
+    $pr->cpu_percent;
+    $pr->nice;
+    $pr->state;
+} 
+ok(1);
+
+   
+@p = sort sort_procs_by_name $p->all_procs;
+@p = sort sort_procs_by_pid  $p->all_procs;
+@p = sort sort_procs_by_uid  $p->all_procs;
+@p = sort sort_procs_by_gid  $p->all_procs;
+@p = sort sort_procs_by_size $p->all_procs;
+@p = sort sort_procs_by_res  $p->all_procs;
+@p = sort sort_procs_by_cpu  $p->all_procs;
+@p = sort sort_procs_by_time $p->all_procs;
+ok(1);
+

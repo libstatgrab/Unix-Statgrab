@@ -7,7 +7,7 @@ sub have_libstatgrab {
     my %args = map { split /\s*=\s*/ } @ARGV;
     my $LIBS = $args{ LIBS } || "-lstatgrab";
     my $INC = $args{ INC };
-    return 1 if system("$CC check.c $INC $LIBS -o /dev/null 2>/dev/null") == 0;
+    return 1 if system("$CC check.c $INC $LIBS 2>/dev/null") == 0;
     return 0;
 }
 
@@ -32,7 +32,8 @@ WriteMakefile(
        AUTHOR         => 'Tassilo von Parseval <tassilo.von.parseval@rwth-aachen.de>') : ()),
     LIBS              => ['-lstatgrab'], 
     DEFINE            => '', 
-    INC               => '-I.', 
+    INC               => '-I.',
+    clean	      => { FILES => "a.out" },
 );
 if  (eval {require ExtUtils::Constant; 1}) {
   # If you edit these definitions to change the constants used by this module,

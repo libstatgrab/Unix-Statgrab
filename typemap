@@ -11,6 +11,7 @@ sg_disk_io_stats_my	    *   O_OBJECT
 sg_network_io_stats_my	    *   O_OBJECT
 sg_network_iface_stats_my   *   O_OBJECT
 sg_page_stats		    *   O_OBJECT
+sg_process_stats_my	    *	O_OBJECT
 sg_process_stats	    *   O_OBJECT
 sg_process_count	    *   O_OBJECT
 

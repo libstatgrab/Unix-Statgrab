@@ -1,4 +1,4 @@
-Unix-Statgrab version 0.01
+Unix-Statgrab version 0.02
 ==========================
 
 Unix::Statgrab is a wrapper for libstatgrab, as available from

@@ -18,6 +18,7 @@ use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $AUTOLOAD);
 # This allows declaration	use Unix::Statgrab ':all';
 # If you do not need this, moving things directly into @EXPORT or @EXPORT_OK
 # will save memory.
+
 %EXPORT_TAGS = ( 'all' => [ qw(
 	get_error drop_privileges 
 	get_host_info 
@@ -31,6 +32,17 @@ use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $AUTOLOAD);
 	get_network_iface_stats
 	get_page_stats get_page_stats_diff
 	get_user_stats
+	get_process_stats
+	
+	sort_procs_by_name
+	sort_procs_by_pid
+	sort_procs_by_uid
+	sort_procs_by_gid
+	sort_procs_by_size
+	sort_procs_by_res
+	sort_procs_by_cpu
+	sort_procs_by_time
+
 	SG_ERROR_ASPRINTF
 	SG_ERROR_DEVSTAT_GETDEVS
 	SG_ERROR_DEVSTAT_SELECTDEVS
@@ -87,7 +99,17 @@ use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $AUTOLOAD);
 	get_network_iface_stats
 	get_page_stats get_page_stats_diff
 	get_user_stats
-	
+	get_process_stats
+
+	sort_procs_by_name
+	sort_procs_by_pid
+	sort_procs_by_uid
+	sort_procs_by_gid
+	sort_procs_by_size
+	sort_procs_by_res
+	sort_procs_by_cpu
+	sort_procs_by_time
+
 	SG_ERROR_ASPRINTF
 	SG_ERROR_DEVSTAT_GETDEVS
 	SG_ERROR_DEVSTAT_SELECTDEVS
@@ -128,8 +150,32 @@ use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $AUTOLOAD);
 	SG_PROCESS_STATE_ZOMBIE
 );
 
-$VERSION = '0.01';
+$VERSION = '0.02';
 
+if ($] >= 5.006) {
+    *sort_procs_by_name = \&_sort_procs_by_name;
+    *sort_procs_by_pid  = \&_sort_procs_by_pid;
+    *sort_procs_by_uid	= \&_sort_procs_by_uid;
+    *sort_procs_by_gid	= \&_sort_procs_by_gid;
+    *sort_procs_by_size	= \&_sort_procs_by_size;
+    *sort_procs_by_res	= \&_sort_procs_by_res;
+    *sort_procs_by_cpu	= \&_sort_procs_by_cpu;
+    *sort_procs_by_time	= \&_sort_procs_by_time;
+} else {
+    no strict 'refs';
+    my $pkg = caller;
+    # older perls don't yet know about prototyped sort routines
+    *sort_procs_by_name = sub { _sort_procs_by_name(${"${pkg}::a"}, ${"${pkg}::b"}) };
+    *sort_procs_by_pid  = sub { _sort_procs_by_pid (${"${pkg}::a"}, ${"${pkg}::b"}) };
+    *sort_procs_by_uid	= sub { _sort_procs_by_uid (${"${pkg}::a"}, ${"${pkg}::b"}) };
+    *sort_procs_by_gid	= sub { _sort_procs_by_gid (${"${pkg}::a"}, ${"${pkg}::b"}) };
+    *sort_procs_by_size	= sub { _sort_procs_by_size(${"${pkg}::a"}, ${"${pkg}::b"}) };
+    *sort_procs_by_res	= sub { _sort_procs_by_res (${"${pkg}::a"}, ${"${pkg}::b"}) };
+    *sort_procs_by_cpu	= sub { _sort_procs_by_cpu (${"${pkg}::a"}, ${"${pkg}::b"}) };
+    *sort_procs_by_time	= sub { _sort_procs_by_time(${"${pkg}::a"}, ${"${pkg}::b"}) };
+}
+    
+    
 sub AUTOLOAD {
     # This AUTOLOAD is used to 'autoload' constants from the constant()
     # XS function.
@@ -196,6 +242,11 @@ Unix::Statgrab is a wrapper for libstatgrab as available from L<http://www.i-scr
 Each of the provided functions follow a simple rule: It never takes any argument and returns either an object (in case of success) or C<undef>. In case C<undef> was returned, check the return value of C<get_error>. Also see L<"ERROR HANDLING"> further below.
 
 =head1 FUNCTIONS
+
+=head2 drop_privileges()
+
+Unix::Statgrab can be told to discard I<setuid> and I<setgid> privileges which is usually a good thing. If your program
+doesn't need the elevated privileges somewhere else, call it right after C<use>ing the module.
 
 =head2 get_host_info()
 
@@ -471,6 +522,85 @@ The number of currently logged in users.
 =item * B<name_list>
 
 A list of the users currently logged in.
+
+=back
+
+=head2 get_process_stats()
+
+Returns loads of information about the current processes. This function only returns a container. If you want to look at the processes returned, call C<all_procs> on its return value.
+
+The processes can also be sorted by various criteria by using the C<sort_by> method. This will change the internal order of the container. This method returns the container object so you can do some method chaining:
+
+    my $procs = get_process_stats;
+    $procs->sort_by("name");
+    print $_->proc_name, "\n" foreach $procs->all_procs;
+
+    # syntactically sweeter
+
+    print $_->proc_name, "\n" 
+	foreach get_process_stats->sort_by("name")->all_procs;
+
+Available sorting methods are I<"name">, I<"pid">, I<"uid">, I<"gid">, I<"size">, I<"res">, I<"cpu"> and I<"time">.
+
+You can also sort the list returned by C<all_procs>. For that you can use one of the eight sorting routines thusly:
+
+    my $p = get_process_stats;
+    
+    my @by_name = sort sort_procs_by_name $p->all_procs;
+    my @by_pid  = sort sort_procs_by_pid  $p->all_procs;
+    my @by_uid  = sort sort_procs_by_uid  $p->all_procs;
+    # etc.
+
+Each object returned by C<all_procs> supports the following methods:
+
+=over 4
+
+=item * B<proc_name>
+
+=item * B<proc_title>
+
+The full command line with which the process was started.
+
+=item * B<pid>
+
+=item * B<parent_pid>
+
+=item * B<pgid>
+
+Process ID of process group leader.
+
+=item * B<uid>
+
+=item * B<euid>
+
+Effective user ID.
+
+=item * B<gid>
+
+=item * B<egid>
+
+Effective group ID.
+
+=item * B<proc_size>
+
+In bytes.
+
+=item * B<proc_resident>
+
+In bytes.
+
+=item * B<time_spent>
+
+Time running in seconds.
+
+=item * B<cpu_percent>
+
+=item * B<nice>
+
+=item * B<state>
+
+One of C<SG_PROCESS_STATE_RUNNING>, C<SG_PROCESS_STATE_SLEEPING>, C<SG_PROCESS_STATE_STOPPED>, C<SG_PROCESS_STATE_ZOMBIE> and
+C<SG_PROCESS_STATE_UNKNOWN>.
 
 =back
 

@@ -28,6 +28,11 @@ typedef struct {
     int nifs;
 } sg_network_iface_stats_my;
 
+typedef struct {
+    sg_process_stats *stats;
+    int nprocs;
+} sg_process_stats_my;
+
 MODULE = Unix::Statgrab		PACKAGE = Unix::Statgrab
 
 INCLUDE: const-xs.inc
@@ -345,6 +350,121 @@ get_user_stats ()
 	XSRETURN(1);
     }
 
+void
+get_process_stats ()
+    PROTOTYPE:
+    CODE:
+    {
+	sg_process_stats_my *self;
+	
+	New(0, self, 1, sg_process_stats_my);
+	
+	if ((self->stats = sg_get_process_stats(&self->nprocs)) == NULL)
+	    XSRETURN_UNDEF;
+
+	EXTEND(SP, 1);
+
+	ST(0) = sv_newmortal();
+	sv_setref_pv(ST(0), "Unix::Statgrab::sg_process_stats_my", (void*)self);
+	XSRETURN(1);
+    }
+
+int
+_sort_procs_by_name (a, b)
+	sg_process_stats *a;
+	sg_process_stats *b;
+    PROTOTYPE: $$
+    CODE:
+    {
+	RETVAL = sg_process_compare_name(a, b);
+    }
+    OUTPUT:
+	RETVAL
+   
+int
+_sort_procs_by_pid (a, b)
+	sg_process_stats *a;
+	sg_process_stats *b;
+    PROTOTYPE: $$
+    CODE:
+    {
+	RETVAL = sg_process_compare_pid(a, b);
+    }
+    OUTPUT:
+	RETVAL
+
+int
+_sort_procs_by_uid (a, b)
+	sg_process_stats *a;
+	sg_process_stats *b;
+    PROTOTYPE: $$
+    CODE:
+    {
+	RETVAL = sg_process_compare_uid(a, b);
+    }
+    OUTPUT:
+	RETVAL
+
+int
+_sort_procs_by_gid (a, b)
+	sg_process_stats *a;
+	sg_process_stats *b;
+    PROTOTYPE: $$
+    CODE:
+    {
+	RETVAL = sg_process_compare_gid(a, b);
+    }
+    OUTPUT:
+	RETVAL
+
+int
+_sort_procs_by_size (a, b)
+	sg_process_stats *a;
+	sg_process_stats *b;
+    PROTOTYPE: $$
+    CODE:
+    {
+	RETVAL = sg_process_compare_size(a, b);
+    }
+    OUTPUT:
+	RETVAL
+	
+int
+_sort_procs_by_res (a, b)
+	sg_process_stats *a;
+	sg_process_stats *b;
+    PROTOTYPE: $$
+    CODE:
+    {
+	RETVAL = sg_process_compare_res(a, b);
+    }
+    OUTPUT:
+	RETVAL
+
+int
+_sort_procs_by_cpu (a, b)
+	sg_process_stats *a;
+	sg_process_stats *b;
+    PROTOTYPE: $$
+    CODE:
+    {
+	RETVAL = sg_process_compare_time(a, b);
+    }
+    OUTPUT:
+	RETVAL
+
+int
+_sort_procs_by_time (a, b)
+	sg_process_stats *a;
+	sg_process_stats *b;
+    PROTOTYPE: $$
+    CODE:
+    {
+	RETVAL = sg_process_compare_time (a, b);
+    }
+    OUTPUT:
+	RETVAL
+	
 MODULE = Unix::Statgrab	    PACKAGE = Unix::Statgrab::sg_host_info
 
 char *
@@ -599,6 +719,14 @@ systime (self, num = 0)
     OUTPUT:
 	RETVAL
 
+void
+DESTROY (self)
+	sg_disk_io_stats_my *self;
+    CODE:
+    {
+	Safefree(self);
+    }
+
 MODULE = Unix::Statgrab		PACKAGE = Unix::Statgrab::sg_fs_stats_my
 
 #define MOUNT(n)    (self->stats + n)
@@ -710,6 +838,14 @@ free_inodes (self, num = 0)
     OUTPUT:
 	RETVAL
 
+void
+DESTROY (self)
+	sg_fs_stats_my *self;
+    CODE:
+    {
+	Safefree(self);
+    }
+
 MODULE = Unix::Statgrab	    PACKAGE = Unix::Statgrab::sg_load_stats
 
 NV
@@ -736,6 +872,14 @@ min15 (self)
     OUTPUT:
 	RETVAL
 	
+void
+DESTROY (self)
+	sg_load_stats *self;
+    CODE:
+    {
+	/* self points to a static buffer */
+    }
+
 MODULE = Unix::Statgrab	    PACKAGE = Unix::Statgrab::sg_mem_stats
 
 NV
@@ -770,6 +914,14 @@ cache (self)
     OUTPUT:
 	RETVAL
 
+void
+DESTROY (self)
+	sg_mem_stats *self;
+    CODE:
+    {
+	/* self points to a static buffer */
+    }
+
 MODULE = Unix::Statgrab     PACKAGE = Unix::Statgrab::sg_swap_stats
 
 NV
@@ -795,6 +947,14 @@ used (self)
 	RETVAL = self->used;
     OUTPUT:
 	RETVAL
+
+void
+DESTROY (self)
+	sg_swap_stats *self;
+    CODE:
+    {
+	/* self points to a static buffer */
+    }
 
 MODULE = Unix::Statgrab     PACKAGE = Unix::Statgrab::sg_network_io_stats_my
 
@@ -912,6 +1072,14 @@ systime (self, num = 0)
     OUTPUT:
 	RETVAL
 
+void
+DESTROY (self)
+	sg_network_io_stats_my *self;
+    CODE:
+    {
+	Safefree(self);
+    }
+
 MODULE = Unix::Statgrab     PACKAGE = Unix::Statgrab::sg_network_iface_stats_my
 
 IV
@@ -966,6 +1134,14 @@ up (self, num = 0)
     OUTPUT:
 	RETVAL
 
+void
+DESTROY (self)
+	sg_network_iface_stats_my *self;
+    CODE:
+    {
+	Safefree(self);
+    }
+
 MODULE = Unix::Statgrab	    PACKAGE = Unix::Statgrab::sg_page_stats
 
 NV
@@ -991,6 +1167,14 @@ systime (self)
 	RETVAL = self->systime;
     OUTPUT:
 	RETVAL
+	
+void
+DESTROY (self)
+	sg_page_stats *self;
+    CODE:
+    {
+	/* self points to a static buffer */
+    }
 
 MODULE = Unix::Statgrab     PACKAGE = Unix::Statgrab::sg_user_stats
 
@@ -1023,3 +1207,199 @@ num_entries (self)
 	RETVAL = self->num_entries;
     OUTPUT:
 	RETVAL
+
+void
+DESTROY (self)
+	sg_user_stats *self;
+    CODE:
+    {
+	/* self points to a static buffer */
+    }
+
+MODULE = Unix::Statgrab	    PACKAGE = Unix::Statgrab::sg_process_stats_my
+
+#define PROC(n)    (self->stats + n)
+
+void
+all_procs (self)
+	sg_process_stats_my *self;
+    PPCODE:
+    {
+	register int i = 0;
+	EXTEND(SP, self->nprocs);
+	
+	for (i = 0; i < self->nprocs; i++) {
+	    SV *proc = sv_newmortal();
+	    sv_setref_pv(proc, "Unix::Statgrab::sg_process_stats", (void*)PROC(i));
+	    XPUSHs(proc);
+	}
+
+	XSRETURN(self->nprocs);
+    }
+
+void
+sort_by (obj, meth)
+	SV *obj;
+	char *meth;
+    PPCODE:
+    {
+	sg_process_stats_my *self = (sg_process_stats_my*)SvIV(SvRV(obj));
+
+	if (strEQ(meth, "name")) 
+	    qsort(self->stats, self->nprocs, sizeof(*self->stats), sg_process_compare_name);
+	else if (strEQ(meth, "pid")) 
+	    qsort(self->stats, self->nprocs, sizeof(*self->stats), sg_process_compare_pid);
+	else if (strEQ(meth, "uid")) 
+	    qsort(self->stats, self->nprocs, sizeof(*self->stats), sg_process_compare_uid);
+	else if (strEQ(meth, "gid")) 
+	    qsort(self->stats, self->nprocs, sizeof(*self->stats), sg_process_compare_gid);
+	else if (strEQ(meth, "size")) 
+	    qsort(self->stats, self->nprocs, sizeof(*self->stats), sg_process_compare_size);
+	else if (strEQ(meth, "res")) 
+	    qsort(self->stats, self->nprocs, sizeof(*self->stats), sg_process_compare_res);
+	else if (strEQ(meth, "cpu")) 
+	    qsort(self->stats, self->nprocs, sizeof(*self->stats), sg_process_compare_cpu);
+	else if (strEQ(meth, "time")) 
+	    qsort(self->stats, self->nprocs, sizeof(*self->stats), sg_process_compare_time);
+	
+	XPUSHs(obj);
+	XSRETURN(1);
+    }
+
+void
+DESTROY (self)
+	sg_process_stats_my *self;
+    CODE:
+    {
+	Safefree(self);
+    }
+	
+MODULE = Unix::Statgrab	    PACKAGE = Unix::Statgrab::sg_process_stats
+
+char *
+proc_name (self)
+	sg_process_stats *self;
+    CODE:
+	RETVAL = self->process_name;
+    OUTPUT:
+	RETVAL
+
+char *
+proc_title (self)
+	sg_process_stats *self;
+    CODE:
+	RETVAL = self->proctitle;
+    OUTPUT:
+	RETVAL
+
+int
+pid (self)
+	sg_process_stats *self;
+    CODE:
+	RETVAL = self->pid;
+    OUTPUT:
+	RETVAL
+
+int
+parent_pid (self)
+	sg_process_stats *self;
+    CODE:
+	RETVAL = self->parent;
+    OUTPUT:
+	RETVAL
+
+int
+pgid (self)
+	sg_process_stats *self;
+    CODE:
+	RETVAL = self->pgid;
+    OUTPUT:
+	RETVAL
+
+int
+uid (self)
+	sg_process_stats *self;
+    CODE:
+	RETVAL = self->uid;
+    OUTPUT:
+	RETVAL
+
+int 
+euid (self)
+	sg_process_stats *self;
+    CODE:
+	RETVAL = self->euid;
+    OUTPUT:
+	RETVAL
+
+int
+gid (self)
+	sg_process_stats *self;
+    CODE:
+	RETVAL = self->gid;
+    OUTPUT:
+	RETVAL
+
+int
+egid (self)
+	sg_process_stats *self;
+    CODE:
+	RETVAL = self->egid;
+    OUTPUT:
+	RETVAL
+
+NV
+proc_size (self)
+	sg_process_stats *self;
+    CODE:
+	RETVAL = self->proc_size;
+    OUTPUT:
+	RETVAL
+
+NV
+proc_resident (self)
+	sg_process_stats *self;
+    CODE:
+	RETVAL = self->proc_resident;
+    OUTPUT:
+	RETVAL
+
+int
+time_spent (self)
+	sg_process_stats *self;
+    CODE:
+	RETVAL = self->time_spent;
+    OUTPUT:
+	RETVAL
+
+double
+cpu_percent (self)
+	sg_process_stats *self;
+    CODE:
+	RETVAL = self->cpu_percent;
+    OUTPUT:
+	RETVAL
+
+int
+nice (self)
+	sg_process_stats *self;
+    CODE:
+	RETVAL = self->nice;
+    OUTPUT:
+	RETVAL
+
+int
+state (self)
+	sg_process_stats *self;
+    CODE:
+	RETVAL = self->state;
+    OUTPUT:
+	RETVAL
+	
+void
+DESTROY (self)
+	sg_process_stats *self;
+    CODE:
+    {
+	/* self points to a static buffer */
+    }

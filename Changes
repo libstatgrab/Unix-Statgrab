@@ -1,5 +1,13 @@
 Revision history for Perl extension Unix::Statgrab.
 
+0.02  Mon Jun 21 07:05:16 CEST 2004
+	- running Makefile.PL could nuke /dev/null. Fixed.
+	  (Tim Bishop <tim AT bishnet DOT net>)
+	- some DESTROY methods missing which potentially lead
+	  to some slight memory leaks. Fixed.
+	- added sg_get_process_stats(). I must have missed that one
+	  for some reason.
+
 0.01  Fri May 21 06:57:16 2004
 	- original version; created by h2xs 1.23 with options
 		-O -b 5.5.3 -n Unix::Statgrab /usr/local/include/statgrab.h
