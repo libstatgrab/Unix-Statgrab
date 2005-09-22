@@ -42,7 +42,9 @@ my %funcs = (
     get_disk_io_stats		=> [ qw/num_disks disk_name read_bytes write_bytes systime/ ],
     get_disk_io_stats_diff	=> [ qw/num_disks disk_name read_bytes write_bytes systime/ ],
     get_fs_stats		=> [ qw/num_fs device_name fs_type mnt_point size 
-					used avail total_inodes used_inodes free_inodes/ ],
+					used avail total_inodes used_inodes free_inodes
+					avail_inodes io_size block_size total_blocks
+					free_blocks used_blocks avail_blocks/ ],
     get_load_stats		=> [ qw/min1 min5 min15/ ],
     get_mem_stats		=> [ qw/total free used cache/ ],
     get_swap_stats		=> [ qw/total free used/ ],

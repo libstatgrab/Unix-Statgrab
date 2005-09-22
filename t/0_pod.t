@@ -1,6 +1,6 @@
-eval "use Test::Pod";
+eval "use Test::Pod 1.18";
 if ($@) {
-    print "1..0 # Skip Test::Pod not installed\n";
+    print "1..0 # Skip Test::Pod (at least 1.18) not installed\n";
     exit;
 } 
  

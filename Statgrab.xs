@@ -838,6 +838,83 @@ free_inodes (self, num = 0)
     OUTPUT:
 	RETVAL
 
+NV
+avail_inodes (self, num = 0)
+	sg_fs_stats_my *self;
+	int num;
+    CODE:
+	if (num < 0 || num >= self->nmounts)
+	    XSRETURN_UNDEF;
+	RETVAL = MOUNT(num)->avail_inodes;
+    OUTPUT:
+	RETVAL
+
+NV
+io_size (self, num = 0)
+	sg_fs_stats_my *self;
+	int num;
+    CODE:
+	if (num < 0 || num >= self->nmounts)
+	    XSRETURN_UNDEF;
+	RETVAL = MOUNT(num)->io_size;
+    OUTPUT:
+	RETVAL
+
+NV
+block_size (self, num = 0)
+	sg_fs_stats_my *self;
+	int num;
+    CODE:
+	if (num < 0 || num >= self->nmounts)
+	    XSRETURN_UNDEF;
+	RETVAL = MOUNT(num)->block_size;
+    OUTPUT:
+	RETVAL
+
+NV
+total_blocks (self, num = 0)
+	sg_fs_stats_my *self;
+	int num;
+    CODE:
+	if (num < 0 || num >= self->nmounts)
+	    XSRETURN_UNDEF;
+	RETVAL = MOUNT(num)->total_blocks;
+    OUTPUT:
+	RETVAL
+
+NV
+free_blocks (self, num = 0)
+	sg_fs_stats_my *self;
+	int num;
+    CODE:
+	if (num < 0 || num >= self->nmounts)
+	    XSRETURN_UNDEF;
+	RETVAL = MOUNT(num)->free_blocks;
+    OUTPUT:
+	RETVAL
+
+NV
+used_blocks (self, num = 0)
+	sg_fs_stats_my *self;
+	int num;
+    CODE:
+	if (num < 0 || num >= self->nmounts)
+	    XSRETURN_UNDEF;
+	RETVAL = MOUNT(num)->used_blocks;
+    OUTPUT:
+	RETVAL
+
+NV
+avail_blocks (self, num = 0)
+	sg_fs_stats_my *self;
+	int num;
+    CODE:
+	if (num < 0 || num >= self->nmounts)
+	    XSRETURN_UNDEF;
+	RETVAL = MOUNT(num)->avail_blocks;
+    OUTPUT:
+	RETVAL
+
 void
 DESTROY (self)
 	sg_fs_stats_my *self;
@@ -1119,7 +1196,7 @@ dup (self, num = 0)
     CODE:
 	if (num < 0 || num >= self->nifs)
 	    XSRETURN_UNDEF;
-	RETVAL = IF(num)->dup;
+	RETVAL = IF(num)->duplex;
     OUTPUT:
 	RETVAL
 

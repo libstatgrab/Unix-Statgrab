@@ -1,4 +1,4 @@
-Unix-Statgrab version 0.03
+Unix-Statgrab version 0.04
 ==========================
 
 Unix::Statgrab is a wrapper for libstatgrab, as available from
@@ -21,6 +21,8 @@ DEPENDENCIES
 This module requires these other modules and libraries:
 
     libstatgrab from http://www.i-scream.org/libstatgrab/
+
+Version 0.12 of libstatgrab is required.
 
 If you have installed libstatgrab in a non-standard location,
 you have to tell Makefile.PL about it:

@@ -1,6 +1,6 @@
-eval "use Test::Pod::Coverage";
+eval "use Test::Pod::Coverage 0.08";
 if ($@) {
-    print "1..0 # Skip Test::Pod::Coverage not installed\n";
+    print "1..0 # Skip Test::Pod::Coverage (at least 0.08) not installed\n";
     exit;
 } 
 

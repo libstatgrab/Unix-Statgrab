@@ -1,5 +1,13 @@
 Revision history for Perl extension Unix::Statgrab.
 
+0.04  Thu Sep 22 08:20:59 CEST 2005
+    - 0.12 is now required for compilation
+    - therefore: additional statistics for get_fs_stats()
+    - fixed a minor nit in the POD tests:
+      make sure that Test::Pod and Test::Pod::Coverage are
+      installed in the required minimum versions
+      (thanks to Ricardo Signes <rjbs AT cpan DOT org>)
+
 0.03  Sun Apr  3 07:38:20 CEST 2005
     - POD- and POD-coverage-tests
 

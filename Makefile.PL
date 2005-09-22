@@ -14,8 +14,8 @@ sub have_libstatgrab {
 if (! have_libstatgrab()) {
     die <<EOD;
 *******************************************
-Couldn't find libstatgrab which is required 
-for this module.
+Couldn't find libstatgrab (at least 0.12)
+which is required for this module.
 
 To obtain it, go to
     http://www.i-scream.org/libstatgrab/

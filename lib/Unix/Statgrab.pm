@@ -150,7 +150,7 @@ use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $AUTOLOAD);
 	SG_PROCESS_STATE_ZOMBIE
 );
 
-$VERSION = '0.03';
+$VERSION = '0.04';
 
 if ($] >= 5.006) {
     *sort_procs_by_name = \&_sort_procs_by_name;
@@ -360,6 +360,22 @@ Size in bytes.
 =item * B<used_inodes($fs)>
 
 =item * B<free_inodes($fs)>
+
+=item * B<avail_inodes($fs)>
+
+=item * B<io_size($fs)>
+
+The recommended size in bytes when doing I/O operations on this device.
+
+=item * B<block_size($fs)>
+
+=item * B<total_blocks($fs)>
+
+=item * B<free_blocks($fs)>
+
+=item * B<used_blocks($fs)>
+
+=item * B<avail_blocks($fs)>
 
 =back
 
