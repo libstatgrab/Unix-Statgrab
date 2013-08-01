@@ -1,15 +1,18 @@
 package Unix::Statgrab;
 
-use 5.00503;
+use 5.00803;
 use strict;
+use warnings;
+
 use Carp;
 
-require Exporter;
-require DynaLoader;
-use AutoLoader;
+# require Exporter;
+# require DynaLoader;
+
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $AUTOLOAD);
-@ISA = qw(Exporter
-	DynaLoader);
+use parent qw(Exporter DynaLoader);
+
+use AutoLoader;
 
 # Items to export into callers namespace by default. Note: do not export
 # names by default without a very good reason. Use EXPORT_OK instead.
@@ -150,32 +153,17 @@ use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $AUTOLOAD);
 	SG_PROCESS_STATE_ZOMBIE
 );
 
-$VERSION = '0.04';
+$VERSION = '0.099';
 
-if ($] >= 5.006) {
-    *sort_procs_by_name = \&_sort_procs_by_name;
-    *sort_procs_by_pid  = \&_sort_procs_by_pid;
-    *sort_procs_by_uid	= \&_sort_procs_by_uid;
-    *sort_procs_by_gid	= \&_sort_procs_by_gid;
-    *sort_procs_by_size	= \&_sort_procs_by_size;
-    *sort_procs_by_res	= \&_sort_procs_by_res;
-    *sort_procs_by_cpu	= \&_sort_procs_by_cpu;
-    *sort_procs_by_time	= \&_sort_procs_by_time;
-} else {
-    no strict 'refs';
-    my $pkg = caller;
-    # older perls don't yet know about prototyped sort routines
-    *sort_procs_by_name = sub { _sort_procs_by_name(${"${pkg}::a"}, ${"${pkg}::b"}) };
-    *sort_procs_by_pid  = sub { _sort_procs_by_pid (${"${pkg}::a"}, ${"${pkg}::b"}) };
-    *sort_procs_by_uid	= sub { _sort_procs_by_uid (${"${pkg}::a"}, ${"${pkg}::b"}) };
-    *sort_procs_by_gid	= sub { _sort_procs_by_gid (${"${pkg}::a"}, ${"${pkg}::b"}) };
-    *sort_procs_by_size	= sub { _sort_procs_by_size(${"${pkg}::a"}, ${"${pkg}::b"}) };
-    *sort_procs_by_res	= sub { _sort_procs_by_res (${"${pkg}::a"}, ${"${pkg}::b"}) };
-    *sort_procs_by_cpu	= sub { _sort_procs_by_cpu (${"${pkg}::a"}, ${"${pkg}::b"}) };
-    *sort_procs_by_time	= sub { _sort_procs_by_time(${"${pkg}::a"}, ${"${pkg}::b"}) };
-}
-    
-    
+*sort_procs_by_name	= \&_sort_procs_by_name;
+*sort_procs_by_pid	= \&_sort_procs_by_pid;
+*sort_procs_by_uid	= \&_sort_procs_by_uid;
+*sort_procs_by_gid	= \&_sort_procs_by_gid;
+*sort_procs_by_size	= \&_sort_procs_by_size;
+*sort_procs_by_res	= \&_sort_procs_by_res;
+*sort_procs_by_cpu	= \&_sort_procs_by_cpu;
+*sort_procs_by_time	= \&_sort_procs_by_time;
+
 sub AUTOLOAD {
     # This AUTOLOAD is used to 'autoload' constants from the constant()
     # XS function.
