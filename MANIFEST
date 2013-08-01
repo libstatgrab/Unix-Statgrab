@@ -1,15 +1,11 @@
+Build.PL
 Changes
-Makefile.PL
+inc/Config/AutoConf/SG.pm
+inc/Statgrab/Builder.pm
+lib/Unix/Statgrab.pm
 MANIFEST
-check.c
+META.yml
 ppport.h
 README
 Statgrab.xs
-t/0_pod.t
-t/0_pod_coverage.t
-t/Unix-Statgrab.t
-fallback/const-c.inc
-fallback/const-xs.inc
-lib/Unix/Statgrab.pm
 typemap
-META.yml                                 Module meta-data (added by MakeMaker)
