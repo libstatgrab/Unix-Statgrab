@@ -25,7 +25,7 @@ my $builder = Statgrab::Builder->new(
                         'ExtUtils::CBuilder' => '0.27',
                         'Module::Build'      => '0.4000',
                       },
-    add_to_cleanup => [ 'Unix-Statgrab-*', '*.o', ],
+    add_to_cleanup => [ 'Unix-Statgrab-*', '*.o', 'config.h', 'config.log', ],
 
                                     );
 
