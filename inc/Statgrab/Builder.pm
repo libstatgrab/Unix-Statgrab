@@ -8,10 +8,10 @@ use parent 'Module::Build';
 use Config;
 use Carp;
 
-use Config::AutoConf::SG;
+use Config::AutoConf::SG ();
 
-use File::Copy;
-use File::Spec;
+use File::Spec ();
+use ExtUtils::Constant ();
 
 sub ACTION_configure
 {
@@ -25,18 +25,14 @@ To obtain it, go to
     http://www.i-scream.org/libstatgrab/
 *******************************************
 EOD
+    # $autoconf->write_config_h();
+    return;
 }
 
 sub ACTION_write_constants
 {
     my $self = shift;
 
-    if ( eval { require ExtUtils::Constant; 1 } )
-    {
-        # If you edit these definitions to change the constants used by this module,
-        # you will need to use the generated const-c.inc and const-xs.inc
-        # files to replace their "fallback" counterparts before distributing your
-        # changes.
         my @names = (
             qw(SG_ERROR_NONE SG_ERROR_INVALID_ARGUMENT SG_ERROR_ASPRINTF
               SG_ERROR_SPRINTF SG_ERROR_DEVICES SG_ERROR_DEVSTAT_GETDEVS
@@ -63,16 +59,6 @@ sub ACTION_write_constants
                                             C_FILE       => 'const-c.inc',
                                             XS_FILE      => 'const-xs.inc',
                                           );
-
-    }
-    else
-    {
-        foreach my $file ( 'const-c.inc', 'const-xs.inc' )
-        {
-            my $fallback = File::Spec->catfile( 'fallback', $file );
-            copy( $fallback, $file ) or die "Can't copy $fallback to $file: $!";
-        }
-    }
 
     return;
 }
