@@ -18,7 +18,7 @@ sub check_libstatgrab
     my ($self) = @_;
     ref($self) or $self = $self->_get_instance();
 
-    return $self->search_libs( "sg_log_init", "statgrab" );
+    return $self->search_libs( "sg_get_process_stats_r", ["statgrab"] );
 }
 
 1;
