@@ -21,17 +21,128 @@ typedef double NV; /* 5.6 and later define NVTYPE, and typedef NV to it.  */
 #endif
 
 static int
+constant_13 (pTHX_ const char *name, IV *iv_return) {
+  /* When generated this function returned values for the list of names given
+     here.  However, subsequent manual editing may have added or removed some.
+     SG_ERROR_HOST SG_ERROR_NONE SG_ERROR_OPEN */
+  /* Offset 9 gives the best switch position.  */
+  switch (name[9]) {
+  case 'H':
+    if (memEQ(name, "SG_ERROR_HOST", 13)) {
+    /*                        ^          */
+#ifdef SG_ERROR_HOST
+      *iv_return = SG_ERROR_HOST;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    break;
+  case 'N':
+    if (memEQ(name, "SG_ERROR_NONE", 13)) {
+    /*                        ^          */
+#ifdef SG_ERROR_NONE
+      *iv_return = SG_ERROR_NONE;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    break;
+  case 'O':
+    if (memEQ(name, "SG_ERROR_OPEN", 13)) {
+    /*                        ^          */
+#ifdef SG_ERROR_OPEN
+      *iv_return = SG_ERROR_OPEN;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    break;
+  }
+  return PERL_constant_NOTFOUND;
+}
+
+static int
+constant_14 (pTHX_ const char *name, IV *iv_return) {
+  /* When generated this function returned values for the list of names given
+     here.  However, subsequent manual editing may have added or removed some.
+     SG_ERROR_IOKIT SG_ERROR_PARSE SG_ERROR_PSTAT SG_ERROR_UNAME */
+  /* Offset 10 gives the best switch position.  */
+  switch (name[10]) {
+  case 'A':
+    if (memEQ(name, "SG_ERROR_PARSE", 14)) {
+    /*                         ^          */
+#ifdef SG_ERROR_PARSE
+      *iv_return = SG_ERROR_PARSE;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    break;
+  case 'N':
+    if (memEQ(name, "SG_ERROR_UNAME", 14)) {
+    /*                         ^          */
+#ifdef SG_ERROR_UNAME
+      *iv_return = SG_ERROR_UNAME;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    break;
+  case 'O':
+    if (memEQ(name, "SG_ERROR_IOKIT", 14)) {
+    /*                         ^          */
+#ifdef SG_ERROR_IOKIT
+      *iv_return = SG_ERROR_IOKIT;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    break;
+  case 'S':
+    if (memEQ(name, "SG_ERROR_PSTAT", 14)) {
+    /*                         ^          */
+#ifdef SG_ERROR_PSTAT
+      *iv_return = SG_ERROR_PSTAT;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    break;
+  }
+  return PERL_constant_NOTFOUND;
+}
+
+static int
 constant_15 (pTHX_ const char *name, IV *iv_return) {
   /* When generated this function returned values for the list of names given
      here.  However, subsequent manual editing may have added or removed some.
-     SG_ERROR_ENOENT SG_ERROR_MALLOC SG_ERROR_SOCKET SG_ERROR_SYSCTL */
-  /* Offset 12 gives the best switch position.  */
-  switch (name[12]) {
-  case 'C':
-    if (memEQ(name, "SG_ERROR_SYSCTL", 15)) {
-    /*                           ^         */
-#ifdef SG_ERROR_SYSCTL
-      *iv_return = SG_ERROR_SYSCTL;
+     SG_ERROR_ENOENT SG_ERROR_GETMSG SG_ERROR_MALLOC SG_ERROR_PDHADD
+     SG_ERROR_PUTMSG SG_ERROR_SOCKET SG_ERROR_SYSCTL */
+  /* Offset 10 gives the best switch position.  */
+  switch (name[10]) {
+  case 'A':
+    if (memEQ(name, "SG_ERROR_MALLOC", 15)) {
+    /*                         ^           */
+#ifdef SG_ERROR_MALLOC
+      *iv_return = SG_ERROR_MALLOC;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    break;
+  case 'D':
+    if (memEQ(name, "SG_ERROR_PDHADD", 15)) {
+    /*                         ^           */
+#ifdef SG_ERROR_PDHADD
+      *iv_return = SG_ERROR_PDHADD;
       return PERL_constant_ISIV;
 #else
       return PERL_constant_NOTDEF;
@@ -39,8 +150,19 @@ constant_15 (pTHX_ const char *name, IV *iv_return) {
     }
     break;
   case 'E':
+    if (memEQ(name, "SG_ERROR_GETMSG", 15)) {
+    /*                         ^           */
+#ifdef SG_ERROR_GETMSG
+      *iv_return = SG_ERROR_GETMSG;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    break;
+  case 'N':
     if (memEQ(name, "SG_ERROR_ENOENT", 15)) {
-    /*                           ^         */
+    /*                         ^           */
 #ifdef SG_ERROR_ENOENT
       *iv_return = SG_ERROR_ENOENT;
       return PERL_constant_ISIV;
@@ -49,9 +171,9 @@ constant_15 (pTHX_ const char *name, IV *iv_return) {
 #endif
     }
     break;
-  case 'K':
+  case 'O':
     if (memEQ(name, "SG_ERROR_SOCKET", 15)) {
-    /*                           ^         */
+    /*                         ^           */
 #ifdef SG_ERROR_SOCKET
       *iv_return = SG_ERROR_SOCKET;
       return PERL_constant_ISIV;
@@ -60,11 +182,22 @@ constant_15 (pTHX_ const char *name, IV *iv_return) {
 #endif
     }
     break;
-  case 'L':
-    if (memEQ(name, "SG_ERROR_MALLOC", 15)) {
-    /*                           ^         */
-#ifdef SG_ERROR_MALLOC
-      *iv_return = SG_ERROR_MALLOC;
+  case 'U':
+    if (memEQ(name, "SG_ERROR_PUTMSG", 15)) {
+    /*                         ^           */
+#ifdef SG_ERROR_PUTMSG
+      *iv_return = SG_ERROR_PUTMSG;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    break;
+  case 'Y':
+    if (memEQ(name, "SG_ERROR_SYSCTL", 15)) {
+    /*                         ^           */
+#ifdef SG_ERROR_SYSCTL
+      *iv_return = SG_ERROR_SYSCTL;
       return PERL_constant_ISIV;
 #else
       return PERL_constant_NOTDEF;
@@ -79,11 +212,21 @@ static int
 constant_16 (pTHX_ const char *name, IV *iv_return) {
   /* When generated this function returned values for the list of names given
      here.  However, subsequent manual editing may have added or removed some.
-     SG_ERROR_OPENDIR SG_ERROR_SETEGID SG_ERROR_SETEUID SG_ERROR_SWAPCTL
-     SG_ERROR_SYSCONF */
+     SG_ERROR_DEVICES SG_ERROR_OPENDIR SG_ERROR_PDHOPEN SG_ERROR_PDHREAD
+     SG_ERROR_READDIR SG_ERROR_SETEGID SG_ERROR_SETEUID SG_ERROR_SPRINTF
+     SG_ERROR_SWAPCTL SG_ERROR_SYSCONF SG_ERROR_SYSINFO */
   /* Offset 13 gives the best switch position.  */
   switch (name[13]) {
   case 'C':
+    if (memEQ(name, "SG_ERROR_DEVICES", 16)) {
+    /*                            ^         */
+#ifdef SG_ERROR_DEVICES
+      *iv_return = SG_ERROR_DEVICES;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
     if (memEQ(name, "SG_ERROR_SWAPCTL", 16)) {
     /*                            ^         */
 #ifdef SG_ERROR_SWAPCTL
@@ -104,6 +247,26 @@ constant_16 (pTHX_ const char *name, IV *iv_return) {
       return PERL_constant_NOTDEF;
 #endif
     }
+    if (memEQ(name, "SG_ERROR_READDIR", 16)) {
+    /*                            ^         */
+#ifdef SG_ERROR_READDIR
+      *iv_return = SG_ERROR_READDIR;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    break;
+  case 'E':
+    if (memEQ(name, "SG_ERROR_PDHREAD", 16)) {
+    /*                            ^         */
+#ifdef SG_ERROR_PDHREAD
+      *iv_return = SG_ERROR_PDHREAD;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
     break;
   case 'G':
     if (memEQ(name, "SG_ERROR_SETEGID", 16)) {
@@ -116,11 +279,42 @@ constant_16 (pTHX_ const char *name, IV *iv_return) {
 #endif
     }
     break;
+  case 'N':
+    if (memEQ(name, "SG_ERROR_SPRINTF", 16)) {
+    /*                            ^         */
+#ifdef SG_ERROR_SPRINTF
+      *iv_return = SG_ERROR_SPRINTF;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    if (memEQ(name, "SG_ERROR_SYSINFO", 16)) {
+    /*                            ^         */
+#ifdef SG_ERROR_SYSINFO
+      *iv_return = SG_ERROR_SYSINFO;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    break;
   case 'O':
     if (memEQ(name, "SG_ERROR_SYSCONF", 16)) {
     /*                            ^         */
 #ifdef SG_ERROR_SYSCONF
       *iv_return = SG_ERROR_SYSCONF;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    break;
+  case 'P':
+    if (memEQ(name, "SG_ERROR_PDHOPEN", 16)) {
+    /*                            ^         */
+#ifdef SG_ERROR_PDHOPEN
+      *iv_return = SG_ERROR_PDHOPEN;
       return PERL_constant_ISIV;
 #else
       return PERL_constant_NOTDEF;
@@ -143,11 +337,56 @@ constant_16 (pTHX_ const char *name, IV *iv_return) {
 }
 
 static int
+constant_17 (pTHX_ const char *name, IV *iv_return) {
+  /* When generated this function returned values for the list of names given
+     here.  However, subsequent manual editing may have added or removed some.
+     SG_ERROR_ASPRINTF SG_ERROR_DISKINFO SG_ERROR_MACHCALL */
+  /* Offset 16 gives the best switch position.  */
+  switch (name[16]) {
+  case 'F':
+    if (memEQ(name, "SG_ERROR_ASPRINT", 16)) {
+    /*                               F      */
+#ifdef SG_ERROR_ASPRINTF
+      *iv_return = SG_ERROR_ASPRINTF;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    break;
+  case 'L':
+    if (memEQ(name, "SG_ERROR_MACHCAL", 16)) {
+    /*                               L      */
+#ifdef SG_ERROR_MACHCALL
+      *iv_return = SG_ERROR_MACHCALL;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    break;
+  case 'O':
+    if (memEQ(name, "SG_ERROR_DISKINF", 16)) {
+    /*                               O      */
+#ifdef SG_ERROR_DISKINFO
+      *iv_return = SG_ERROR_DISKINFO;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    break;
+  }
+  return PERL_constant_NOTFOUND;
+}
+
+static int
 constant_19 (pTHX_ const char *name, IV *iv_return) {
   /* When generated this function returned values for the list of names given
      here.  However, subsequent manual editing may have added or removed some.
      SG_ERROR_GETIFADDRS SG_ERROR_GETMNTINFO SG_ERROR_KSTAT_OPEN
-     SG_ERROR_KSTAT_READ */
+     SG_ERROR_KSTAT_READ SG_ERROR_MUTEX_LOCK SG_ERROR_PDHCOLLECT
+     SG_ERROR_PERMISSION */
   /* Offset 16 gives the best switch position.  */
   switch (name[16]) {
   case 'D':
@@ -171,12 +410,43 @@ constant_19 (pTHX_ const char *name, IV *iv_return) {
       return PERL_constant_NOTDEF;
 #endif
     }
+    if (memEQ(name, "SG_ERROR_PDHCOLLECT", 19)) {
+    /*                               ^         */
+#ifdef SG_ERROR_PDHCOLLECT
+      *iv_return = SG_ERROR_PDHCOLLECT;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    break;
+  case 'I':
+    if (memEQ(name, "SG_ERROR_PERMISSION", 19)) {
+    /*                               ^         */
+#ifdef SG_ERROR_PERMISSION
+      *iv_return = SG_ERROR_PERMISSION;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
     break;
   case 'N':
     if (memEQ(name, "SG_ERROR_GETMNTINFO", 19)) {
     /*                               ^         */
 #ifdef SG_ERROR_GETMNTINFO
       *iv_return = SG_ERROR_GETMNTINFO;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    break;
+  case 'O':
+    if (memEQ(name, "SG_ERROR_MUTEX_LOCK", 19)) {
+    /*                               ^         */
+#ifdef SG_ERROR_MUTEX_LOCK
+      *iv_return = SG_ERROR_MUTEX_LOCK;
       return PERL_constant_ISIV;
 #else
       return PERL_constant_NOTDEF;
@@ -199,51 +469,39 @@ constant_19 (pTHX_ const char *name, IV *iv_return) {
 }
 
 static int
-constant_20 (pTHX_ const char *name, IV *iv_return) {
+constant_21 (pTHX_ const char *name, IV *iv_return) {
   /* When generated this function returned values for the list of names given
      here.  However, subsequent manual editing may have added or removed some.
-     SG_ERROR_GETPAGESIZE SG_ERROR_UNSUPPORTED SG_IFACE_DUPLEX_FULL
-     SG_IFACE_DUPLEX_HALF */
-  /* Offset 19 gives the best switch position.  */
-  switch (name[19]) {
-  case 'D':
-    if (memEQ(name, "SG_ERROR_UNSUPPORTE", 19)) {
-    /*                                  D      */
-#ifdef SG_ERROR_UNSUPPORTED
-      *iv_return = SG_ERROR_UNSUPPORTED;
-      return PERL_constant_ISIV;
-#else
-      return PERL_constant_NOTDEF;
-#endif
-    }
-    break;
-  case 'E':
-    if (memEQ(name, "SG_ERROR_GETPAGESIZ", 19)) {
-    /*                                  E      */
-#ifdef SG_ERROR_GETPAGESIZE
-      *iv_return = SG_ERROR_GETPAGESIZE;
-      return PERL_constant_ISIV;
-#else
-      return PERL_constant_NOTDEF;
-#endif
-    }
-    break;
-  case 'F':
-    if (memEQ(name, "SG_IFACE_DUPLEX_HAL", 19)) {
-    /*                                  F      */
-#ifdef SG_IFACE_DUPLEX_HALF
-      *iv_return = SG_IFACE_DUPLEX_HALF;
-      return PERL_constant_ISIV;
-#else
-      return PERL_constant_NOTDEF;
-#endif
-    }
-    break;
+     SG_ERROR_KSTAT_LOOKUP SG_ERROR_MUTEX_UNLOCK SG_ERROR_SYSCTLBYNAME */
+  /* Offset 17 gives the best switch position.  */
+  switch (name[17]) {
   case 'L':
-    if (memEQ(name, "SG_IFACE_DUPLEX_FUL", 19)) {
-    /*                                  L      */
-#ifdef SG_IFACE_DUPLEX_FULL
-      *iv_return = SG_IFACE_DUPLEX_FULL;
+    if (memEQ(name, "SG_ERROR_MUTEX_UNLOCK", 21)) {
+    /*                                ^          */
+#ifdef SG_ERROR_MUTEX_UNLOCK
+      *iv_return = SG_ERROR_MUTEX_UNLOCK;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    break;
+  case 'N':
+    if (memEQ(name, "SG_ERROR_SYSCTLBYNAME", 21)) {
+    /*                                ^          */
+#ifdef SG_ERROR_SYSCTLBYNAME
+      *iv_return = SG_ERROR_SYSCTLBYNAME;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    break;
+  case 'O':
+    if (memEQ(name, "SG_ERROR_KSTAT_LOOKUP", 21)) {
+    /*                                ^          */
+#ifdef SG_ERROR_KSTAT_LOOKUP
+      *iv_return = SG_ERROR_KSTAT_LOOKUP;
       return PERL_constant_ISIV;
 #else
       return PERL_constant_NOTDEF;
@@ -259,46 +517,12 @@ constant_24 (pTHX_ const char *name, IV *iv_return) {
   /* When generated this function returned values for the list of names given
      here.  However, subsequent manual editing may have added or removed some.
      SG_ERROR_DEVSTAT_GETDEVS SG_ERROR_KVM_GETSWAPINFO SG_ERROR_SYSCTLNAMETOMIB
-     SG_PROCESS_STATE_RUNNING SG_PROCESS_STATE_STOPPED SG_PROCESS_STATE_UNKNOWN
      */
-  /* Offset 21 gives the best switch position.  */
-  switch (name[21]) {
-  case 'E':
-    if (memEQ(name, "SG_ERROR_DEVSTAT_GETDEVS", 24)) {
-    /*                                    ^         */
-#ifdef SG_ERROR_DEVSTAT_GETDEVS
-      *iv_return = SG_ERROR_DEVSTAT_GETDEVS;
-      return PERL_constant_ISIV;
-#else
-      return PERL_constant_NOTDEF;
-#endif
-    }
-    break;
-  case 'I':
-    if (memEQ(name, "SG_PROCESS_STATE_RUNNING", 24)) {
-    /*                                    ^         */
-#ifdef SG_PROCESS_STATE_RUNNING
-      *iv_return = SG_PROCESS_STATE_RUNNING;
-      return PERL_constant_ISIV;
-#else
-      return PERL_constant_NOTDEF;
-#endif
-    }
-    break;
+  /* Offset 11 gives the best switch position.  */
+  switch (name[11]) {
   case 'M':
-    if (memEQ(name, "SG_ERROR_SYSCTLNAMETOMIB", 24)) {
-    /*                                    ^         */
-#ifdef SG_ERROR_SYSCTLNAMETOMIB
-      *iv_return = SG_ERROR_SYSCTLNAMETOMIB;
-      return PERL_constant_ISIV;
-#else
-      return PERL_constant_NOTDEF;
-#endif
-    }
-    break;
-  case 'N':
     if (memEQ(name, "SG_ERROR_KVM_GETSWAPINFO", 24)) {
-    /*                                    ^         */
+    /*                          ^                   */
 #ifdef SG_ERROR_KVM_GETSWAPINFO
       *iv_return = SG_ERROR_KVM_GETSWAPINFO;
       return PERL_constant_ISIV;
@@ -307,22 +531,22 @@ constant_24 (pTHX_ const char *name, IV *iv_return) {
 #endif
     }
     break;
-  case 'O':
-    if (memEQ(name, "SG_PROCESS_STATE_UNKNOWN", 24)) {
-    /*                                    ^         */
-#ifdef SG_PROCESS_STATE_UNKNOWN
-      *iv_return = SG_PROCESS_STATE_UNKNOWN;
+  case 'S':
+    if (memEQ(name, "SG_ERROR_SYSCTLNAMETOMIB", 24)) {
+    /*                          ^                   */
+#ifdef SG_ERROR_SYSCTLNAMETOMIB
+      *iv_return = SG_ERROR_SYSCTLNAMETOMIB;
       return PERL_constant_ISIV;
 #else
       return PERL_constant_NOTDEF;
 #endif
     }
     break;
-  case 'P':
-    if (memEQ(name, "SG_PROCESS_STATE_STOPPED", 24)) {
-    /*                                    ^         */
-#ifdef SG_PROCESS_STATE_STOPPED
-      *iv_return = SG_PROCESS_STATE_STOPPED;
+  case 'V':
+    if (memEQ(name, "SG_ERROR_DEVSTAT_GETDEVS", 24)) {
+    /*                          ^                   */
+#ifdef SG_ERROR_DEVSTAT_GETDEVS
+      *iv_return = SG_ERROR_DEVSTAT_GETDEVS;
       return PERL_constant_ISIV;
 #else
       return PERL_constant_NOTDEF;
@@ -346,93 +570,44 @@ constant (pTHX_ const char *name, STRLEN len, IV *iv_return) {
      Regenerate these constant functions by feeding this entire source file to
      perl -x
 
-#!/usr/bin/perl -w
+#!/Users/sno/perl5/perlbrew/perls/perl-5.18.0/bin/perl -w
 use ExtUtils::Constant qw (constant_types C_constant XS_constant);
 
 my $types = {map {($_, 1)} qw(IV)};
-my @names = (qw(SG_ERROR_ASPRINTF SG_ERROR_DEVSTAT_GETDEVS
-	       SG_ERROR_DEVSTAT_SELECTDEVS SG_ERROR_ENOENT SG_ERROR_GETIFADDRS
-	       SG_ERROR_GETMNTINFO SG_ERROR_GETPAGESIZE
+my @names = (qw(SG_ERROR_ASPRINTF SG_ERROR_DEVICES SG_ERROR_DEVSTAT_GETDEVS
+	       SG_ERROR_DEVSTAT_SELECTDEVS SG_ERROR_DISKINFO SG_ERROR_ENOENT
+	       SG_ERROR_GETIFADDRS SG_ERROR_GETMNTINFO SG_ERROR_GETMSG
+	       SG_ERROR_GETPAGESIZE SG_ERROR_HOST SG_ERROR_INITIALISATION
+	       SG_ERROR_INVALID_ARGUMENT SG_ERROR_IOKIT
 	       SG_ERROR_KSTAT_DATA_LOOKUP SG_ERROR_KSTAT_LOOKUP
 	       SG_ERROR_KSTAT_OPEN SG_ERROR_KSTAT_READ SG_ERROR_KVM_GETSWAPINFO
-	       SG_ERROR_KVM_OPENFILES SG_ERROR_MALLOC SG_ERROR_NONE
-	       SG_ERROR_OPEN SG_ERROR_OPENDIR SG_ERROR_PARSE SG_ERROR_SETEGID
+	       SG_ERROR_KVM_OPENFILES SG_ERROR_MACHCALL SG_ERROR_MALLOC
+	       SG_ERROR_MEMSTATUS SG_ERROR_MUTEX_LOCK SG_ERROR_MUTEX_UNLOCK
+	       SG_ERROR_NONE SG_ERROR_OPEN SG_ERROR_OPENDIR SG_ERROR_PARSE
+	       SG_ERROR_PDHADD SG_ERROR_PDHCOLLECT SG_ERROR_PDHOPEN
+	       SG_ERROR_PDHREAD SG_ERROR_PERMISSION SG_ERROR_PSTAT
+	       SG_ERROR_PUTMSG SG_ERROR_READDIR SG_ERROR_SETEGID
 	       SG_ERROR_SETEUID SG_ERROR_SETMNTENT SG_ERROR_SOCKET
-	       SG_ERROR_SWAPCTL SG_ERROR_SYSCONF SG_ERROR_SYSCTL
-	       SG_ERROR_SYSCTLBYNAME SG_ERROR_SYSCTLNAMETOMIB SG_ERROR_UNAME
-	       SG_ERROR_UNSUPPORTED SG_ERROR_XSW_VER_MISMATCH
-	       SG_IFACE_DUPLEX_FULL SG_IFACE_DUPLEX_HALF
-	       SG_IFACE_DUPLEX_UNKNOWN SG_PROCESS_STATE_RUNNING
-	       SG_PROCESS_STATE_SLEEPING SG_PROCESS_STATE_STOPPED
-	       SG_PROCESS_STATE_UNKNOWN SG_PROCESS_STATE_ZOMBIE));
+	       SG_ERROR_SPRINTF SG_ERROR_SWAPCTL SG_ERROR_SYSCONF
+	       SG_ERROR_SYSCTL SG_ERROR_SYSCTLBYNAME SG_ERROR_SYSCTLNAMETOMIB
+	       SG_ERROR_SYSINFO SG_ERROR_UNAME SG_ERROR_UNSUPPORTED
+	       SG_ERROR_XSW_VER_MISMATCH));
 
-print constant_types(); # macro defs
+print constant_types(), "\n"; # macro defs
 foreach (C_constant ("Unix::Statgrab", 'constant', 'IV', $types, undef, 3, @names) ) {
     print $_, "\n"; # C constant subs
 }
-print "#### XS Section:\n";
+print "\n#### XS Section:\n";
 print XS_constant ("Unix::Statgrab", $types);
 __END__
    */
 
   switch (len) {
   case 13:
-    /* Names all of length 13.  */
-    /* SG_ERROR_NONE SG_ERROR_OPEN */
-    /* Offset 9 gives the best switch position.  */
-    switch (name[9]) {
-    case 'N':
-      if (memEQ(name, "SG_ERROR_NONE", 13)) {
-      /*                        ^          */
-#ifdef SG_ERROR_NONE
-        *iv_return = SG_ERROR_NONE;
-        return PERL_constant_ISIV;
-#else
-        return PERL_constant_NOTDEF;
-#endif
-      }
-      break;
-    case 'O':
-      if (memEQ(name, "SG_ERROR_OPEN", 13)) {
-      /*                        ^          */
-#ifdef SG_ERROR_OPEN
-        *iv_return = SG_ERROR_OPEN;
-        return PERL_constant_ISIV;
-#else
-        return PERL_constant_NOTDEF;
-#endif
-      }
-      break;
-    }
+    return constant_13 (aTHX_ name, iv_return);
     break;
   case 14:
-    /* Names all of length 14.  */
-    /* SG_ERROR_PARSE SG_ERROR_UNAME */
-    /* Offset 9 gives the best switch position.  */
-    switch (name[9]) {
-    case 'P':
-      if (memEQ(name, "SG_ERROR_PARSE", 14)) {
-      /*                        ^           */
-#ifdef SG_ERROR_PARSE
-        *iv_return = SG_ERROR_PARSE;
-        return PERL_constant_ISIV;
-#else
-        return PERL_constant_NOTDEF;
-#endif
-      }
-      break;
-    case 'U':
-      if (memEQ(name, "SG_ERROR_UNAME", 14)) {
-      /*                        ^           */
-#ifdef SG_ERROR_UNAME
-        *iv_return = SG_ERROR_UNAME;
-        return PERL_constant_ISIV;
-#else
-        return PERL_constant_NOTDEF;
-#endif
-      }
-      break;
-    }
+    return constant_14 (aTHX_ name, iv_return);
     break;
   case 15:
     return constant_15 (aTHX_ name, iv_return);
@@ -441,41 +616,18 @@ __END__
     return constant_16 (aTHX_ name, iv_return);
     break;
   case 17:
-    if (memEQ(name, "SG_ERROR_ASPRINTF", 17)) {
-#ifdef SG_ERROR_ASPRINTF
-      *iv_return = SG_ERROR_ASPRINTF;
-      return PERL_constant_ISIV;
-#else
-      return PERL_constant_NOTDEF;
-#endif
-    }
+    return constant_17 (aTHX_ name, iv_return);
     break;
   case 18:
-    if (memEQ(name, "SG_ERROR_SETMNTENT", 18)) {
-#ifdef SG_ERROR_SETMNTENT
-      *iv_return = SG_ERROR_SETMNTENT;
-      return PERL_constant_ISIV;
-#else
-      return PERL_constant_NOTDEF;
-#endif
-    }
-    break;
-  case 19:
-    return constant_19 (aTHX_ name, iv_return);
-    break;
-  case 20:
-    return constant_20 (aTHX_ name, iv_return);
-    break;
-  case 21:
-    /* Names all of length 21.  */
-    /* SG_ERROR_KSTAT_LOOKUP SG_ERROR_SYSCTLBYNAME */
-    /* Offset 11 gives the best switch position.  */
-    switch (name[11]) {
+    /* Names all of length 18.  */
+    /* SG_ERROR_MEMSTATUS SG_ERROR_SETMNTENT */
+    /* Offset 17 gives the best switch position.  */
+    switch (name[17]) {
     case 'S':
-      if (memEQ(name, "SG_ERROR_SYSCTLBYNAME", 21)) {
-      /*                          ^                */
-#ifdef SG_ERROR_SYSCTLBYNAME
-        *iv_return = SG_ERROR_SYSCTLBYNAME;
+      if (memEQ(name, "SG_ERROR_MEMSTATU", 17)) {
+      /*                                S      */
+#ifdef SG_ERROR_MEMSTATUS
+        *iv_return = SG_ERROR_MEMSTATUS;
         return PERL_constant_ISIV;
 #else
         return PERL_constant_NOTDEF;
@@ -483,10 +635,10 @@ __END__
       }
       break;
     case 'T':
-      if (memEQ(name, "SG_ERROR_KSTAT_LOOKUP", 21)) {
-      /*                          ^                */
-#ifdef SG_ERROR_KSTAT_LOOKUP
-        *iv_return = SG_ERROR_KSTAT_LOOKUP;
+      if (memEQ(name, "SG_ERROR_SETMNTEN", 17)) {
+      /*                                T      */
+#ifdef SG_ERROR_SETMNTENT
+        *iv_return = SG_ERROR_SETMNTENT;
         return PERL_constant_ISIV;
 #else
         return PERL_constant_NOTDEF;
@@ -494,6 +646,41 @@ __END__
       }
       break;
     }
+    break;
+  case 19:
+    return constant_19 (aTHX_ name, iv_return);
+    break;
+  case 20:
+    /* Names all of length 20.  */
+    /* SG_ERROR_GETPAGESIZE SG_ERROR_UNSUPPORTED */
+    /* Offset 19 gives the best switch position.  */
+    switch (name[19]) {
+    case 'D':
+      if (memEQ(name, "SG_ERROR_UNSUPPORTE", 19)) {
+      /*                                  D      */
+#ifdef SG_ERROR_UNSUPPORTED
+        *iv_return = SG_ERROR_UNSUPPORTED;
+        return PERL_constant_ISIV;
+#else
+        return PERL_constant_NOTDEF;
+#endif
+      }
+      break;
+    case 'E':
+      if (memEQ(name, "SG_ERROR_GETPAGESIZ", 19)) {
+      /*                                  E      */
+#ifdef SG_ERROR_GETPAGESIZE
+        *iv_return = SG_ERROR_GETPAGESIZE;
+        return PERL_constant_ISIV;
+#else
+        return PERL_constant_NOTDEF;
+#endif
+      }
+      break;
+    }
+    break;
+  case 21:
+    return constant_21 (aTHX_ name, iv_return);
     break;
   case 22:
     if (memEQ(name, "SG_ERROR_KVM_OPENFILES", 22)) {
@@ -506,32 +693,13 @@ __END__
     }
     break;
   case 23:
-    /* Names all of length 23.  */
-    /* SG_IFACE_DUPLEX_UNKNOWN SG_PROCESS_STATE_ZOMBIE */
-    /* Offset 19 gives the best switch position.  */
-    switch (name[19]) {
-    case 'M':
-      if (memEQ(name, "SG_PROCESS_STATE_ZOMBIE", 23)) {
-      /*                                  ^          */
-#ifdef SG_PROCESS_STATE_ZOMBIE
-        *iv_return = SG_PROCESS_STATE_ZOMBIE;
-        return PERL_constant_ISIV;
+    if (memEQ(name, "SG_ERROR_INITIALISATION", 23)) {
+#ifdef SG_ERROR_INITIALISATION
+      *iv_return = SG_ERROR_INITIALISATION;
+      return PERL_constant_ISIV;
 #else
-        return PERL_constant_NOTDEF;
+      return PERL_constant_NOTDEF;
 #endif
-      }
-      break;
-    case 'N':
-      if (memEQ(name, "SG_IFACE_DUPLEX_UNKNOWN", 23)) {
-      /*                                  ^          */
-#ifdef SG_IFACE_DUPLEX_UNKNOWN
-        *iv_return = SG_IFACE_DUPLEX_UNKNOWN;
-        return PERL_constant_ISIV;
-#else
-        return PERL_constant_NOTDEF;
-#endif
-      }
-      break;
     }
     break;
   case 24:
@@ -539,23 +707,23 @@ __END__
     break;
   case 25:
     /* Names all of length 25.  */
-    /* SG_ERROR_XSW_VER_MISMATCH SG_PROCESS_STATE_SLEEPING */
-    /* Offset 24 gives the best switch position.  */
-    switch (name[24]) {
-    case 'G':
-      if (memEQ(name, "SG_PROCESS_STATE_SLEEPIN", 24)) {
-      /*                                       G      */
-#ifdef SG_PROCESS_STATE_SLEEPING
-        *iv_return = SG_PROCESS_STATE_SLEEPING;
+    /* SG_ERROR_INVALID_ARGUMENT SG_ERROR_XSW_VER_MISMATCH */
+    /* Offset 11 gives the best switch position.  */
+    switch (name[11]) {
+    case 'V':
+      if (memEQ(name, "SG_ERROR_INVALID_ARGUMENT", 25)) {
+      /*                          ^                    */
+#ifdef SG_ERROR_INVALID_ARGUMENT
+        *iv_return = SG_ERROR_INVALID_ARGUMENT;
         return PERL_constant_ISIV;
 #else
         return PERL_constant_NOTDEF;
 #endif
       }
       break;
-    case 'H':
-      if (memEQ(name, "SG_ERROR_XSW_VER_MISMATC", 24)) {
-      /*                                       H      */
+    case 'W':
+      if (memEQ(name, "SG_ERROR_XSW_VER_MISMATCH", 25)) {
+      /*                          ^                    */
 #ifdef SG_ERROR_XSW_VER_MISMATCH
         *iv_return = SG_ERROR_XSW_VER_MISMATCH;
         return PERL_constant_ISIV;
