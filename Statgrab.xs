@@ -8,38 +8,14 @@
 
 #include "const-c.inc"
 
-typedef struct {
-    sg_disk_io_stats *stats;
-    int ndisks;
-} sg_disk_io_stats_my;
-
-typedef struct {
-    sg_fs_stats *stats;
-    int nmounts;
-} sg_fs_stats_my;
-
-typedef struct {
-    sg_network_io_stats *stats;
-    int nifs;
-} sg_network_io_stats_my;
-
-typedef struct {
-    sg_network_iface_stats *stats;
-    int nifs;
-} sg_network_iface_stats_my;
-
-typedef struct {
-    sg_process_stats *stats;
-    int nprocs;
-} sg_process_stats_my;
-
 MODULE = Unix::Statgrab		PACKAGE = Unix::Statgrab
 
 INCLUDE: const-xs.inc
 
 BOOT:
 {
-    sg_init();
+    /* sg_log_init(properties_pfx, env_name, argv0) */
+    sg_init(1);
 }
 
 void
@@ -47,24 +23,17 @@ get_error ()
     PROTOTYPE: 
     CODE:
     {
-	SV *sv = sv_newmortal();
-	int ec = sg_get_error();
+	sg_error_details *self = safemalloc(sizeof(sg_error_details));
 
-	SvUPGRADE(sv, SVt_PVIV);
-	sv_setpv(sv, sg_str_error(ec));
-	SvIVX(sv) = ec;
-	SvIOK_on(sv);
+	if (SG_ERROR_NONE == sg_get_error_details(self))
+	{
+	    XSRETURN_UNDEF;
+	}
 
 	EXTEND(SP, 1);
-	ST(0) = sv;
-	
-	if (GIMME == G_ARRAY) {
-	    EXTEND(SP, 2);
-	    ST(1) = sv_newmortal();
-	    sv_setpv(ST(1), sg_get_error_arg());
-	    XSRETURN(2);
-	}
-	
+
+	ST(0) = sv_newmortal();
+	sv_setref_pv(ST(0), "Unix::Statgrab::sg_error_details", (void*)self);
 	XSRETURN(1);
     }
 
@@ -82,7 +51,7 @@ get_host_info ()
     CODE:
     {
 	sg_host_info *self;
-	if ((self = sg_get_host_info()) == NULL)
+	if ((self = sg_get_host_info_r(NULL)) == NULL)
 	    XSRETURN_UNDEF;
 
 	EXTEND(SP, 1);
@@ -98,45 +67,13 @@ get_cpu_stats ()
     CODE:
     {
 	sg_cpu_stats *self;
-	if ((self = sg_get_cpu_stats()) == NULL) 
+	if ((self = sg_get_cpu_stats_r(NULL)) == NULL) 
 	    XSRETURN_UNDEF;
 
 	EXTEND(SP, 1);
 
 	ST(0) = sv_newmortal();
 	sv_setref_pv(ST(0), "Unix::Statgrab::sg_cpu_stats", (void*)self);
-	XSRETURN(1);
-    }
-
-void
-get_cpu_stats_diff ()
-    PROTOTYPE:
-    CODE:
-    {
-	sg_cpu_stats *self;
-	if ((self = sg_get_cpu_stats_diff()) == NULL)
-	    XSRETURN_UNDEF;
-
-	EXTEND(SP, 1);
-
-	ST(0) = sv_newmortal();
-	sv_setref_pv(ST(0), "Unix::Statgrab::sg_cpu_stats", (void*)self);
-	XSRETURN(1);
-    }
-
-void
-get_cpu_percents ()
-    PROTOTYPE:
-    CODE:
-    {
-	sg_cpu_percents *self;
-	if ((self = sg_get_cpu_percents()) == NULL) 
-	    XSRETURN_UNDEF;
-	
-	EXTEND(SP, 1);
-
-	ST(0) = sv_newmortal();
-	sv_setref_pv(ST(0), "Unix::Statgrab::sg_cpu_percents", (void*)self);
 	XSRETURN(1);
     }
 
@@ -145,36 +82,14 @@ get_disk_io_stats ()
     PROTOTYPE:
     CODE:
     {
-	sg_disk_io_stats_my *self;
-	
-	New(0, self, 1, sg_disk_io_stats_my);
-	
-	if ((self->stats = sg_get_disk_io_stats(&self->ndisks)) == NULL)
+	sg_disk_io_stats *self;
+	if ((self = sg_get_disk_io_stats_r(NULL)) == NULL)
 	    XSRETURN_UNDEF;
 
 	EXTEND(SP, 1);
 
 	ST(0) = sv_newmortal();
-	sv_setref_pv(ST(0), "Unix::Statgrab::sg_disk_io_stats_my", (void*)self);
-	XSRETURN(1);
-    }
-
-void
-get_disk_io_stats_diff ()
-    PROTOTYPE:
-    CODE:
-    {
-	sg_disk_io_stats_my *self;
-
-	New(0, self, 1, sg_disk_io_stats_my);
-
-	if ((self->stats = sg_get_disk_io_stats_diff(&self->ndisks)) == NULL)
-	    XSRETURN_UNDEF;
-
-	EXTEND(SP, 1);
-
-	ST(0) = sv_newmortal();
-	sv_setref_pv(ST(0), "Unix::Statgrab::sg_disk_io_stats_my", (void*)self);
+	sv_setref_pv(ST(0), "Unix::Statgrab::sg_disk_io_stats", (void*)self);
 	XSRETURN(1);
     }
 
@@ -183,17 +98,17 @@ get_fs_stats ()
     PROTOTYPE:
     CODE:
     {
-	sg_fs_stats_my *self;
+	sg_fs_stats *self;
 
-	New(0, self, 1, sg_fs_stats_my);
+	New(0, self, 1, sg_fs_stats);
 
-	if ((self->stats = sg_get_fs_stats(&self->nmounts)) == NULL)
+	if ((self = sg_get_fs_stats_r(NULL)) == NULL)
 	    XSRETURN_UNDEF;
 
 	EXTEND(SP, 1);
 
 	ST(0) = sv_newmortal();
-	sv_setref_pv(ST(0), "Unix::Statgrab::sg_fs_stats_my", (void*)self);
+	sv_setref_pv(ST(0), "Unix::Statgrab::sg_fs_stats", (void*)self);
 	XSRETURN(1);
     }
 
@@ -203,7 +118,7 @@ get_load_stats ()
     CODE:
     {
 	sg_load_stats *self;
-	if ((self = sg_get_load_stats()) == NULL)
+	if ((self = sg_get_load_stats_r(NULL)) == NULL)
 	    XSRETURN_UNDEF;
 	
 	EXTEND(SP, 1);
@@ -219,7 +134,7 @@ get_mem_stats ()
     CODE:
     {
 	sg_mem_stats *self;
-	if ((self = sg_get_mem_stats()) == NULL)
+	if ((self = sg_get_mem_stats_r(NULL)) == NULL)
 	    XSRETURN_UNDEF;
 
 	EXTEND(SP, 1);
@@ -235,7 +150,7 @@ get_swap_stats ()
     CODE:
     {
 	sg_swap_stats *self;
-	if ((self = sg_get_swap_stats()) == NULL)
+	if ((self = sg_get_swap_stats_r(NULL)) == NULL)
 	    XSRETURN_UNDEF;
 
 	EXTEND(SP, 1);
@@ -250,55 +165,36 @@ get_network_io_stats ()
     PROTOTYPE:
     CODE:
     {
-	sg_network_io_stats_my *self;
+	sg_network_io_stats *self;
 
-	New(0, self, 1, sg_network_io_stats_my);
+	New(0, self, 1, sg_network_io_stats);
 
-	if ((self->stats = sg_get_network_io_stats(&self->nifs)) == NULL)
+	if ((self = sg_get_network_io_stats_r(NULL)) == NULL)
 	    XSRETURN_UNDEF;
 
 	EXTEND(SP, 1);
 
 	ST(0) = sv_newmortal();
-	sv_setref_pv(ST(0), "Unix::Statgrab::sg_network_io_stats_my", (void*)self);
+	sv_setref_pv(ST(0), "Unix::Statgrab::sg_network_io_stats", (void*)self);
 	XSRETURN(1);
     }
 	
-void
-get_network_io_stats_diff ()
-    PROTOTYPE:
-    CODE:
-    {
-	sg_network_io_stats_my *self;
-
-	New(0, self, 1, sg_network_io_stats_my);
-
-	if ((self->stats = sg_get_network_io_stats_diff(&self->nifs)) == NULL)
-	    XSRETURN_UNDEF;
-
-	EXTEND(SP, 1);
-
-	ST(0) = sv_newmortal();
-	sv_setref_pv(ST(0), "Unix::Statgrab::sg_network_io_stats_my", (void*)self);
-	XSRETURN(1);
-    }
-
 void
 get_network_iface_stats ()
     PROTOTYPE:
     CODE:
     {
-	sg_network_iface_stats_my *self;
+	sg_network_iface_stats *self;
 
-	New(0, self, 1, sg_network_iface_stats_my);
+	New(0, self, 1, sg_network_iface_stats);
 
-	if ((self->stats = sg_get_network_iface_stats(&self->nifs)) == NULL)
+	if ((self = sg_get_network_iface_stats_r(NULL)) == NULL)
 	    XSRETURN_UNDEF;
 
 	EXTEND(SP, 1);
 
 	ST(0) = sv_newmortal();
-	sv_setref_pv(ST(0), "Unix::Statgrab::sg_network_iface_stats_my", (void*)self);
+	sv_setref_pv(ST(0), "Unix::Statgrab::sg_network_iface_stats", (void*)self);
 	XSRETURN(1);
     }
 
@@ -308,23 +204,7 @@ get_page_stats ()
     CODE:
     {
 	sg_page_stats *self;
-	if ((self = sg_get_page_stats()) == NULL)
-	    XSRETURN_UNDEF;
-
-	EXTEND(SP, 1);
-
-	ST(0) = sv_newmortal();
-	sv_setref_pv(ST(0), "Unix::Statgrab::sg_page_stats", (void*)self);
-	XSRETURN(1);
-    }
-
-void
-get_page_stats_diff ()
-    PROTOTYPE:
-    CODE:
-    {
-	sg_page_stats *self;
-	if ((self = sg_get_page_stats_diff()) == NULL)
+	if ((self = sg_get_page_stats_r(NULL)) == NULL)
 	    XSRETURN_UNDEF;
 
 	EXTEND(SP, 1);
@@ -340,7 +220,7 @@ get_user_stats ()
     CODE:
     {
 	sg_user_stats *self;
-	if ((self = sg_get_user_stats()) == NULL)
+	if ((self = sg_get_user_stats_r(NULL)) == NULL)
 	    XSRETURN_UNDEF;
 
 	EXTEND(SP, 1);
@@ -355,163 +235,207 @@ get_process_stats ()
     PROTOTYPE:
     CODE:
     {
-	sg_process_stats_my *self;
+	sg_process_stats *self;
 	
-	New(0, self, 1, sg_process_stats_my);
+	New(0, self, 1, sg_process_stats);
 	
-	if ((self->stats = sg_get_process_stats(&self->nprocs)) == NULL)
+	if ((self = sg_get_process_stats_r(NULL)) == NULL)
 	    XSRETURN_UNDEF;
 
 	EXTEND(SP, 1);
 
 	ST(0) = sv_newmortal();
-	sv_setref_pv(ST(0), "Unix::Statgrab::sg_process_stats_my", (void*)self);
+	sv_setref_pv(ST(0), "Unix::Statgrab::sg_process_stats", (void*)self);
 	XSRETURN(1);
     }
 
-int
-_sort_procs_by_name (a, b)
-	sg_process_stats *a;
-	sg_process_stats *b;
-    PROTOTYPE: $$
+MODULE = Unix::Statgrab	    PACKAGE = Unix::Statgrab::sg_error_details
+
+UV
+error (self)
+	sg_error_details *self;
     CODE:
-    {
-	RETVAL = sg_process_compare_name(a, b);
-    }
-    OUTPUT:
-	RETVAL
-   
-int
-_sort_procs_by_pid (a, b)
-	sg_process_stats *a;
-	sg_process_stats *b;
-    PROTOTYPE: $$
-    CODE:
-    {
-	RETVAL = sg_process_compare_pid(a, b);
-    }
+	RETVAL = self->error;
     OUTPUT:
 	RETVAL
 
-int
-_sort_procs_by_uid (a, b)
-	sg_process_stats *a;
-	sg_process_stats *b;
-    PROTOTYPE: $$
+const char *
+error_name(self)
+	sg_error_details *self;
     CODE:
-    {
-	RETVAL = sg_process_compare_uid(a, b);
-    }
+	RETVAL = sg_str_error(self->error);
     OUTPUT:
 	RETVAL
 
-int
-_sort_procs_by_gid (a, b)
-	sg_process_stats *a;
-	sg_process_stats *b;
-    PROTOTYPE: $$
+IV
+errno_value (self)
+	sg_error_details *self;
     CODE:
-    {
-	RETVAL = sg_process_compare_gid(a, b);
-    }
+	RETVAL = self->errno_value;
     OUTPUT:
 	RETVAL
 
-int
-_sort_procs_by_size (a, b)
-	sg_process_stats *a;
-	sg_process_stats *b;
-    PROTOTYPE: $$
+const char *
+error_arg (self)
+	sg_error_details *self;
     CODE:
-    {
-	RETVAL = sg_process_compare_size(a, b);
-    }
-    OUTPUT:
-	RETVAL
-	
-int
-_sort_procs_by_res (a, b)
-	sg_process_stats *a;
-	sg_process_stats *b;
-    PROTOTYPE: $$
-    CODE:
-    {
-	RETVAL = sg_process_compare_res(a, b);
-    }
+	RETVAL = self->error_arg;
     OUTPUT:
 	RETVAL
 
-int
-_sort_procs_by_cpu (a, b)
-	sg_process_stats *a;
-	sg_process_stats *b;
-    PROTOTYPE: $$
+void
+strperror (self)
+	sg_error_details *self;
     CODE:
     {
-	RETVAL = sg_process_compare_time(a, b);
-    }
-    OUTPUT:
-	RETVAL
+	char *buf = NULL;
+	if(NULL == sg_strperror(&buf, self))
+	    XSRETURN_UNDEF;
 
-int
-_sort_procs_by_time (a, b)
-	sg_process_stats *a;
-	sg_process_stats *b;
-    PROTOTYPE: $$
+	EXTEND(SP, 1);
+
+	ST(0) = newSVpv(buf, 0);
+	free(buf);
+	sv_2mortal(ST(0));
+	XSRETURN(1);
+    }
+
+void
+DESTROY (self)
+	sg_error_details *self;
     CODE:
     {
-	RETVAL = sg_process_compare_time (a, b);
+	Safefree(self);
     }
-    OUTPUT:
-	RETVAL
-	
+
 MODULE = Unix::Statgrab	    PACKAGE = Unix::Statgrab::sg_host_info
 
-char *
-os_name (self)
+UV
+entries (self)
 	sg_host_info *self;
     CODE:
-	RETVAL = self->os_name;
+	RETVAL = sg_get_nelements(self);
     OUTPUT:
 	RETVAL
 
 char *
-os_release (self)
+os_name (self, num = 0)
 	sg_host_info *self;
+	UV num;
     CODE:
-	RETVAL = self->os_release;
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].os_name;
     OUTPUT:
 	RETVAL
 
 char *
-os_version (self)
+os_release (self, num = 0)
 	sg_host_info *self;
+	UV num;
     CODE:
-	RETVAL = self->os_version;
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].os_release;
     OUTPUT:
 	RETVAL
 
 char *
-platform (self)
+os_version (self, num = 0)
 	sg_host_info *self;
+	UV num;
     CODE:
-	RETVAL = self->platform;
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].os_version;
     OUTPUT:
 	RETVAL
 
 char *
-hostname (self)
+platform (self, num = 0)
 	sg_host_info *self;
+	UV num;
     CODE:
-	RETVAL = self->hostname;
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].platform;
+    OUTPUT:
+	RETVAL
+
+char *
+hostname (self, num = 0)
+	sg_host_info *self;
+	UV num;
+    CODE:
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].hostname;
     OUTPUT:
 	RETVAL
 
 UV
-uptime (self)
+bitwidth (self, num = 0)
 	sg_host_info *self;
+	UV num;
     CODE:
-	RETVAL = self->uptime;
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].bitwidth;
+    OUTPUT:
+	RETVAL
+
+UV
+host_state (self, num = 0)
+	sg_host_info *self;
+	UV num;
+    CODE:
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].host_state;
+    OUTPUT:
+	RETVAL
+
+UV
+ncpus (self, num = 0)
+	sg_host_info *self;
+	UV num;
+    CODE:
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].ncpus;
+    OUTPUT:
+	RETVAL
+
+UV
+maxcpus (self, num = 0)
+	sg_host_info *self;
+	UV num;
+    CODE:
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].maxcpus;
+    OUTPUT:
+	RETVAL
+
+IV
+systime (self, num = 0)
+	sg_host_info *self;
+	UV num;
+    CODE:
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].systime;
+    OUTPUT:
+	RETVAL
+
+IV
+uptime (self, num = 0)
+	sg_host_info *self;
+	UV num;
+    CODE:
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].uptime;
     OUTPUT:
 	RETVAL
 
@@ -520,72 +444,170 @@ DESTROY (self)
 	sg_host_info *self;
     CODE:
     {
-	/* self points to a static buffer */
+	sg_free_host_info(self);
     }
 
 MODULE = Unix::Statgrab		PACKAGE = Unix::Statgrab::sg_cpu_stats
 
-NV
-user (self)
-	sg_cpu_stats *self;
-    CODE:
-	RETVAL = self->user;
-    OUTPUT:
-	RETVAL
-
-NV
-kernel (self)
-	sg_cpu_stats *self;
-    CODE:
-	RETVAL = self->kernel;
-    OUTPUT:
-	RETVAL
-
-NV
-idle (self)
-	sg_cpu_stats *self;
-    CODE:
-	RETVAL = self->idle;
-    OUTPUT:
-	RETVAL
-
-NV
-iowait (self)
-	sg_cpu_stats *self;
-    CODE:
-	RETVAL = self->iowait;
-    OUTPUT:
-	RETVAL
-
-NV
-swap (self)
-	sg_cpu_stats *self;
-    CODE:
-	RETVAL = self->swap;
-    OUTPUT:
-	RETVAL
-
-NV
-nice (self)
-	sg_cpu_stats *self;
-    CODE:
-	RETVAL = self->nice;
-    OUTPUT:
-	RETVAL
-
-NV
-total (self)
-	sg_cpu_stats *self;
-    CODE:
-	RETVAL = self->total;
-    OUTPUT:
-	RETVAL
-
 UV
-systime (self)
+entries (self)
 	sg_cpu_stats *self;
     CODE:
-	RETVAL = self->systime;
+	RETVAL = sg_get_nelements(self);
+    OUTPUT:
+	RETVAL
+
+NV
+user (self, num = 0)
+	sg_cpu_stats *self;
+	UV num;
+    CODE:
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].user;
+    OUTPUT:
+	RETVAL
+
+NV
+kernel (self, num = 0)
+	sg_cpu_stats *self;
+	UV num;
+    CODE:
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].kernel;
+    OUTPUT:
+	RETVAL
+
+NV
+idle (self, num = 0)
+	sg_cpu_stats *self;
+	UV num;
+    CODE:
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].idle;
+    OUTPUT:
+	RETVAL
+
+NV
+iowait (self, num = 0)
+	sg_cpu_stats *self;
+	UV num;
+    CODE:
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].iowait;
+    OUTPUT:
+	RETVAL
+
+NV
+swap (self, num = 0)
+	sg_cpu_stats *self;
+	UV num;
+    CODE:
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].swap;
+    OUTPUT:
+	RETVAL
+
+NV
+nice (self, num = 0)
+	sg_cpu_stats *self;
+	UV num;
+    CODE:
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].nice;
+    OUTPUT:
+	RETVAL
+
+NV
+total (self, num = 0)
+	sg_cpu_stats *self;
+	UV num;
+    CODE:
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].total;
+    OUTPUT:
+	RETVAL
+
+NV
+context_switches (self, num = 0)
+	sg_cpu_stats *self;
+	UV num;
+    CODE:
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].context_switches;
+    OUTPUT:
+	RETVAL
+
+NV
+voluntary_context_switches (self, num = 0)
+	sg_cpu_stats *self;
+	UV num;
+    CODE:
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].voluntary_context_switches;
+    OUTPUT:
+	RETVAL
+
+NV
+involuntary_context_switches (self, num = 0)
+	sg_cpu_stats *self;
+	UV num;
+    CODE:
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].involuntary_context_switches;
+    OUTPUT:
+	RETVAL
+
+NV
+syscalls (self, num = 0)
+	sg_cpu_stats *self;
+	UV num;
+    CODE:
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].syscalls;
+    OUTPUT:
+	RETVAL
+
+NV
+interrupts (self, num = 0)
+	sg_cpu_stats *self;
+	UV num;
+    CODE:
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].interrupts;
+    OUTPUT:
+	RETVAL
+
+NV
+soft_interrupts (self, num = 0)
+	sg_cpu_stats *self;
+	UV num;
+    CODE:
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].soft_interrupts;
+    OUTPUT:
+	RETVAL
+
+IV
+systime (self, num = 0)
+	sg_cpu_stats *self;
+	UV num;
+    CODE:
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].systime;
     OUTPUT:
 	RETVAL
 
@@ -594,64 +616,126 @@ DESTROY (self)
 	sg_cpu_stats *self;
     CODE:
     {
-	/* self points to a static buffer */
+	sg_free_cpu_stats(self);
     }
-	
+
+void
+get_cpu_stats_diff (last, now)
+	sg_cpu_stats *last;
+	sg_cpu_stats *now;
+    CODE:
+    {
+	sg_cpu_stats *self;
+	if ((self = sg_get_cpu_stats_diff_between(last, now, NULL)) == NULL)
+	    XSRETURN_UNDEF;
+
+	EXTEND(SP, 1);
+
+	ST(0) = sv_newmortal();
+	sv_setref_pv(ST(0), "Unix::Statgrab::sg_cpu_stats", (void*)self);
+	XSRETURN(1);
+    }
+
+void
+get_cpu_percents (of)
+	sg_cpu_stats *of;
+    CODE:
+    {
+	sg_cpu_percents *self;
+	if ((self = sg_get_cpu_percents_r(of, NULL)) == NULL) 
+	    XSRETURN_UNDEF;
+
+	EXTEND(SP, 1);
+
+	ST(0) = sv_newmortal();
+	sv_setref_pv(ST(0), "Unix::Statgrab::sg_cpu_percents", (void*)self);
+	XSRETURN(1);
+    }
+
 MODULE = Unix::Statgrab		PACKAGE = Unix::Statgrab::sg_cpu_percents
 
-NV
-user (self)
-	sg_cpu_percents *self;
+UV
+entries (self)
+	sg_cpu_stats *self;
     CODE:
-	RETVAL = self->user;
+	RETVAL = sg_get_nelements(self);
     OUTPUT:
 	RETVAL
 
 NV
-kernel (self)
+user (self, num = 0)
 	sg_cpu_percents *self;
+	UV num;
     CODE:
-	RETVAL = self->kernel;
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].user;
     OUTPUT:
 	RETVAL
 
 NV
-idle (self)
+kernel (self, num = 0)
 	sg_cpu_percents *self;
+	UV num;
     CODE:
-	RETVAL = self->idle;
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].kernel;
     OUTPUT:
 	RETVAL
 
 NV
-iowait (self)
+idle (self, num = 0)
 	sg_cpu_percents *self;
+	UV num;
     CODE:
-	RETVAL = self->iowait;
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].idle;
     OUTPUT:
 	RETVAL
 
 NV
-swap (self)
+iowait (self, num = 0)
 	sg_cpu_percents *self;
+	UV num;
     CODE:
-	RETVAL = self->swap;
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].iowait;
     OUTPUT:
 	RETVAL
 
 NV
-nice (self)
+swap (self, num = 0)
 	sg_cpu_percents *self;
+	UV num;
     CODE:
-	RETVAL = self->nice;
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].swap;
+    OUTPUT:
+	RETVAL
+
+NV
+nice (self, num = 0)
+	sg_cpu_percents *self;
+	UV num;
+    CODE:
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].nice;
     OUTPUT:
 	RETVAL
 
 UV
-systime (self)
+time_taken (self, num = 0)
 	sg_cpu_percents *self;
+	UV num;
     CODE:
-	RETVAL = self->time_taken;
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].time_taken;
     OUTPUT:
 	RETVAL
 
@@ -660,334 +744,458 @@ DESTROY (self)
 	sg_cpu_percents *self;
     CODE:
     {
-	/* self points to a static buffer */
+	sg_free_cpu_percents(self);
     }
 
-MODULE = Unix::Statgrab		PACKAGE = Unix::Statgrab::sg_disk_io_stats_my
+MODULE = Unix::Statgrab		PACKAGE = Unix::Statgrab::sg_disk_io_stats
 
-#define DISK(n)	(self->stats + n)
-
-int
-num_disks (self)
-	sg_disk_io_stats_my *self;
+UV
+entries (self)
+	sg_disk_io_stats *self;
     CODE:
-	RETVAL = self->ndisks;
+	RETVAL = sg_get_nelements(self);
     OUTPUT:
 	RETVAL
 
 char *
 disk_name (self, num = 0)
-	sg_disk_io_stats_my *self;
-	int num;
+	sg_disk_io_stats *self;
+	UV num;
     CODE:
-	if (num < 0 || num >= self->ndisks)
+	if (num >= sg_get_nelements(self))
 	    XSRETURN_UNDEF;
-	RETVAL = DISK(num)->disk_name;
+	RETVAL = self[num].disk_name;
     OUTPUT:
 	RETVAL
 
 NV
 read_bytes (self, num = 0)
-	sg_disk_io_stats_my *self;
-	int num;
+	sg_disk_io_stats *self;
+	UV num;
     CODE:
-	if (num < 0 || num >= self->ndisks)
+	if (num >= sg_get_nelements(self))
 	    XSRETURN_UNDEF;
-	RETVAL = DISK(num)->read_bytes;
+	RETVAL = self[num].read_bytes;
     OUTPUT:
 	RETVAL
 
 NV
 write_bytes (self, num = 0)
-	sg_disk_io_stats_my *self;
-	int num;
+	sg_disk_io_stats *self;
+	UV num;
     CODE:
-	if (num < 0 || num >= self->ndisks)
+	if (num >= sg_get_nelements(self))
 	    XSRETURN_UNDEF;
-	RETVAL = DISK(num)->write_bytes;
+	RETVAL = self[num].write_bytes;
     OUTPUT:
 	RETVAL
 
 UV
 systime (self, num = 0)
-	sg_disk_io_stats_my *self;
-	int num;
+	sg_disk_io_stats *self;
+	UV num;
     CODE:
-	if (num < 0 || num >= self->ndisks)
+	if (num >= sg_get_nelements(self))
 	    XSRETURN_UNDEF;
-	RETVAL = DISK(num)->systime;
+	RETVAL = self[num].systime;
     OUTPUT:
 	RETVAL
 
 void
 DESTROY (self)
-	sg_disk_io_stats_my *self;
+	sg_disk_io_stats *self;
     CODE:
     {
-	Safefree(self);
+	sg_free_disk_io_stats(self);
     }
 
-MODULE = Unix::Statgrab		PACKAGE = Unix::Statgrab::sg_fs_stats_my
-
-#define MOUNT(n)    (self->stats + n)
-
-IV
-num_fs (self)
-	sg_fs_stats_my *self;
+void
+get_disk_io_stats_diff (last, now)
+	sg_disk_io_stats *last;
+	sg_disk_io_stats *now;
     CODE:
-	RETVAL = self->nmounts;
+    {
+	sg_disk_io_stats *self;
+
+	if ((self = sg_get_disk_io_stats_diff_between(last, now, NULL)) == NULL)
+	    XSRETURN_UNDEF;
+
+	EXTEND(SP, 1);
+
+	ST(0) = sv_newmortal();
+	sv_setref_pv(ST(0), "Unix::Statgrab::sg_disk_io_stats", (void*)self);
+	XSRETURN(1);
+    }
+
+MODULE = Unix::Statgrab		PACKAGE = Unix::Statgrab::sg_fs_stats
+
+UV
+entries (self)
+	sg_fs_stats *self;
+    CODE:
+	RETVAL = sg_get_nelements(self);
     OUTPUT:
 	RETVAL
 
 char *
 device_name (self, num = 0)
-	sg_fs_stats_my *self;
-	int num;
+	sg_fs_stats *self;
+	UV num;
     CODE:
-	if (num < 0 || num >= self->nmounts)
+	if (num >= sg_get_nelements(self))
 	    XSRETURN_UNDEF;
-	RETVAL = MOUNT(num)->device_name;
+	RETVAL = self[num].device_name;
     OUTPUT:
 	RETVAL
 
 char *
 fs_type (self, num = 0)
-	sg_fs_stats_my *self;
-	int num;
+	sg_fs_stats *self;
+	UV num;
     CODE:
-	if (num < 0 || num >= self->nmounts)
+	if (num >= sg_get_nelements(self))
 	    XSRETURN_UNDEF;
-	RETVAL = MOUNT(num)->fs_type;
+	RETVAL = self[num].fs_type;
     OUTPUT:
 	RETVAL
 
 char *
 mnt_point (self, num = 0)
-	sg_fs_stats_my *self;
-	int num;
+	sg_fs_stats *self;
+	UV num;
     CODE:
-	if (num < 0 || num >= self->nmounts)
+	if (num >= sg_get_nelements(self))
 	    XSRETURN_UNDEF;
-	RETVAL = MOUNT(num)->mnt_point;
+	RETVAL = self[num].mnt_point;
+    OUTPUT:
+	RETVAL
+
+UV
+device_type (self, num = 0)
+	sg_fs_stats *self;
+	UV num;
+    CODE:
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].device_type;
     OUTPUT:
 	RETVAL
 
 NV
 size (self, num = 0)
-	sg_fs_stats_my *self;
-	int num;
+	sg_fs_stats *self;
+	UV num;
     CODE:
-	if (num < 0 || num >= self->nmounts)
+	if (num >= sg_get_nelements(self))
 	    XSRETURN_UNDEF;
-	RETVAL = MOUNT(num)->size;
+	RETVAL = self[num].size;
     OUTPUT:
 	RETVAL
 
 NV
 used (self, num = 0)
-	sg_fs_stats_my *self;
-	int num;
+	sg_fs_stats *self;
+	UV num;
     CODE:
-	if (num < 0 || num >= self->nmounts)
+	if (num >= sg_get_nelements(self))
 	    XSRETURN_UNDEF;
-	RETVAL = MOUNT(num)->used;
+	RETVAL = self[num].used;
+    OUTPUT:
+	RETVAL
+
+NV
+free (self, num = 0)
+	sg_fs_stats *self;
+	UV num;
+    CODE:
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].free;
     OUTPUT:
 	RETVAL
 
 NV
 avail (self, num = 0)
-	sg_fs_stats_my *self;
-	int num;
+	sg_fs_stats *self;
+	UV num;
     CODE:
-	if (num < 0 || num >= self->nmounts)
+	if (num >= sg_get_nelements(self))
 	    XSRETURN_UNDEF;
-	RETVAL = MOUNT(num)->avail;
+	RETVAL = self[num].avail;
     OUTPUT:
 	RETVAL
 
 NV
 total_inodes (self, num = 0)
-	sg_fs_stats_my *self;
-	int num;
+	sg_fs_stats *self;
+	UV num;
     CODE:
-	if (num < 0 || num >= self->nmounts)
+	if (num >= sg_get_nelements(self))
 	    XSRETURN_UNDEF;
-	RETVAL = MOUNT(num)->total_inodes;
+	RETVAL = self[num].total_inodes;
     OUTPUT:
 	RETVAL
 
 NV
 used_inodes (self, num = 0)
-	sg_fs_stats_my *self;
-	int num;
+	sg_fs_stats *self;
+	UV num;
     CODE:
-	if (num < 0 || num >= self->nmounts)
+	if (num >= sg_get_nelements(self))
 	    XSRETURN_UNDEF;
-	RETVAL = MOUNT(num)->used_inodes;
+	RETVAL = self[num].used_inodes;
     OUTPUT:
 	RETVAL
 
 NV
 free_inodes (self, num = 0)
-	sg_fs_stats_my *self;
-	int num;
+	sg_fs_stats *self;
+	UV num;
     CODE:
-	if (num < 0 || num >= self->nmounts)
+	if (num >= sg_get_nelements(self))
 	    XSRETURN_UNDEF;
-	RETVAL = MOUNT(num)->free_inodes;
+	RETVAL = self[num].free_inodes;
     OUTPUT:
 	RETVAL
 
 NV
 avail_inodes (self, num = 0)
-	sg_fs_stats_my *self;
-	int num;
+	sg_fs_stats *self;
+	UV num;
     CODE:
-	if (num < 0 || num >= self->nmounts)
+	if (num >= sg_get_nelements(self))
 	    XSRETURN_UNDEF;
-	RETVAL = MOUNT(num)->avail_inodes;
+	RETVAL = self[num].avail_inodes;
     OUTPUT:
 	RETVAL
 
 NV
 io_size (self, num = 0)
-	sg_fs_stats_my *self;
-	int num;
+	sg_fs_stats *self;
+	UV num;
     CODE:
-	if (num < 0 || num >= self->nmounts)
+	if (num >= sg_get_nelements(self))
 	    XSRETURN_UNDEF;
-	RETVAL = MOUNT(num)->io_size;
+	RETVAL = self[num].io_size;
     OUTPUT:
 	RETVAL
 
 NV
 block_size (self, num = 0)
-	sg_fs_stats_my *self;
-	int num;
+	sg_fs_stats *self;
+	UV num;
     CODE:
-	if (num < 0 || num >= self->nmounts)
+	if (num >= sg_get_nelements(self))
 	    XSRETURN_UNDEF;
-	RETVAL = MOUNT(num)->block_size;
+	RETVAL = self[num].block_size;
     OUTPUT:
 	RETVAL
 
 NV
 total_blocks (self, num = 0)
-	sg_fs_stats_my *self;
-	int num;
+	sg_fs_stats *self;
+	UV num;
     CODE:
-	if (num < 0 || num >= self->nmounts)
+	if (num >= sg_get_nelements(self))
 	    XSRETURN_UNDEF;
-	RETVAL = MOUNT(num)->total_blocks;
+	RETVAL = self[num].total_blocks;
     OUTPUT:
 	RETVAL
 
 NV
 free_blocks (self, num = 0)
-	sg_fs_stats_my *self;
-	int num;
+	sg_fs_stats *self;
+	UV num;
     CODE:
-	if (num < 0 || num >= self->nmounts)
+	if (num >= sg_get_nelements(self))
 	    XSRETURN_UNDEF;
-	RETVAL = MOUNT(num)->free_blocks;
+	RETVAL = self[num].free_blocks;
     OUTPUT:
 	RETVAL
 
 NV
 used_blocks (self, num = 0)
-	sg_fs_stats_my *self;
-	int num;
+	sg_fs_stats *self;
+	UV num;
     CODE:
-	if (num < 0 || num >= self->nmounts)
+	if (num >= sg_get_nelements(self))
 	    XSRETURN_UNDEF;
-	RETVAL = MOUNT(num)->used_blocks;
+	RETVAL = self[num].used_blocks;
     OUTPUT:
 	RETVAL
 
 NV
 avail_blocks (self, num = 0)
-	sg_fs_stats_my *self;
-	int num;
+	sg_fs_stats *self;
+	UV num;
     CODE:
-	if (num < 0 || num >= self->nmounts)
+	if (num >= sg_get_nelements(self))
 	    XSRETURN_UNDEF;
-	RETVAL = MOUNT(num)->avail_blocks;
+	RETVAL = self[num].avail_blocks;
+    OUTPUT:
+	RETVAL
+
+IV
+systime (self, num = 0)
+	sg_fs_stats *self;
+	UV num;
+    CODE:
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].systime;
     OUTPUT:
 	RETVAL
 
 void
 DESTROY (self)
-	sg_fs_stats_my *self;
+	sg_fs_stats *self;
     CODE:
     {
-	Safefree(self);
+	sg_free_fs_stats(self);
+    }
+
+void
+get_fs_stats_diff (last, now)
+	sg_fs_stats *last;
+	sg_fs_stats *now;
+    CODE:
+    {
+	sg_fs_stats *self;
+
+	if ((self = sg_get_fs_stats_diff_between(last, now, NULL)) == NULL)
+	    XSRETURN_UNDEF;
+
+	EXTEND(SP, 1);
+
+	ST(0) = sv_newmortal();
+	sv_setref_pv(ST(0), "Unix::Statgrab::sg_fs_stats", (void*)self);
+	XSRETURN(1);
     }
 
 MODULE = Unix::Statgrab	    PACKAGE = Unix::Statgrab::sg_load_stats
 
-NV
-min1 (self)
+UV
+entries (self)
 	sg_load_stats *self;
     CODE:
-	RETVAL = self->min1;
+	RETVAL = sg_get_nelements(self);
     OUTPUT:
 	RETVAL
 
 NV
-min5 (self)
+min1 (self, num = 0)
 	sg_load_stats *self;
+	UV num;
     CODE:
-	RETVAL = self->min5;
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].min1;
     OUTPUT:
 	RETVAL
 
 NV
-min15 (self)
+min5 (self, num = 0)
 	sg_load_stats *self;
+	UV num;
     CODE:
-	RETVAL = self->min15;
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].min5;
     OUTPUT:
 	RETVAL
-	
+
+NV
+min15 (self, num = 0)
+	sg_load_stats *self;
+	UV num;
+    CODE:
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].min15;
+    OUTPUT:
+	RETVAL
+
+IV
+systime (self, num = 0)
+	sg_load_stats *self;
+	UV num;
+    CODE:
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].systime;
+    OUTPUT:
+	RETVAL
+
 void
 DESTROY (self)
 	sg_load_stats *self;
     CODE:
     {
-	/* self points to a static buffer */
+	sg_free_load_stats(self);
     }
 
 MODULE = Unix::Statgrab	    PACKAGE = Unix::Statgrab::sg_mem_stats
 
-NV
-total (self)
+UV
+entries (self)
 	sg_mem_stats *self;
     CODE:
-	RETVAL = self->total;
+	RETVAL = sg_get_nelements(self);
     OUTPUT:
 	RETVAL
 
 NV
-free (self)
+total (self, num = 0)
 	sg_mem_stats *self;
+	UV num;
     CODE:
-	RETVAL = self->free;
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].total;
     OUTPUT:
 	RETVAL
 
 NV
-used (self)
+free (self, num = 0)
 	sg_mem_stats *self;
+	UV num;
     CODE:
-	RETVAL = self->used;
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].free;
     OUTPUT:
 	RETVAL
 
 NV
-cache (self)
+used (self, num = 0)
 	sg_mem_stats *self;
+	UV num;
     CODE:
-	RETVAL = self->cache;
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].used;
+    OUTPUT:
+	RETVAL
+
+NV
+cache (self, num = 0)
+	sg_mem_stats *self;
+	UV num;
+    CODE:
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].cache;
+    OUTPUT:
+	RETVAL
+
+IV
+systime (self, num = 0)
+	sg_mem_stats *self;
+	UV num;
+    CODE:
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].systime;
     OUTPUT:
 	RETVAL
 
@@ -996,32 +1204,60 @@ DESTROY (self)
 	sg_mem_stats *self;
     CODE:
     {
-	/* self points to a static buffer */
+	sg_free_mem_stats(self);
     }
 
 MODULE = Unix::Statgrab     PACKAGE = Unix::Statgrab::sg_swap_stats
 
-NV
-total (self)
+UV
+entries (self)
 	sg_swap_stats *self;
     CODE:
-	RETVAL = self->total;
+	RETVAL = sg_get_nelements(self);
     OUTPUT:
 	RETVAL
 
 NV
-free (self)
+total (self, num = 0)
 	sg_swap_stats *self;
+	UV num;
     CODE:
-	RETVAL = self->free;
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].total;
     OUTPUT:
 	RETVAL
 
 NV
-used (self)
+free (self, num = 0)
 	sg_swap_stats *self;
+	UV num;
     CODE:
-	RETVAL = self->used;
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].free;
+    OUTPUT:
+	RETVAL
+
+NV
+used (self, num = 0)
+	sg_swap_stats *self;
+	UV num;
+    CODE:
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].used;
+    OUTPUT:
+	RETVAL
+
+IV
+systime (self, num = 0)
+	sg_swap_stats *self;
+	UV num;
+    CODE:
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].systime;
     OUTPUT:
 	RETVAL
 
@@ -1030,218 +1266,268 @@ DESTROY (self)
 	sg_swap_stats *self;
     CODE:
     {
-	/* self points to a static buffer */
+	sg_free_swap_stats(self);
     }
 
-MODULE = Unix::Statgrab     PACKAGE = Unix::Statgrab::sg_network_io_stats_my
+MODULE = Unix::Statgrab     PACKAGE = Unix::Statgrab::sg_network_io_stats
 
-# some perls have IF defined already
-
-#ifdef IF
-# undef IF
-#endif
-#define IF(n)	(self->stats + n)
-
-IV
-num_ifaces (self)
-	sg_network_io_stats_my *self;
+UV
+entries (self)
+	sg_network_io_stats *self;
     CODE:
-	RETVAL = self->nifs;
+	RETVAL = sg_get_nelements(self);
     OUTPUT:
 	RETVAL
 
 char *
 interface_name (self, num = 0)
-	sg_network_io_stats_my *self;
-	int num;
+	sg_network_io_stats *self;
+	UV num;
     CODE:
-	if (num < 0 || num >= self->nifs)
+	if (num >= sg_get_nelements(self))
 	    XSRETURN_UNDEF;
-	RETVAL = IF(num)->interface_name;
+	RETVAL = self[num].interface_name;
     OUTPUT:
 	RETVAL
 
 NV
 tx (self, num = 0)
-	sg_network_io_stats_my *self;
-	int num;
+	sg_network_io_stats *self;
+	UV num;
     CODE:
-	if (num < 0 || num >= self->nifs)
+	if (num >= sg_get_nelements(self))
 	    XSRETURN_UNDEF;
-	RETVAL = IF(num)->tx;
+	RETVAL = self[num].tx;
     OUTPUT:
 	RETVAL
     
 NV
 rx (self, num = 0)
-	sg_network_io_stats_my *self;
-	int num;
+	sg_network_io_stats *self;
+	UV num;
     CODE:
-	if (num < 0 || num >= self->nifs)
+	if (num >= sg_get_nelements(self))
 	    XSRETURN_UNDEF;
-	RETVAL = IF(num)->rx;
+	RETVAL = self[num].rx;
     OUTPUT:
 	RETVAL
    
 NV
 ipackets (self, num = 0)
-	sg_network_io_stats_my *self;
-	int num;
+	sg_network_io_stats *self;
+	UV num;
     CODE:
-	if (num < 0 || num >= self->nifs)
+	if (num >= sg_get_nelements(self))
 	    XSRETURN_UNDEF;
-	RETVAL = IF(num)->ipackets;
+	RETVAL = self[num].ipackets;
     OUTPUT:
 	RETVAL
 
 NV
 opackets (self, num = 0)
-	sg_network_io_stats_my *self;
-	int num;
+	sg_network_io_stats *self;
+	UV num;
     CODE:
-	if (num < 0 || num >= self->nifs)
+	if (num >= sg_get_nelements(self))
 	    XSRETURN_UNDEF;
-	RETVAL = IF(num)->opackets;
+	RETVAL = self[num].opackets;
     OUTPUT:
 	RETVAL
 
 NV
 ierrors (self, num = 0)
-	sg_network_io_stats_my *self;
-	int num;
+	sg_network_io_stats *self;
+	UV num;
     CODE:
-	if (num < 0 || num >= self->nifs)
+	if (num >= sg_get_nelements(self))
 	    XSRETURN_UNDEF;
-	RETVAL = IF(num)->ierrors;
+	RETVAL = self[num].ierrors;
     OUTPUT:
 	RETVAL
 
 NV
 oerrors (self, num = 0)
-	sg_network_io_stats_my *self;
-	int num;
+	sg_network_io_stats *self;
+	UV num;
     CODE:
-	if (num < 0 || num >= self->nifs)
+	if (num >= sg_get_nelements(self))
 	    XSRETURN_UNDEF;
-	RETVAL = IF(num)->oerrors;
+	RETVAL = self[num].oerrors;
     OUTPUT:
 	RETVAL
 
 NV
 collisions (self, num = 0)
-	sg_network_io_stats_my *self;
-	int num;
+	sg_network_io_stats *self;
+	UV num;
     CODE:
-	if (num < 0 || num >= self->nifs)
+	if (num >= sg_get_nelements(self))
 	    XSRETURN_UNDEF;
-	RETVAL = IF(num)->collisions;
+	RETVAL = self[num].collisions;
     OUTPUT:
 	RETVAL
 
 UV
 systime (self, num = 0)
-	sg_network_io_stats_my *self;
-	int num;
+	sg_network_io_stats *self;
+	UV num;
     CODE:
-	if (num < 0 || num >= self->nifs)
+	if (num >= sg_get_nelements(self))
 	    XSRETURN_UNDEF;
-	RETVAL = IF(num)->systime;
+	RETVAL = self[num].systime;
     OUTPUT:
 	RETVAL
 
 void
 DESTROY (self)
-	sg_network_io_stats_my *self;
+	sg_network_io_stats *self;
     CODE:
     {
-	Safefree(self);
+	sg_free_network_io_stats(self);
     }
 
-MODULE = Unix::Statgrab     PACKAGE = Unix::Statgrab::sg_network_iface_stats_my
-
-IV
-num_ifaces (self)
-	sg_network_iface_stats_my *self;
+void
+get_network_io_stats_diff (last, now)
+	sg_network_io_stats *last;
+	sg_network_io_stats *now;
     CODE:
-	RETVAL = self->nifs;
+    {
+	sg_network_io_stats *self;
+
+	if ((self = sg_get_network_io_stats_diff_between(last, now, NULL)) == NULL)
+	    XSRETURN_UNDEF;
+
+	EXTEND(SP, 1);
+
+	ST(0) = sv_newmortal();
+	sv_setref_pv(ST(0), "Unix::Statgrab::sg_network_io_stats", (void*)self);
+	XSRETURN(1);
+    }
+
+MODULE = Unix::Statgrab     PACKAGE = Unix::Statgrab::sg_network_iface_stats
+
+UV
+entries (self)
+	sg_network_iface_stats *self;
+    CODE:
+	RETVAL = sg_get_nelements(self);
     OUTPUT:
 	RETVAL
 
 char *
 interface_name (self, num = 0)
-	sg_network_iface_stats_my *self;
-	int num;
+	sg_network_iface_stats *self;
+	UV num;
     CODE:
-	if (num < 0 || num >= self->nifs)
+	if (num >= sg_get_nelements(self))
 	    XSRETURN_UNDEF;
-	RETVAL = IF(num)->interface_name;
+	RETVAL = self[num].interface_name;
     OUTPUT:
 	RETVAL
 
-IV
+NV
 speed (self, num = 0)
-	sg_network_iface_stats_my *self;
-	int num;
+	sg_network_iface_stats *self;
+	UV num;
     CODE:
-	if (num < 0 || num >= self->nifs)
+	if (num >= sg_get_nelements(self))
 	    XSRETURN_UNDEF;
-	RETVAL = IF(num)->speed;
-    OUTPUT:
-	RETVAL
-
-IV
-dup (self, num = 0)
-	sg_network_iface_stats_my *self;
-	int num;
-    CODE:
-	if (num < 0 || num >= self->nifs)
-	    XSRETURN_UNDEF;
-	RETVAL = IF(num)->duplex;
-    OUTPUT:
-	RETVAL
-
-IV
-up (self, num = 0)
-	sg_network_iface_stats_my *self;
-	int num;
-    CODE:
-	if (num < 0 || num >= self->nifs)
-	    XSRETURN_UNDEF;
-	RETVAL = IF(num)->up;
-    OUTPUT:
-	RETVAL
-
-void
-DESTROY (self)
-	sg_network_iface_stats_my *self;
-    CODE:
-    {
-	Safefree(self);
-    }
-
-MODULE = Unix::Statgrab	    PACKAGE = Unix::Statgrab::sg_page_stats
-
-NV
-pages_pagein (self)
-	sg_page_stats *self;
-    CODE:
-	RETVAL = self->pages_pagein;
+	RETVAL = self[num].speed;
     OUTPUT:
 	RETVAL
 
 NV
-pages_pageout (self)
-	sg_page_stats *self;
+factor (self, num = 0)
+	sg_network_iface_stats *self;
+	UV num;
     CODE:
-	RETVAL = self->pages_pageout;
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].factor;
     OUTPUT:
 	RETVAL
 
 UV
-systime (self)
+duplex (self, num = 0)
+	sg_network_iface_stats *self;
+	UV num;
+    CODE:
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].duplex;
+    OUTPUT:
+	RETVAL
+
+UV
+up (self, num = 0)
+	sg_network_iface_stats *self;
+	UV num;
+    CODE:
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].up;
+    OUTPUT:
+	RETVAL
+
+IV
+systime (self, num = 0)
+	sg_network_iface_stats *self;
+	UV num;
+    CODE:
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].systime;
+    OUTPUT:
+	RETVAL
+
+void
+DESTROY (self)
+	sg_network_iface_stats *self;
+    CODE:
+    {
+	sg_free_network_iface_stats(self);
+    }
+
+MODULE = Unix::Statgrab	    PACKAGE = Unix::Statgrab::sg_page_stats
+
+UV
+entries (self)
 	sg_page_stats *self;
     CODE:
-	RETVAL = self->systime;
+	RETVAL = sg_get_nelements(self);
+    OUTPUT:
+	RETVAL
+
+NV
+pages_pagein (self, num = 0)
+	sg_page_stats *self;
+	UV num;
+    CODE:
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].pages_pagein;
+    OUTPUT:
+	RETVAL
+
+NV
+pages_pageout (self, num = 0)
+	sg_page_stats *self;
+	UV num;
+    CODE:
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].pages_pageout;
+    OUTPUT:
+	RETVAL
+
+UV
+systime (self, num = 0)
+	sg_page_stats *self;
+	UV num;
+    CODE:
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].systime;
     OUTPUT:
 	RETVAL
 	
@@ -1250,233 +1536,326 @@ DESTROY (self)
 	sg_page_stats *self;
     CODE:
     {
-	/* self points to a static buffer */
+	sg_free_page_stats(self);
+    }
+
+void
+get_page_stats_diff (last, now)
+	sg_page_stats *last;
+	sg_page_stats *now;
+    CODE:
+    {
+	sg_page_stats *self;
+	if ((self = sg_get_page_stats_diff_between(last, now, NULL)) == NULL)
+	    XSRETURN_UNDEF;
+
+	EXTEND(SP, 1);
+
+	ST(0) = sv_newmortal();
+	sv_setref_pv(ST(0), "Unix::Statgrab::sg_page_stats", (void*)self);
+	XSRETURN(1);
     }
 
 MODULE = Unix::Statgrab     PACKAGE = Unix::Statgrab::sg_user_stats
 
-void
-name_list (self)
+UV
+entries (self)
 	sg_user_stats *self;
     CODE:
-    {	
-	register char *c = self->name_list;
-	register char *last = self->name_list;
-	register unsigned int i = 0;
-	
-	EXTEND(SP, self->num_entries);
+	RETVAL = sg_get_nelements(self);
+    OUTPUT:
+	RETVAL
 
-	while (*c) {
-	    if (*c++ == ' ' || !*c) {
-		ST(i) = sv_newmortal();
-		sv_setpvn(ST(i), last, *c ? c - last - 1 : c - last);
-		last = c;
-		i++;
-	    }
-	}
-	XSRETURN(i);
-    }
-
-IV
-num_entries (self)
+char *
+login_name (self, num = 0)
 	sg_user_stats *self;
+	UV num;
     CODE:
-	RETVAL = self->num_entries;
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].login_name;
     OUTPUT:
 	RETVAL
 
 void
-DESTROY (self)
+record_id (self, num = 0)
 	sg_user_stats *self;
+	UV num;
     CODE:
-    {
-	/* self points to a static buffer */
-    }
+    { 
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
 
-MODULE = Unix::Statgrab	    PACKAGE = Unix::Statgrab::sg_process_stats_my
+	EXTEND(SP, 1);
 
-#define PROC(n)    (self->stats + n)
-
-void
-all_procs (self)
-	sg_process_stats_my *self;
-    PPCODE:
-    {
-	register int i = 0;
-	EXTEND(SP, self->nprocs);
-	
-	for (i = 0; i < self->nprocs; i++) {
-	    SV *proc = sv_newmortal();
-	    sv_setref_pv(proc, "Unix::Statgrab::sg_process_stats", (void*)PROC(i));
-	    XPUSHs(proc);
-	}
-
-	XSRETURN(self->nprocs);
-    }
-
-void
-sort_by (obj, meth)
-	SV *obj;
-	char *meth;
-    PPCODE:
-    {
-	sg_process_stats_my *self = (sg_process_stats_my*)SvIV(SvRV(obj));
-
-	if (strEQ(meth, "name")) 
-	    qsort(self->stats, self->nprocs, sizeof(*self->stats), sg_process_compare_name);
-	else if (strEQ(meth, "pid")) 
-	    qsort(self->stats, self->nprocs, sizeof(*self->stats), sg_process_compare_pid);
-	else if (strEQ(meth, "uid")) 
-	    qsort(self->stats, self->nprocs, sizeof(*self->stats), sg_process_compare_uid);
-	else if (strEQ(meth, "gid")) 
-	    qsort(self->stats, self->nprocs, sizeof(*self->stats), sg_process_compare_gid);
-	else if (strEQ(meth, "size")) 
-	    qsort(self->stats, self->nprocs, sizeof(*self->stats), sg_process_compare_size);
-	else if (strEQ(meth, "res")) 
-	    qsort(self->stats, self->nprocs, sizeof(*self->stats), sg_process_compare_res);
-	else if (strEQ(meth, "cpu")) 
-	    qsort(self->stats, self->nprocs, sizeof(*self->stats), sg_process_compare_cpu);
-	else if (strEQ(meth, "time")) 
-	    qsort(self->stats, self->nprocs, sizeof(*self->stats), sg_process_compare_time);
-	
-	XPUSHs(obj);
+	ST(0) = newSVpvn_flags(self[num].record_id, self[num].record_id_size, SVs_TEMP);
 	XSRETURN(1);
     }
 
+char *
+device (self, num = 0)
+	sg_user_stats *self;
+	UV num;
+    CODE:
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].device;
+    OUTPUT:
+	RETVAL
+
+char *
+hostname (self, num = 0)
+	sg_user_stats *self;
+	UV num;
+    CODE:
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].hostname;
+    OUTPUT:
+	RETVAL
+
+IV
+pid (self, num = 0)
+	sg_user_stats *self;
+	UV num;
+    CODE:
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].pid;
+    OUTPUT:
+	RETVAL
+
+IV
+login_time (self, num = 0)
+	sg_user_stats *self;
+	UV num;
+    CODE:
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].login_time;
+    OUTPUT:
+	RETVAL
+
+IV
+systime (self, num = 0)
+	sg_user_stats *self;
+	UV num;
+    CODE:
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].systime;
+    OUTPUT:
+	RETVAL
+
 void
 DESTROY (self)
-	sg_process_stats_my *self;
+	sg_user_stats *self;
     CODE:
     {
-	Safefree(self);
+	sg_free_user_stats(self);
     }
-	
+
 MODULE = Unix::Statgrab	    PACKAGE = Unix::Statgrab::sg_process_stats
 
-char *
-proc_name (self)
+UV
+entries (self)
 	sg_process_stats *self;
     CODE:
-	RETVAL = self->process_name;
+	RETVAL = sg_get_nelements(self);
     OUTPUT:
 	RETVAL
 
-char *
-proc_title (self)
-	sg_process_stats *self;
-    CODE:
-	RETVAL = self->proctitle;
-    OUTPUT:
-	RETVAL
-
-int
-pid (self)
-	sg_process_stats *self;
-    CODE:
-	RETVAL = self->pid;
-    OUTPUT:
-	RETVAL
-
-int
-parent_pid (self)
-	sg_process_stats *self;
-    CODE:
-	RETVAL = self->parent;
-    OUTPUT:
-	RETVAL
-
-int
-pgid (self)
-	sg_process_stats *self;
-    CODE:
-	RETVAL = self->pgid;
-    OUTPUT:
-	RETVAL
-
-int
-uid (self)
-	sg_process_stats *self;
-    CODE:
-	RETVAL = self->uid;
-    OUTPUT:
-	RETVAL
-
-int 
-euid (self)
-	sg_process_stats *self;
-    CODE:
-	RETVAL = self->euid;
-    OUTPUT:
-	RETVAL
-
-int
-gid (self)
-	sg_process_stats *self;
-    CODE:
-	RETVAL = self->gid;
-    OUTPUT:
-	RETVAL
-
-int
-egid (self)
-	sg_process_stats *self;
-    CODE:
-	RETVAL = self->egid;
-    OUTPUT:
-	RETVAL
-
-NV
-proc_size (self)
-	sg_process_stats *self;
-    CODE:
-	RETVAL = self->proc_size;
-    OUTPUT:
-	RETVAL
-
-NV
-proc_resident (self)
-	sg_process_stats *self;
-    CODE:
-	RETVAL = self->proc_resident;
-    OUTPUT:
-	RETVAL
-
-int
-time_spent (self)
-	sg_process_stats *self;
-    CODE:
-	RETVAL = self->time_spent;
-    OUTPUT:
-	RETVAL
-
-double
-cpu_percent (self)
-	sg_process_stats *self;
-    CODE:
-	RETVAL = self->cpu_percent;
-    OUTPUT:
-	RETVAL
-
-int
-nice (self)
-	sg_process_stats *self;
-    CODE:
-	RETVAL = self->nice;
-    OUTPUT:
-	RETVAL
-
-int
-state (self)
-	sg_process_stats *self;
-    CODE:
-	RETVAL = self->state;
-    OUTPUT:
-	RETVAL
-	
 void
 DESTROY (self)
 	sg_process_stats *self;
     CODE:
     {
-	/* self points to a static buffer */
+	sg_free_process_stats(self);
     }
+	
+char *
+proc_name (self, num = 0)
+	sg_process_stats *self;
+	UV num;
+    CODE:
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].process_name;
+    OUTPUT:
+	RETVAL
+
+char *
+proc_title (self, num = 0)
+	sg_process_stats *self;
+	UV num;
+    CODE:
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].proctitle;
+    OUTPUT:
+	RETVAL
+
+IV
+pid (self, num = 0)
+	sg_process_stats *self;
+	UV num;
+    CODE:
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].pid;
+    OUTPUT:
+	RETVAL
+
+IV
+parent_pid (self, num = 0)
+	sg_process_stats *self;
+	UV num;
+    CODE:
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].parent;
+    OUTPUT:
+	RETVAL
+
+IV
+pgid (self, num = 0)
+	sg_process_stats *self;
+	UV num;
+    CODE:
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].pgid;
+    OUTPUT:
+	RETVAL
+
+IV
+uid (self, num = 0)
+	sg_process_stats *self;
+	UV num;
+    CODE:
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].uid;
+    OUTPUT:
+	RETVAL
+
+IV 
+euid (self, num = 0)
+	sg_process_stats *self;
+	UV num;
+    CODE:
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].euid;
+    OUTPUT:
+	RETVAL
+
+IV
+gid (self, num = 0)
+	sg_process_stats *self;
+	UV num;
+    CODE:
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].gid;
+    OUTPUT:
+	RETVAL
+
+IV
+egid (self, num = 0)
+	sg_process_stats *self;
+	UV num;
+    CODE:
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].egid;
+    OUTPUT:
+	RETVAL
+
+NV
+proc_size (self, num = 0)
+	sg_process_stats *self;
+	UV num;
+    CODE:
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].proc_size;
+    OUTPUT:
+	RETVAL
+
+NV
+proc_resident (self, num = 0)
+	sg_process_stats *self;
+	UV num;
+    CODE:
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].proc_resident;
+    OUTPUT:
+	RETVAL
+
+IV
+start_time (self, num = 0)
+	sg_process_stats *self;
+	UV num;
+    CODE:
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].start_time;
+    OUTPUT:
+	RETVAL
+
+IV
+time_spent (self, num = 0)
+	sg_process_stats *self;
+	UV num;
+    CODE:
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].time_spent;
+    OUTPUT:
+	RETVAL
+
+NV
+cpu_percent (self, num = 0)
+	sg_process_stats *self;
+	UV num;
+    CODE:
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].cpu_percent;
+    OUTPUT:
+	RETVAL
+
+IV
+nice (self, num = 0)
+	sg_process_stats *self;
+	UV num;
+    CODE:
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].nice;
+    OUTPUT:
+	RETVAL
+
+UV
+state (self, num = 0)
+	sg_process_stats *self;
+	UV num;
+    CODE:
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].state;
+    OUTPUT:
+	RETVAL
+
+IV
+systime (self, num = 0)
+	sg_process_stats *self;
+	UV num;
+    CODE:
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].systime;
+    OUTPUT:
+	RETVAL
