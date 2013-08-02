@@ -6,13 +6,12 @@ use warnings;
 
 use Carp;
 
-# require Exporter;
-# require DynaLoader;
+require Exporter;
+require DynaLoader;
 
+# use AutoLoader;
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $AUTOLOAD);
-use parent qw(Exporter DynaLoader);
-
-use AutoLoader;
+@ISA = qw(Exporter DynaLoader);
 
 # Items to export into callers namespace by default. Note: do not export
 # names by default without a very good reason. Use EXPORT_OK instead.
@@ -22,147 +21,71 @@ use AutoLoader;
 # If you do not need this, moving things directly into @EXPORT or @EXPORT_OK
 # will save memory.
 
+my @constants_names = (
+        qw(SG_ERROR_NONE SG_ERROR_INVALID_ARGUMENT SG_ERROR_ASPRINTF
+          SG_ERROR_SPRINTF SG_ERROR_DEVICES SG_ERROR_DEVSTAT_GETDEVS
+          SG_ERROR_DEVSTAT_SELECTDEVS SG_ERROR_DISKINFO SG_ERROR_ENOENT
+          SG_ERROR_GETIFADDRS SG_ERROR_GETMNTINFO SG_ERROR_GETPAGESIZE
+          SG_ERROR_HOST SG_ERROR_KSTAT_DATA_LOOKUP SG_ERROR_KSTAT_LOOKUP
+          SG_ERROR_KSTAT_OPEN SG_ERROR_KSTAT_READ SG_ERROR_KVM_GETSWAPINFO
+          SG_ERROR_KVM_OPENFILES SG_ERROR_MALLOC SG_ERROR_MEMSTATUS
+          SG_ERROR_OPEN SG_ERROR_OPENDIR SG_ERROR_READDIR SG_ERROR_PARSE
+          SG_ERROR_PDHADD SG_ERROR_PDHCOLLECT SG_ERROR_PDHOPEN SG_ERROR_PDHREAD
+          SG_ERROR_PERMISSION SG_ERROR_PSTAT SG_ERROR_SETEGID SG_ERROR_SETEUID
+          SG_ERROR_SETMNTENT SG_ERROR_SOCKET SG_ERROR_SWAPCTL SG_ERROR_SYSCONF
+          SG_ERROR_SYSCTL SG_ERROR_SYSCTLBYNAME SG_ERROR_SYSCTLNAMETOMIB
+          SG_ERROR_SYSINFO SG_ERROR_MACHCALL SG_ERROR_IOKIT SG_ERROR_UNAME
+          SG_ERROR_UNSUPPORTED SG_ERROR_XSW_VER_MISMATCH SG_ERROR_GETMSG
+          SG_ERROR_PUTMSG SG_ERROR_INITIALISATION SG_ERROR_MUTEX_LOCK
+          SG_ERROR_MUTEX_UNLOCK),
+        qw(sg_unknown_configuration sg_physical_host sg_virtual_machine
+          sg_paravirtual_machine sg_hardware_virtualized),
+        qw(sg_fs_unknown sg_fs_regular sg_fs_special sg_fs_loopback
+          sg_fs_remote sg_fs_local sg_fs_alltypes),
+        qw(SG_IFACE_DUPLEX_FULL SG_IFACE_DUPLEX_HALF SG_IFACE_DUPLEX_UNKNOWN),
+        qw(SG_IFACE_DOWN SG_IFACE_UP),
+        qw(SG_PROCESS_STATE_RUNNING SG_PROCESS_STATE_SLEEPING
+          SG_PROCESS_STATE_STOPPED SG_PROCESS_STATE_ZOMBIE
+          SG_PROCESS_STATE_UNKNOWN),
+      );
+
 %EXPORT_TAGS = ( 'all' => [ qw(
 	get_error drop_privileges 
 	get_host_info 
-	get_cpu_stats get_cpu_stats_diff get_cpu_percents
-	get_disk_io_stats get_disk_io_stats_diff
+	get_cpu_stats
+	get_disk_io_stats
 	get_fs_stats
 	get_load_stats
 	get_mem_stats
 	get_swap_stats
-	get_network_io_stats get_network_io_stats_diff
+	get_network_io_stats
 	get_network_iface_stats
-	get_page_stats get_page_stats_diff
+	get_page_stats
 	get_user_stats
-	get_process_stats
-	
-	sort_procs_by_name
-	sort_procs_by_pid
-	sort_procs_by_uid
-	sort_procs_by_gid
-	sort_procs_by_size
-	sort_procs_by_res
-	sort_procs_by_cpu
-	sort_procs_by_time
-
-	SG_ERROR_ASPRINTF
-	SG_ERROR_DEVSTAT_GETDEVS
-	SG_ERROR_DEVSTAT_SELECTDEVS
-	SG_ERROR_ENOENT
-	SG_ERROR_GETIFADDRS
-	SG_ERROR_GETMNTINFO
-	SG_ERROR_GETPAGESIZE
-	SG_ERROR_KSTAT_DATA_LOOKUP
-	SG_ERROR_KSTAT_LOOKUP
-	SG_ERROR_KSTAT_OPEN
-	SG_ERROR_KSTAT_READ
-	SG_ERROR_KVM_GETSWAPINFO
-	SG_ERROR_KVM_OPENFILES
-	SG_ERROR_MALLOC
-	SG_ERROR_NONE
-	SG_ERROR_OPEN
-	SG_ERROR_OPENDIR
-	SG_ERROR_PARSE
-	SG_ERROR_SETEGID
-	SG_ERROR_SETEUID
-	SG_ERROR_SETMNTENT
-	SG_ERROR_SOCKET
-	SG_ERROR_SWAPCTL
-	SG_ERROR_SYSCONF
-	SG_ERROR_SYSCTL
-	SG_ERROR_SYSCTLBYNAME
-	SG_ERROR_SYSCTLNAMETOMIB
-	SG_ERROR_UNAME
-	SG_ERROR_UNSUPPORTED
-	SG_ERROR_XSW_VER_MISMATCH
-	SG_IFACE_DUPLEX_FULL
-	SG_IFACE_DUPLEX_HALF
-	SG_IFACE_DUPLEX_UNKNOWN
-	SG_PROCESS_STATE_RUNNING
-	SG_PROCESS_STATE_SLEEPING
-	SG_PROCESS_STATE_STOPPED
-	SG_PROCESS_STATE_UNKNOWN
-	SG_PROCESS_STATE_ZOMBIE
-) ] );
+	get_process_stats),
+	@constants_names
+    ] );
 
 @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 
-@EXPORT = qw(
-
+@EXPORT = (qw(
 	get_error drop_privileges 
 	get_host_info 
-	get_cpu_stats get_cpu_stats_diff get_cpu_percents
-	get_disk_io_stats get_disk_io_stats_diff
+	get_cpu_stats
+	get_disk_io_stats
 	get_fs_stats
 	get_load_stats
 	get_mem_stats
 	get_swap_stats
-	get_network_io_stats get_network_io_stats_diff
+	get_network_io_stats
 	get_network_iface_stats
-	get_page_stats get_page_stats_diff
+	get_page_stats
 	get_user_stats
-	get_process_stats
-
-	sort_procs_by_name
-	sort_procs_by_pid
-	sort_procs_by_uid
-	sort_procs_by_gid
-	sort_procs_by_size
-	sort_procs_by_res
-	sort_procs_by_cpu
-	sort_procs_by_time
-
-	SG_ERROR_ASPRINTF
-	SG_ERROR_DEVSTAT_GETDEVS
-	SG_ERROR_DEVSTAT_SELECTDEVS
-	SG_ERROR_ENOENT
-	SG_ERROR_GETIFADDRS
-	SG_ERROR_GETMNTINFO
-	SG_ERROR_GETPAGESIZE
-	SG_ERROR_KSTAT_DATA_LOOKUP
-	SG_ERROR_KSTAT_LOOKUP
-	SG_ERROR_KSTAT_OPEN
-	SG_ERROR_KSTAT_READ
-	SG_ERROR_KVM_GETSWAPINFO
-	SG_ERROR_KVM_OPENFILES
-	SG_ERROR_MALLOC
-	SG_ERROR_NONE
-	SG_ERROR_OPEN
-	SG_ERROR_OPENDIR
-	SG_ERROR_PARSE
-	SG_ERROR_SETEGID
-	SG_ERROR_SETEUID
-	SG_ERROR_SETMNTENT
-	SG_ERROR_SOCKET
-	SG_ERROR_SWAPCTL
-	SG_ERROR_SYSCONF
-	SG_ERROR_SYSCTL
-	SG_ERROR_SYSCTLBYNAME
-	SG_ERROR_SYSCTLNAMETOMIB
-	SG_ERROR_UNAME
-	SG_ERROR_UNSUPPORTED
-	SG_ERROR_XSW_VER_MISMATCH
-	SG_IFACE_DUPLEX_FULL
-	SG_IFACE_DUPLEX_HALF
-	SG_IFACE_DUPLEX_UNKNOWN
-	SG_PROCESS_STATE_RUNNING
-	SG_PROCESS_STATE_SLEEPING
-	SG_PROCESS_STATE_STOPPED
-	SG_PROCESS_STATE_UNKNOWN
-	SG_PROCESS_STATE_ZOMBIE
-);
+	get_process_stats),
+	@constants_names
+    );
 
 $VERSION = '0.099';
-
-*sort_procs_by_name	= \&_sort_procs_by_name;
-*sort_procs_by_pid	= \&_sort_procs_by_pid;
-*sort_procs_by_uid	= \&_sort_procs_by_uid;
-*sort_procs_by_gid	= \&_sort_procs_by_gid;
-*sort_procs_by_size	= \&_sort_procs_by_size;
-*sort_procs_by_res	= \&_sort_procs_by_res;
-*sort_procs_by_cpu	= \&_sort_procs_by_cpu;
-*sort_procs_by_time	= \&_sort_procs_by_time;
 
 sub AUTOLOAD {
     # This AUTOLOAD is used to 'autoload' constants from the constant()
@@ -175,13 +98,7 @@ sub AUTOLOAD {
     if ($error) { croak $error; }
     {
 	no strict 'refs';
-	# Fixed between 5.005_53 and 5.005_61
-#XXX	if ($] >= 5.00561) {
-#XXX	    *$AUTOLOAD = sub () { $val };
-#XXX	}
-#XXX	else {
-	    *$AUTOLOAD = sub { $val };
-#XXX	}
+	*$AUTOLOAD = sub { $val };
     }
     goto &$AUTOLOAD;
 }
