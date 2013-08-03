@@ -1,10 +1,28 @@
-# http://module-build.sourceforge.net/META-spec.html
-#XXXXXXX This is a prototype!!!  It will change in the future!!! XXXXX#
-name:         Unix-Statgrab
-version:      0.04
-version_from: lib/Unix/Statgrab.pm
-installdirs:  site
-requires:
-
-distribution_type: module
-generated_by: ExtUtils::MakeMaker version 6.17
+---
+abstract: 'Perl extension for collecting information about the machine'
+author:
+  - 'Tassilo von Parseval <tassilo.von.parseval@rwth-aachen.de>'
+  - 'Jens Rehsack <sno@NetBSD.org>'
+build_requires:
+  Capture::Tiny: 0.06
+  Config::AutoConf: 0.19
+  ExtUtils::CBuilder: 0.27
+  Module::Build: 0.4000
+configure_requires:
+  Config::AutoConf: 0.19
+  File::Copy: 0
+  Module::Build: 0.4000
+dynamic_config: 1
+generated_by: 'Module::Build version 0.4007, CPAN::Meta::Converter version 2.131560'
+license: perl
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: 1.4
+name: Unix-Statgrab
+provides:
+  Unix::Statgrab:
+    file: lib/Unix/Statgrab.pm
+    version: 0.099_001
+resources:
+  license: http://dev.perl.org/licenses/
+version: 0.099_001

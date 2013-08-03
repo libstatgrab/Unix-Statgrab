@@ -1,0 +1,47 @@
+{
+   "abstract" : "Perl extension for collecting information about the machine",
+   "author" : [
+      "Tassilo von Parseval <tassilo.von.parseval@rwth-aachen.de>",
+      "Jens Rehsack <sno@NetBSD.org>"
+   ],
+   "dynamic_config" : 1,
+   "generated_by" : "Module::Build version 0.4007, CPAN::Meta::Converter version 2.131560",
+   "license" : [
+      "perl_5"
+   ],
+   "meta-spec" : {
+      "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
+      "version" : "2"
+   },
+   "name" : "Unix-Statgrab",
+   "prereqs" : {
+      "build" : {
+         "requires" : {
+            "Capture::Tiny" : "0.06",
+            "Config::AutoConf" : "0.19",
+            "ExtUtils::CBuilder" : "0.27",
+            "Module::Build" : "0.4000"
+         }
+      },
+      "configure" : {
+         "requires" : {
+            "Config::AutoConf" : "0.19",
+            "File::Copy" : "0",
+            "Module::Build" : "0.4000"
+         }
+      }
+   },
+   "provides" : {
+      "Unix::Statgrab" : {
+         "file" : "lib/Unix/Statgrab.pm",
+         "version" : "0.099_001"
+      }
+   },
+   "release_status" : "testing",
+   "resources" : {
+      "license" : [
+         "http://dev.perl.org/licenses/"
+      ]
+   },
+   "version" : "0.099_001"
+}
