@@ -1675,7 +1675,7 @@ DESTROY (self)
     }
 	
 char *
-proc_name (self, num = 0)
+process_name (self, num = 0)
 	sg_process_stats *self;
 	UV num;
     CODE:
@@ -1686,7 +1686,7 @@ proc_name (self, num = 0)
 	RETVAL
 
 char *
-proc_title (self, num = 0)
+proctitle (self, num = 0)
 	sg_process_stats *self;
 	UV num;
     CODE:
@@ -1708,7 +1708,7 @@ pid (self, num = 0)
 	RETVAL
 
 IV
-parent_pid (self, num = 0)
+parent (self, num = 0)
 	sg_process_stats *self;
 	UV num;
     CODE:
@@ -1726,6 +1726,17 @@ pgid (self, num = 0)
 	if (num >= sg_get_nelements(self))
 	    XSRETURN_UNDEF;
 	RETVAL = self[num].pgid;
+    OUTPUT:
+	RETVAL
+
+IV
+sessid (self, num = 0)
+	sg_process_stats *self;
+	UV num;
+    CODE:
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].sessid;
     OUTPUT:
 	RETVAL
 
@@ -1770,6 +1781,39 @@ egid (self, num = 0)
 	if (num >= sg_get_nelements(self))
 	    XSRETURN_UNDEF;
 	RETVAL = self[num].egid;
+    OUTPUT:
+	RETVAL
+
+NV
+context_switches (self, num = 0)
+	sg_process_stats *self;
+	UV num;
+    CODE:
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].context_switches;
+    OUTPUT:
+	RETVAL
+
+NV
+voluntary_context_switches (self, num = 0)
+	sg_process_stats *self;
+	UV num;
+    CODE:
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].voluntary_context_switches;
+    OUTPUT:
+	RETVAL
+
+NV
+involuntary_context_switches (self, num = 0)
+	sg_process_stats *self;
+	UV num;
+    CODE:
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+	RETVAL = self[num].involuntary_context_switches;
     OUTPUT:
 	RETVAL
 
