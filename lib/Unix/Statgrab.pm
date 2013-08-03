@@ -9,7 +9,7 @@ use Carp;
 require Exporter;
 require DynaLoader;
 
-# use AutoLoader;
+use AutoLoader;
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $AUTOLOAD);
 @ISA = qw(Exporter DynaLoader);
 
