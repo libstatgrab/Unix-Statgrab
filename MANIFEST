@@ -2,10 +2,10 @@ Build.PL
 Changes
 inc/Config/AutoConf/SG.pm
 inc/Statgrab/Builder.pm
+lib/Unix/ppport.h
 lib/Unix/Statgrab.pm
 lib/Unix/Statgrab.xs
 MANIFEST
 META.yml
-ppport.h
 README
 typemap
