@@ -95,13 +95,16 @@ my %methods = (
 sub check_methods
 {
     my ( $o, $methods ) = @_;
-    (my $func = ref($o)) =~ s/Unix::Statgrab::sg_(\w+).*$/$1/g;
-    defined( $funcs{$func} ) and ok( $o->entries(), "Unix::Statgrab::sg_${func}->entries" );
+    ( my $func = ref($o) ) =~ s/Unix::Statgrab::sg_(\w+).*$/$1/g;
+    defined( $funcs{ "get_" . $func } )
+      and ok( $o->entries(), "Unix::Statgrab::sg_${func}->entries" );
     foreach my $method (@$methods)
     {
-        ok( defined($o->$method()), "Unix::Statgrab::sg_$func->$method" );
+        ok( defined( $o->$method() ), "Unix::Statgrab::sg_$func->$method" );
     }
 }
+
+sleep 10;
 
 # we only check that nothing segfaults
 foreach my $func ( sort keys %funcs )
@@ -113,6 +116,26 @@ foreach my $func ( sort keys %funcs )
         my $o = &{$sub}();
         ok( $o, "Unix::Statgrab::$func" ) or skip("Can't invoke methods on non-object");
         check_methods( $o, $funcs{$func} );
+        if ( defined( $methods{$func} ) )
+        {
+            foreach my $inh_func ( sort keys %{ $methods{$func} } )
+            {
+                my $inh_sub = $o->can($inh_func);
+                ok( $inh_sub, "Unix::Statgrab->can('$inh_func')" ) or next;
+                my $inh_o;
+                if ( $methods{$func}{$inh_func} == $funcs{$func} )
+                {
+                    my $n = &{$sub}();
+                    $inh_o = &{$inh_sub}( $n, $o );
+                }
+                else
+                {
+                    $inh_o = &{$inh_sub}($o);
+                }
+                ok( $inh_o, "Unix::Statgrab::$func" ) or next;
+                check_methods( $inh_o, $methods{$func}{$inh_func} );
+            }
+        }
     }
 }
 
