@@ -621,13 +621,13 @@ DESTROY (self)
     }
 
 void
-get_cpu_stats_diff (last, now)
-	sg_cpu_stats *last;
+get_cpu_stats_diff (now, last)
 	sg_cpu_stats *now;
+	sg_cpu_stats *last;
     CODE:
     {
 	sg_cpu_stats *self;
-	if ((self = sg_get_cpu_stats_diff_between(last, now, NULL)) == NULL)
+	if ((self = sg_get_cpu_stats_diff_between(now, last, NULL)) == NULL)
 	    XSRETURN_UNDEF;
 
 	EXTEND(SP, 1);
@@ -643,7 +643,8 @@ get_cpu_percents (of)
     CODE:
     {
 	sg_cpu_percents *self;
-	if ((self = sg_get_cpu_percents_r(of, NULL)) == NULL) 
+	size_t entries;
+	if ((self = sg_get_cpu_percents_r(of, &entries)) == NULL) 
 	    XSRETURN_UNDEF;
 
 	EXTEND(SP, 1);
@@ -811,14 +812,14 @@ DESTROY (self)
     }
 
 void
-get_disk_io_stats_diff (last, now)
-	sg_disk_io_stats *last;
+get_disk_io_stats_diff (now, last)
 	sg_disk_io_stats *now;
+	sg_disk_io_stats *last;
     CODE:
     {
 	sg_disk_io_stats *self;
 
-	if ((self = sg_get_disk_io_stats_diff_between(last, now, NULL)) == NULL)
+	if ((self = sg_get_disk_io_stats_diff_between(now, last, NULL)) == NULL)
 	    XSRETURN_UNDEF;
 
 	EXTEND(SP, 1);
@@ -1056,14 +1057,14 @@ DESTROY (self)
     }
 
 void
-get_fs_stats_diff (last, now)
-	sg_fs_stats *last;
+get_fs_stats_diff (now, last)
 	sg_fs_stats *now;
+	sg_fs_stats *last;
     CODE:
     {
 	sg_fs_stats *self;
 
-	if ((self = sg_get_fs_stats_diff_between(last, now, NULL)) == NULL)
+	if ((self = sg_get_fs_stats_diff_between(now, last, NULL)) == NULL)
 	    XSRETURN_UNDEF;
 
 	EXTEND(SP, 1);
@@ -1388,14 +1389,14 @@ DESTROY (self)
     }
 
 void
-get_network_io_stats_diff (last, now)
-	sg_network_io_stats *last;
+get_network_io_stats_diff (now, last)
 	sg_network_io_stats *now;
+	sg_network_io_stats *last;
     CODE:
     {
 	sg_network_io_stats *self;
 
-	if ((self = sg_get_network_io_stats_diff_between(last, now, NULL)) == NULL)
+	if ((self = sg_get_network_io_stats_diff_between(now, last, NULL)) == NULL)
 	    XSRETURN_UNDEF;
 
 	EXTEND(SP, 1);
@@ -1541,13 +1542,13 @@ DESTROY (self)
     }
 
 void
-get_page_stats_diff (last, now)
-	sg_page_stats *last;
+get_page_stats_diff (now, last)
 	sg_page_stats *now;
+	sg_page_stats *last;
     CODE:
     {
 	sg_page_stats *self;
-	if ((self = sg_get_page_stats_diff_between(last, now, NULL)) == NULL)
+	if ((self = sg_get_page_stats_diff_between(now, last, NULL)) == NULL)
 	    XSRETURN_UNDEF;
 
 	EXTEND(SP, 1);
