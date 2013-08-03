@@ -15,6 +15,7 @@ INCLUDE: const-xs.inc
 BOOT:
 {
     /* sg_log_init(properties_pfx, env_name, argv0) */
+    sg_log_init("libstatgrab", "LIBSTATGRAB_LOG_PROPERTIES", NULL);
     sg_init(1);
 }
 

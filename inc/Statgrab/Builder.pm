@@ -11,12 +11,12 @@ use Carp;
 use Config::AutoConf::SG ();
 
 use Cwd qw(getcwd);
-use File::Spec         ();
+use File::Spec ();
 
-use AutoSplit ();
-use ExtUtils::Constant ();
+use AutoSplit             ();
+use ExtUtils::Constant    ();
 use ExtUtils::Mkbootstrap ();
-use ExtUtils::ParseXS ();
+use ExtUtils::ParseXS     ();
 
 sub ACTION_configure
 {
@@ -31,8 +31,6 @@ To obtain it, go to
 *******************************************
 EOD
     # $autoconf->write_config_h();
-    use Data::Dumper;
-    print STDERR Dumper($autoconf);
     return;
 }
 
@@ -66,19 +64,30 @@ sub ACTION_write_constants
         qw(SG_PROCESS_STATE_RUNNING SG_PROCESS_STATE_SLEEPING
           SG_PROCESS_STATE_STOPPED SG_PROCESS_STATE_ZOMBIE
           SG_PROCESS_STATE_UNKNOWN),
-                );
+    );
 
-    my $xsfile = "lib/Unix/Statgrab.xs";
-    my $spec = $self->_infer_xs_spec($xsfile);
+    my $xsfile  = "lib/Unix/Statgrab.xs";
+    my $spec    = $self->_infer_xs_spec($xsfile);
+    my $c_const = File::Spec->catfile( $spec->{src_dir}, 'const-c.inc' );
+    #my $c_const = File::Spec->catfile(getcwd(), 'const-c.inc');
+    my $xs_const = File::Spec->catfile( $spec->{src_dir}, 'const-xs.inc' );
+    #my $xs_const = File::Spec->catfile(getcwd(), 'const-xs.inc');
+
+    # workaround #ifdef around each constant (stupid that it's not documented)
+    open(my $c_fh, ">", $c_const) or die("Cannot open $c_const for writing: $!");
+    foreach my $name (@names) {
+	print $c_fh "#define $name $name\n";
+    }
     ExtUtils::Constant::WriteConstants(
                                         NAME         => 'Unix::Statgrab',
                                         NAMES        => \@names,
                                         DEFAULT_TYPE => 'UV',
-                                        C_FILE       => File::Spec->catfile(getcwd(), 'const-c.inc'),
-                                        XS_FILE      => File::Spec->catfile(getcwd(), 'const-xs.inc'),
+                                        C_FH       => $c_fh,
+                                        XS_FILE      => $xs_const,
                                       );
-    $self->add_to_cleanup(File::Spec->catfile(getcwd(), 'const-c.inc')); ## FIXME
-    $self->add_to_cleanup(File::Spec->catfile(getcwd(), 'const-xs.inc')); ## FIXME
+    close($c_fh);
+    $self->add_to_cleanup($c_const);     ## FIXME
+    $self->add_to_cleanup($xs_const);    ## FIXME
 
     return;
 }
@@ -86,13 +95,21 @@ sub ACTION_write_constants
 sub ACTION_autosplit
 {
     my $self = shift;
-    AutoSplit::autosplit("blib/lib/Unix/Statgrab.pm", "blib/arch/auto", 0, 1, 1);
+    AutoSplit::autosplit( "blib/lib/Unix/Statgrab.pm", "blib/arch/auto", 0, 1, 1 );
 }
-
 
 sub ACTION_code
 {
-    my $self = shift;
+    my $self     = shift;
+    my $cbuilder = $self->cbuilder;
+
+    $self->{properties}->{extra_linker_flags} ||= [];
+    unshift(
+             @{ $self->{properties}->{extra_linker_flags} },
+             split( " ", $cbuilder->{config}{ldflags} )
+           );    # XXX currently silently ignored by EU::CB
+    push( @{ $self->{properties}->{extra_linker_flags} }, '-lstatgrab' )
+      ;          # XXX fetch it from $autoconf ...
 
     # for my $path (catdir("blib","bindoc"), catdir("blib","bin")) {
     #     mkpath $path unless -d $path;
@@ -103,60 +120,7 @@ sub ACTION_code
 
     $self->SUPER::ACTION_code();
 
-    $self->dispatch("compile_xs");
     $self->dispatch("autosplit");
-}
-
-sub ACTION_compile_xs
-{
-    my $self = shift;
-    my $cbuilder = $self->cbuilder;
-    my $xsfile = "lib/Unix/Statgrab.xs";
-    my $spec = $self->_infer_xs_spec($xsfile);
-
-    File::Path::mkpath($spec->{archdir}, 0, oct(777)) unless -d $spec->{archdir};
-
-    $self->log_info( "Compiling Statgrab.xs\n");
-    if (!$self->up_to_date($xsfile, $spec->{c_file})) {
-        ExtUtils::ParseXS::process_file( filename   => $xsfile,
-                                         prototypes => 0,
-					 # typemap => File::Spec->catfile(getcwd(), "typemap"),
-                                         output     => $spec->{c_file});
-    }
-    $self->add_to_cleanup($spec->{c_file}); ## FIXME
-    $self->add_to_cleanup($spec->{obj_file}); ## FIXME
-
-    my $extra_compiler_flags = $self->notes('CFLAGS');
-    $Config{ccflags} =~ /(-arch \S+(?: -arch \S+)*)/ and $extra_compiler_flags .= " $1";
-
-    if (!$self->up_to_date($spec->{c_file}, $spec->{obj_file})) {
-        $cbuilder->compile( source               => $spec->{c_file},
-                            include_dirs         => [ "." ],
-                            extra_compiler_flags => $extra_compiler_flags,
-                            object_file          => $spec->{obj_file});
-    }
-
-    # Create .bs bootstrap file, needed by Dynaloader.
-    if ( !$self->up_to_date( $spec->{obj_file}, $spec->{bs_file} ) ) {
-        ExtUtils::Mkbootstrap::Mkbootstrap($spec->{bs_file});
-        if ( !-f $spec->{bs_file} ) {
-            # Create file in case Mkbootstrap didn't do anything.
-            open( my $fh, '>', $spec->{bs_file} ) or confess "Can't open $spec->{bs_file}: $!";
-        }
-        utime( (time) x 2, $spec->{bs_file} );    # touch
-    }
-
-    my $extra_linker_flags = $cbuilder->{config}{ldflags}; # XXX
-    my $objects = [ $spec->{obj_file} ];
-    # .o => .(a|bundle)
-    if ( !$self->up_to_date( [ @$objects ], $spec->{lib_file} ) ) {
-        $cbuilder->link(
-                        module_name => 'Unix::Statgrab',
-                        extra_linker_flags => join(" ", $extra_linker_flags, "-lstatgrab"),
-                        objects     => $objects,
-			lib_file    => $spec->{lib_file},
-                       );
-    }
 }
 
 1;
