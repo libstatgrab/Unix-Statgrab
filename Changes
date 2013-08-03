@@ -1,5 +1,11 @@
 Revision history for Perl extension Unix::Statgrab.
 
+0.099_001 Sa  3 Aug 2013 19:13:04 CEST
+    - Update Unix::Statgrab for being used with libstatgrab 0.90
+    - kick out all "special" handling (process_stats, cpu_percents)
+      and replace them by general stats as naturally provided
+    - move pod tests to xt/ making them Author only tests
+
 0.04  Thu Sep 22 08:20:59 CEST 2005
     - 0.12 is now required for compilation
     - therefore: additional statistics for get_fs_stats()
