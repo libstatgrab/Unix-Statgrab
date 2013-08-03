@@ -26,7 +26,7 @@ my $builder = Statgrab::Builder->new(
                         'Module::Build'      => '0.4000',
                       },
     add_to_cleanup => [ 'Unix-Statgrab-*', '*.o', 'config.h', 'config.log', ],
-
+    test_files => [ "t/*.t", "xt/*.t" ],
                                     );
 
 $builder->create_build_script();
