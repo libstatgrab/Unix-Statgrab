@@ -643,8 +643,7 @@ get_cpu_percents (of)
     CODE:
     {
 	sg_cpu_percents *self;
-	size_t entries;
-	if ((self = sg_get_cpu_percents_r(of, &entries)) == NULL) 
+	if ((self = sg_get_cpu_percents_r(of, NULL)) == NULL) 
 	    XSRETURN_UNDEF;
 
 	EXTEND(SP, 1);
