@@ -104,8 +104,6 @@ sub check_methods
     }
 }
 
-sleep 10;
-
 # we only check that nothing segfaults
 foreach my $func ( sort keys %funcs )
 {
