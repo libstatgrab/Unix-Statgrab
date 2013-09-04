@@ -5,7 +5,7 @@ use warnings;
 
 use Test::More;
 
-use_ok("Unix::Statgrab");
+use_ok("Unix::Statgrab") or BAIL_OUT "Couldn't load Unix::Statgrab";
 Unix::Statgrab->import(":all");
 
 my @constants_names = (
