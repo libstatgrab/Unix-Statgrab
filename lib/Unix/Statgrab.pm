@@ -1,6 +1,6 @@
 package Unix::Statgrab;
 
-use 5.00803;
+use 5.008003;
 use strict;
 use warnings;
 
