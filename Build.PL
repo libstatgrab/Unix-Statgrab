@@ -28,5 +28,8 @@ my $builder = Statgrab::Builder->new(
     add_to_cleanup => [ 'Unix-Statgrab-*', '*.o', 'config.h', 'config.log', ],
     test_files => [ "t/*.t", "xt/*.t" ],
                                     );
-
+eval {
+    $builder->dispatch("configure");
+};
+$@ and warn $@ and exit 0;
 $builder->create_build_script();

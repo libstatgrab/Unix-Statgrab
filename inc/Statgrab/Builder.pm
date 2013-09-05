@@ -115,7 +115,7 @@ sub ACTION_code
     #     mkpath $path unless -d $path;
     # }
 
-    $self->dispatch("configure");
+    #$self->dispatch("configure");
     $self->dispatch("write_constants");
 
     $self->SUPER::ACTION_code();
