@@ -23,6 +23,7 @@ sandbox/
 \.tmp$
 .travis.yml
 tmp/
-\bt\b/
+\bxt\b/
 const-.*.inc
 config\..*
+\.[co]

@@ -6,7 +6,9 @@ lib/Unix/ppport.h
 lib/Unix/Statgrab.pm
 lib/Unix/Statgrab.xs
 MANIFEST
+META.json
 META.yml
 README
+t/01-methods.t
+t/02-hashlist.t
 typemap
-META.json
