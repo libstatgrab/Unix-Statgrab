@@ -1,12 +1,18 @@
 Revision history for Perl extension Unix::Statgrab.
 
-0.099_001 Sa  3 Aug 2013 19:13:04 CEST
+0.099_002
+    - Update POD to match current functionality
+    - introduce as_list() for each object
+    - Changes reformatted as per CPAN::Changes::Spec
+    - Fix Build to make the distribution more CPAN testers friendly
+
+0.099_001 2013-08-03 19:13:04 CEST
     - Update Unix::Statgrab for being used with libstatgrab 0.90
     - kick out all "special" handling (process_stats, cpu_percents)
       and replace them by general stats as naturally provided
     - move pod tests to xt/ making them Author only tests
 
-0.04  Thu Sep 22 08:20:59 CEST 2005
+0.04  2005-09-22 08:20:59 CEST
     - 0.12 is now required for compilation
     - therefore: additional statistics for get_fs_stats()
     - fixed a minor nit in the POD tests:
@@ -14,18 +20,18 @@ Revision history for Perl extension Unix::Statgrab.
       installed in the required minimum versions
       (thanks to Ricardo Signes <rjbs AT cpan DOT org>)
 
-0.03  Sun Apr  3 07:38:20 CEST 2005
+0.03  2005-04-03 07:38:20 CEST
     - POD- and POD-coverage-tests
 
-0.02  Mon Jun 21 07:05:16 CEST 2004
-	- running Makefile.PL could nuke /dev/null. Fixed.
-	  (Tim Bishop <tim AT bishnet DOT net>)
-	- some DESTROY methods missing which potentially lead
-	  to some slight memory leaks. Fixed.
-	- added sg_get_process_stats(). I must have missed that one
-	  for some reason.
+0.02  2004-06-21 07:05:16 CEST
+    - running Makefile.PL could nuke /dev/null. Fixed.
+      (Tim Bishop <tim AT bishnet DOT net>)
+    - some DESTROY methods missing which potentially lead
+      to some slight memory leaks. Fixed.
+    - added sg_get_process_stats(). I must have missed that one
+      for some reason.
 
-0.01  Fri May 21 06:57:16 2004
-	- original version; created by h2xs 1.23 with options
-		-O -b 5.5.3 -n Unix::Statgrab /usr/local/include/statgrab.h
+0.01  2004-05-21 06:57:16
+    - original version; created by h2xs 1.23 with
+      "h2xs -O -b 5.5.3 -n Unix::Statgrab /usr/local/include/statgrab.h"
 
