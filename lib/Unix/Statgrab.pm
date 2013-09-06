@@ -183,7 +183,7 @@ sub Unix::Statgrab::sg_process_stats::as_list { return $to_hash_array->( $_[0], 
 
 1;
 __END__
-# Below is stub documentation for your module. You'd better edit it!
+
 
 =head1 NAME
 
@@ -193,469 +193,252 @@ Unix::Statgrab - Perl extension for collecting information about the machine
 
     use Unix::Statgrab;
 
-    local $, = "\n";
-    
-    my $host = get_host_info or 
-	die get_error;
-	
-    print $host->os_name, 
-	  $host->os_release,
-	  $host->os_version,
-	  ...;
+    my $host_stats = get_host_info();
+    print $host_stats->hostname . " is a " . $host_stats->bitwidth . " " . $host_stats->os_name . "\n";
 
-    my $disks = get_disk_io_stats or
-	die get_error;
-	
-    for (0 .. $disks->num_disks - 1) {
-	print $disks->disk_name($_),
-	      $disks->read_bytes($_),
-	      ...;
+    my $filesystems = get_fs_stats();
+    my @mount_points = map { $filesystems->mnt_point($_) } (0 .. $filesystems->entries() - 1);
+    print $host_stats->hostname . " has " . join( ", ", @mount_points ) . " mounted\n";
+
+    my $proc_list = get_process_stats();
+    my @proc_by_type;
+    foreach my $proc_entry (0 .. $proc_list->entries() - 1) {
+	$proc_by_type[$proc_list->state($proc_entry)]++;
     }
+    my $total_procs = 0;
+    $total_procs += $_ for grep { defined $_ } @proc_by_type;
+    foreach my $state (qw(SG_PROCESS_STATE_RUNNING SG_PROCESS_STATE_SLEEPING
+			  SG_PROCESS_STATE_STOPPED SG_PROCESS_STATE_ZOMBIE
+					  SG_PROCESS_STATE_UNKNOWN)) {
+	defined $proc_by_type[Unix::Statgrab->$state] or next;
+	print $proc_by_type[Unix::Statgrab->$state] . " of " . $total_procs . " procs in $state\n";
+    }
+
+    my $last_cpu_stats = get_cpu_stats() or croak( get_error()->strperror() );
+    do_sth_way_longer();
+    my $cpu_diff = get_cpu_stats()->get_cpu_stats_diff($last_cpu_stats);
+
+    my $last_cpu_percent = $last_cpu_percent->get_cpu_percents();
+    my $diff_cpu_percent = $cpu_diff->get_cpu_percents();
+    my $now_cpu_percent = get_cpu_stats()->get_cpu_percents();
 
 =head1 DESCRIPTION
 
-Unix::Statgrab is a wrapper for libstatgrab as available from L<http://www.i-scream.org/libstatgrab/>. It is a reasonably portable attempt to query interesting stats about your computer. It covers information on the operating system, CPU, memory usage, network interfaces, hard-disks etc. 
+Unix::Statgrab is a wrapper for libstatgrab as available from
+L<http://www.i-scream.org/libstatgrab/>. It is a reasonably portable attempt
+to query interesting stats about your computer. It covers information on the
+operating system, CPU, memory usage, network interfaces, hard-disks etc. 
 
-Each of the provided functions follow a simple rule: It never takes any argument and returns either an object (in case of success) or C<undef>. In case C<undef> was returned, check the return value of C<get_error>. Also see L<"ERROR HANDLING"> further below.
+Each of the provided functions follow a simple rule: It never takes any
+argument and returns either an object (in case of success) or C<undef>. In
+case C<undef> was returned, check the return value of C<get_error>. Also
+see L<"ERROR HANDLING"> further below.
+
+To avoid error during copying documentation, the original function
+documentation will be refererred where reasonable. Each returned object
+has a getter method named as the attribute in original documentation.
+Those getters take a optional index argument, asking for the attribute
+of the C<n>th statistic item. Further, each object provides an C<entries>()
+method, telling you how much statistics for requested type are returned
+(yes, even C<get_host_info()> has that, maybe we have more host_info
+when grabbing that statistic in a cluster, grid or cloud). Additionally,
+for the users of Perl's list processing features, each object has an
+C<as_list>() method which returns the statistic as list of hash items
+containing each attribute / value pair of available attributes.
 
 =head1 FUNCTIONS
 
 =head2 drop_privileges()
 
-Unix::Statgrab can be told to discard I<setuid> and I<setgid> privileges which is usually a good thing. If your program
-doesn't need the elevated privileges somewhere else, call it right after C<use>ing the module.
+Unix::Statgrab can be told to discard I<setuid> and I<setgid> privileges
+which is usually a good thing. If your program
+doesn't need the elevated privileges somewhere else, call it right after
+C<use>ing the module.
+
+This function is depreciated and might be removed in a future version of
+libstatgrab (and then in Unix::Statgrab, too).
 
 =head2 get_host_info()
 
-Returns generic information about this machine. The object it returns supports the following methods:
-
-=over 4
-
-=item * B<os_name>
-
-=item * B<os_release>
-
-=item * B<os_version>
-
-=item * B<platform>
-
-=item * B<hostname>
-
-=item * B<uptime>
-
-=back
+Returns generic information about this machine. The object it returns
+is a L<http://www.i-scream.org/libstatgrab/docs/sg_get_host_info.3.html|Unix::Statgrab::sg_host_info>.
 
 =head2 get_cpu_stats
 
-Returns information about this machine's usage of the CPU. The object it returns supports the following methods, all of which return the number of ticks the processor has spent in the respective states:
+Returns information about this machine's usage of the CPU. The object it
+returns is a L<http://www.i-scream.org/libstatgrab/docs/sg_get_cpu_stats.3.html|Unix::Statgrab::sg_cpu_stats>.
+
+=head3 extra sg_cpu_stats methods
 
 =over 4
 
-=item * B<user>
+=item * C<get_cpu_stats_diff>
 
-=item * B<kernel>
+Provides the difference between the last measurement and the recent one.
 
-=item * B<idle>
+  $recent->get_cpu_stats_diff($last);
 
-=item * B<iowait>
+Returns L<http://www.i-scream.org/libstatgrab/docs/sg_get_cpu_stats.3.html|Unix::Statgrab::sg_cpu_stats>
 
-=item * B<swap>
+=item * C<get_cpu_percents>
 
-=item * B<nice>
-
-=item * B<total>
-
-=item * B<systime>
-
-The system time in seconds.
+Provides a percentage representation of the single cpu ticks measured.
+Returns L<http://www.i-scream.org/libstatgrab/docs/sg_get_cpu_stats.3.html|Unix::Statgrab::sg_cpu_percents>
 
 =back
-
-=head2 get_cpu_stats_diff
-
-Returns the differences in ticks for each of the states since last time C<get_cpu_stats> or C<get_cpu_stats_diff> was called.
-If C<cpu_get_stats_diff> is called for the first time (and C<get_cpu_stats> wasn't called before) its return values will be the same as C<get_cpu_stats>.
-
-Its return value supports the same methods as C<get_cpu_stats>. C<systime> then will be the seconds since the last call of this function.
-
-=head2 get_cpu_percents
-
-Calls C<get_cpu_stats_diff> under the hood but instead of returning ticks, it returns percentages. Its return value provides the same methods as C<get_cpu_stats> and C<get_cpu_stats_diff>.
 
 =head2 get_disk_io_stats
 
-Returns the disk IO per disk stored in the kernel which holds the amount of data transferred since bootup. Unlike most other methods presented in this manpage, the methods you can call on its return value take an additional optional parameter which specifies which disk you want information about. If you do not provide this parameter, 0 (= first disk) is assumed.
+Delivers the disk IO per disk stored in the kernel which holds the amount of
+data transferred since bootup. The object it returns is a
+L<http://www.i-scream.org/libstatgrab/docs/sg_get_disk_io_stats.3.html|Unix::Statgrab::sg_disk_io_stats>.
+
+=head3 extra sg_disk_io_stats methods
 
 =over 4
 
-=item * B<num_disks>
+=item * C<get_disk_io_stats_diff>
 
-The number of disks that were found on this machine.
+Provides the difference between the last measurement and the recent one.
 
-=item * B<disk_name($disk)>
+  $recent->get_disk_io_stats_diff($last);
 
-=item * B<read_bytes($disk)>
-
-=item * B<write_bytes($disk)>
-
-=item * B<systime($disk)>
-
-The system time in seconds over which C<read_bytes> and C<write_bytes> were transferred.
+Returns L<http://www.i-scream.org/libstatgrab/docs/sg_get_disk_io_stats.3.html|Unix::Statgrab::sg_disk_io_stats>
 
 =back
-
-=head2 get_disk_io_stats_diff
-
-The same as C<get_disk_io_stats> except that it will report the difference to the last call of either C<get_disk_io_stats> or C<get_disk_io_stats_diff>. Provides the same methods as C<get_disk_io_stats>.
 
 =head2 get_fs_stats
 
-Returns statistics about the mounted filesystems, including free space and inode usage. The provided methods again take one optional argument which specifies which partition you want information about. If you do not provide this parameter, 0 (= first mounted filesystem) is assumed:
+Returns statistics about the mounted filesystems. The object it returns is a
+L<http://www.i-scream.org/libstatgrab/docs/sg_get_fs_stats.3.html|Unix::Statgrab::sg_fs_stats>.
+
+=head3 extra sg_fs_stats methods
 
 =over 4
 
-=item * B<num_fs>
+=item * C<get_fs_stats_diff>
 
-The number of mounted filesystems that were found on this machine.
+Provides the difference between the last measurement and the recent one.
 
-=item * B<device_name($fs)>
+  $recent->get_fs_stats_diff($last);
 
-=item * B<fs_type($fs)>
-
-=item * B<mnt_point($fs)>
-
-=item * B<size($fs)>
-
-Size in bytes.
-
-=item * B<used($fs)>
-
-=item * B<avail($fs)>
-
-=item * B<total_inodes($fs)>
-
-=item * B<used_inodes($fs)>
-
-=item * B<free_inodes($fs)>
-
-=item * B<avail_inodes($fs)>
-
-=item * B<io_size($fs)>
-
-The recommended size in bytes when doing I/O operations on this device.
-
-=item * B<block_size($fs)>
-
-=item * B<total_blocks($fs)>
-
-=item * B<free_blocks($fs)>
-
-=item * B<used_blocks($fs)>
-
-=item * B<avail_blocks($fs)>
+Returns L<http://www.i-scream.org/libstatgrab/docs/sg_get_fs_stats.3.html|Unix::Statgrab::sg_fs_stats>
 
 =back
 
-=head2 get_load_stats()
+=head2 get_load_stats
 
-Returns the load average over various span of times. The following methods are provided:
+Returns the load average over various span of times. The object it returns is a
+L<http://www.i-scream.org/libstatgrab/docs/sg_get_load_stats.3.html|Unix::Statgrab::sg_load_stats>.
+
+=head2 get_mem_stats
+
+Returns statistics about memory usage. The object it returns is a
+L<http://www.i-scream.org/libstatgrab/docs/sg_get_mem_stats.3.html|Unix::Statgrab::sg_mem_stats>.
+
+=head2 get_swap_stats
+
+Returns statistics about swap usage. The object it returns is a
+L<http://www.i-scream.org/libstatgrab/docs/sg_get_swap_stats.3.html|Unix::Statgrab::sg_swap_stats>.
+
+=head2 get_network_io_stats
+
+Returns statistics about the network traffic per network interface as
+stored in the kernel. The object it returns is a
+L<http://www.i-scream.org/libstatgrab/docs/sg_get_network_io_stats.3.html|Unix::Statgrab::sg_network_io_stats>.
+
+=head3 extra sg_network_io_stats methods
 
 =over 4
 
-=item * B<min1>
+=item * C<get_network_io_stats_diff>
 
-Load average over 1 minute.
+Provides the difference between the last measurement and the recent one.
 
-=item * B<min5>
+  $recent->get_network_io_stats_diff($last);
 
-=item * B<min15>
+Returns L<http://www.i-scream.org/libstatgrab/docs/sg_get_network_io_stats.3.html|Unix::Statgrab::sg_network_io_stats>
 
 =back
 
-=head2 get_mem_stats()
+=head2 get_network_iface_stats
 
-Returns statistics about memory usage. The following methods exist:
+Returns statistics about each of the found network interfaces in your computer.
+The object it returns is a
+L<http://www.i-scream.org/libstatgrab/docs/sg_get_network_iface_stats.3.html|Unix::Statgrab::sg_network_iface_stats>.
+
+=head2 get_page_stats
+
+Returns the number of pages the system has paged in and out since bootup.
+The object it returns is a
+L<http://www.i-scream.org/libstatgrab/docs/sg_get_page_stats.3.html|Unix::Statgrab::sg_page_stats>.
+
+=head3 extra sg_page_stats methods
 
 =over 4
 
-=item * B<total>
+=item * C<get_page_stats_diff>
 
-Total memory in bytes.
+Provides the difference between the last measurement and the recent one.
 
-=item * B<free>
+  $recent->get_page_stats_diff($last);
 
-=item * B<used>
-
-=item * B<cache>
-
-Amount of cache used in bytes.
+Returns L<http://www.i-scream.org/libstatgrab/docs/sg_get_page_stats.3.html|Unix::Statgrab::sg_page_stats>
 
 =back
 
-=head2 get_swap_stats()
+=head2 get_process_stats
 
-Returns statistics about swap usage. The following methods exist:
+Returns loads of information about the current processes.
+The object it returns is a
+L<http://www.i-scream.org/libstatgrab/docs/sg_get_process_stats.3.html|Unix::Statgrab::sg_process_stats>.
 
-=over 4
+=head2 get_user_stats
 
-=item * B<total>
-
-Total swap memory in bytes.
-
-=item * B<used>
-
-=item * B<free>
-
-=back
-
-=head2 get_network_io_stats()
-
-Returns statistics about the network traffic per network interface as stored in the kernel. Again, the provided methods support one optional parameter specifiying which network interface to query. If the parameter is missing, 0 (= first interface) is assumed.
-
-=over 4
-
-=item * B<num_ifaces>
-
-The number of network interfaces found on your machine.
-
-=item * B<interface_name($if)>
-
-=item * B<tx($if)>
-
-The number of bytes transmitted.
-
-=item * B<rx($if)>
-
-The number of bytes received.
-
-=item * B<ipackets($if)>
-
-The number of packets received.
-
-=item * B<opackets($if)>
-
-The number of bytes transmitted.
-
-=item * B<ierrors($if)>
-
-The number of receive errors
-
-=item * B<oerrors($if)>
-
-The number of transmit errors
-
-=item * B<collisions($if)>
-
-=item * B<systime>
-
-The time period over which C<tx> and C<rx> were transferred.
-
-=back
-
-=head2 get_network_io_stats_diff()
-
-The same as C<get_network_io_stats> except that it will report on the difference to the last time C<get_network_io_stats> or C<get_network_io_stats_diff> was called. It supports the same methods as C<get_network_io_stats>.
-
-=head2 get_network_iface_stats()
-
-Returns statistics about each of the found network interfaces in your computer. The provided methods take one optional argument being the interface to query. If this parameter is missing, 0 (= first interface) is assumed.
-
-=over 4
-
-=item * B<num_ifaces>
-
-The number of interfaces found.
-
-=item * B<interface_name($if)>
-
-=item * B<speed($if)>
-
-The speed of the interface, in megabits/sec
-
-=item * B<dup($if)>
-
-One of C<SG_IFACE_DUPLEX_FULL>, C<SG_IFACE_DUPLEX_HALF> and C<SG_IFACE_DUPLEX_UNKNOWN>. Unknown could mean that duplex hasn't been negotiated yet.
-
-=item * B<up($if)>
-
-Whether the interface is up.
-
-=back
-
-=head2 get_page_stats()
-
-Returns the number of pages the system has paged in  and  out since bootup. It supports the following methods:
-
-=over 4
-
-=item * B<pages_pagein>
-
-=item * B<pages_pageout>
-
-=item * B<systime>
-
-The time period over which pages_pagein and pages_pageout were transferred, in seconds.
-
-=back
-
-=head2 get_page_stats_diff()
-
-The same as C<get_page_stats> except that it will report the difference to the last time C<get_page_stats> or C<get_page_stats_diff> was called. Supports the same methods as C<get_page_stats>.
-
-=head2 get_user_stats()
-
-Returns information about the currently logged in users. It supports the following methods:
-
-=over 4
-
-=item * B<num_entries>
-
-The number of currently logged in users.
-
-=item * B<name_list>
-
-A list of the users currently logged in.
-
-=back
-
-=head2 get_process_stats()
-
-Returns loads of information about the current processes. This function only returns a container. If you want to look at the processes returned, call C<all_procs> on its return value.
-
-The processes can also be sorted by various criteria by using the C<sort_by> method. This will change the internal order of the container. This method returns the container object so you can do some method chaining:
-
-    my $procs = get_process_stats;
-    $procs->sort_by("name");
-    print $_->proc_name, "\n" foreach $procs->all_procs;
-
-    # syntactically sweeter
-
-    print $_->proc_name, "\n" 
-	foreach get_process_stats->sort_by("name")->all_procs;
-
-Available sorting methods are I<"name">, I<"pid">, I<"uid">, I<"gid">, I<"size">, I<"res">, I<"cpu"> and I<"time">.
-
-You can also sort the list returned by C<all_procs>. For that you can use one of the eight sorting routines thusly:
-
-    my $p = get_process_stats;
-    
-    my @by_name = sort sort_procs_by_name $p->all_procs;
-    my @by_pid  = sort sort_procs_by_pid  $p->all_procs;
-    my @by_uid  = sort sort_procs_by_uid  $p->all_procs;
-    # etc.
-
-Each object returned by C<all_procs> supports the following methods:
-
-=over 4
-
-=item * B<proc_name>
-
-=item * B<proc_title>
-
-The full command line with which the process was started.
-
-=item * B<pid>
-
-=item * B<parent_pid>
-
-=item * B<pgid>
-
-Process ID of process group leader.
-
-=item * B<uid>
-
-=item * B<euid>
-
-Effective user ID.
-
-=item * B<gid>
-
-=item * B<egid>
-
-Effective group ID.
-
-=item * B<proc_size>
-
-In bytes.
-
-=item * B<proc_resident>
-
-In bytes.
-
-=item * B<time_spent>
-
-Time running in seconds.
-
-=item * B<cpu_percent>
-
-=item * B<nice>
-
-=item * B<state>
-
-One of C<SG_PROCESS_STATE_RUNNING>, C<SG_PROCESS_STATE_SLEEPING>, C<SG_PROCESS_STATE_STOPPED>, C<SG_PROCESS_STATE_ZOMBIE> and
-C<SG_PROCESS_STATE_UNKNOWN>.
-
-=back
+Returns session information about logged on users.
+The object it returns is a
+L<http://www.i-scream.org/libstatgrab/docs/sg_get_user_stats.3.html|Unix::Statgrab::sg_user_stats>.
 
 =head1 ERROR HANDLING
 
-One function C<get_error> exists that will return the error encountered during the last operation, if any. Its return value is dual-typed. In string context, it returns a text representation of the error. In numeric context it returns one of the following values:
+One function C<get_error> exists that will return the last error encountered,
+if any. It's return value is an object of type
+L<http://www.i-scream.org/libstatgrab/docs/sg_get_error.3.html|Unix::Statgrab::sg_error_details>.
 
-    SG_ERROR_ASPRINTF
-    SG_ERROR_DEVSTAT_GETDEVS
-    SG_ERROR_DEVSTAT_SELECTDEVS
-    SG_ERROR_ENOENT
-    SG_ERROR_GETIFADDRS
-    SG_ERROR_GETMNTINFO
-    SG_ERROR_GETPAGESIZE
-    SG_ERROR_KSTAT_DATA_LOOKUP
-    SG_ERROR_KSTAT_LOOKUP
-    SG_ERROR_KSTAT_OPEN
-    SG_ERROR_KSTAT_READ
-    SG_ERROR_KVM_GETSWAPINFO
-    SG_ERROR_KVM_OPENFILES
-    SG_ERROR_MALLOC
-    SG_ERROR_NONE
-    SG_ERROR_OPEN
-    SG_ERROR_OPENDIR
-    SG_ERROR_PARSE
-    SG_ERROR_SETEGID
-    SG_ERROR_SETEUID
-    SG_ERROR_SETMNTENT
-    SG_ERROR_SOCKET
-    SG_ERROR_SWAPCTL
-    SG_ERROR_SYSCONF
-    SG_ERROR_SYSCTL
-    SG_ERROR_SYSCTLBYNAME
-    SG_ERROR_SYSCTLNAMETOMIB
-    SG_ERROR_UNAME
-    SG_ERROR_UNSUPPORTED
-    SG_ERROR_XSW_VER_MISMATCH
+=head3 extra sg_error_details methods
 
-Based on the above, you have finer control over the error handling:
+=over 4
 
-    my $disks = get_disk_io_stats;
-    
-    if (! $disks) {
-	if (get_error == SG_ERROR_PARSE) {
-	    ...
-	} else if (get_error == SG_ERROR_OPEN) {
-	    ...
-	} 
-	etc. 
-    }
+=item * C<error_name>
+
+Returns a textual representation for the C<error> numeric value. The textual
+representation is delivered by the libstatgrab function C<sg_str_error>.
+
+=item * C<strperror>
+
+Returns a textual representation for the C<sg_error_details> object. The
+textual representation is delivered by the libstatgrab function
+C<sg_strperror>.
+
+=back
 
 =head1 EXPORT
 
 B<All> by default. This means all of the above functions plus the following constants:
 
+  SG_ERROR_NONE
+  SG_ERROR_INVALID_ARGUMENT
   SG_ERROR_ASPRINTF
+  SG_ERROR_SPRINTF
+  SG_ERROR_DEVICES
   SG_ERROR_DEVSTAT_GETDEVS
   SG_ERROR_DEVSTAT_SELECTDEVS
+  SG_ERROR_DISKINFO
   SG_ERROR_ENOENT
   SG_ERROR_GETIFADDRS
   SG_ERROR_GETMNTINFO
   SG_ERROR_GETPAGESIZE
+  SG_ERROR_HOST
   SG_ERROR_KSTAT_DATA_LOOKUP
   SG_ERROR_KSTAT_LOOKUP
   SG_ERROR_KSTAT_OPEN
@@ -663,10 +446,17 @@ B<All> by default. This means all of the above functions plus the following cons
   SG_ERROR_KVM_GETSWAPINFO
   SG_ERROR_KVM_OPENFILES
   SG_ERROR_MALLOC
-  SG_ERROR_NONE
+  SG_ERROR_MEMSTATUS
   SG_ERROR_OPEN
   SG_ERROR_OPENDIR
+  SG_ERROR_READDIR
   SG_ERROR_PARSE
+  SG_ERROR_PDHADD
+  SG_ERROR_PDHCOLLECT
+  SG_ERROR_PDHOPEN
+  SG_ERROR_PDHREAD
+  SG_ERROR_PERMISSION
+  SG_ERROR_PSTAT
   SG_ERROR_SETEGID
   SG_ERROR_SETEUID
   SG_ERROR_SETMNTENT
@@ -676,17 +466,44 @@ B<All> by default. This means all of the above functions plus the following cons
   SG_ERROR_SYSCTL
   SG_ERROR_SYSCTLBYNAME
   SG_ERROR_SYSCTLNAMETOMIB
+  SG_ERROR_SYSINFO
+  SG_ERROR_MACHCALL
+  SG_ERROR_IOKIT
   SG_ERROR_UNAME
   SG_ERROR_UNSUPPORTED
   SG_ERROR_XSW_VER_MISMATCH
+  SG_ERROR_GETMSG
+  SG_ERROR_PUTMSG
+  SG_ERROR_INITIALISATION
+  SG_ERROR_MUTEX_LOCK
+  SG_ERROR_MUTEX_UNLOCK
+
+  sg_unknown_configuration
+  sg_physical_host
+  sg_virtual_machine
+  sg_paravirtual_machine
+  sg_hardware_virtualized
+
+  sg_fs_unknown
+  sg_fs_regular
+  sg_fs_special
+  sg_fs_loopback
+  sg_fs_remote
+  sg_fs_local
+  sg_fs_alltypes
+
   SG_IFACE_DUPLEX_FULL
   SG_IFACE_DUPLEX_HALF
   SG_IFACE_DUPLEX_UNKNOWN
+
+  SG_IFACE_DOWN
+  SG_IFACE_UP
+
   SG_PROCESS_STATE_RUNNING
   SG_PROCESS_STATE_SLEEPING
   SG_PROCESS_STATE_STOPPED
-  SG_PROCESS_STATE_UNKNOWN
   SG_PROCESS_STATE_ZOMBIE
+  SG_PROCESS_STATE_UNKNOWN
 
 If you don't want that, use the module thusly:
 
@@ -701,20 +518,81 @@ or provide a list of those symbols you want:
 
 =head1 SEE ALSO
 
-The excellent and very complete manpage of statgrab(3). You can get additional information for each of the above
-functions by prefixing the function name with "sg_" and feed it to C<man>:
+The excellent and very complete manpage of statgrab(3). You can get
+additional information for each of the above functions by prefixing the
+function name with "sg_" and feed it to C<man>:
 
     man sg_get_network_iface_stats
 
 libstatgrab's home is at L<http://www.i-scream.org/libstatgrab/>
 
+=head1 SUPPORT
+
+You can find documentation for this module with the perldoc command.
+
+    perldoc Unix::Statgrab
+
+You can also look for information at:
+
+=over 4
+
+=item * RT: CPAN's request tracker
+
+L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Unix-Statgrab>
+
+=item * AnnoCPAN: Annotated CPAN documentation
+
+L<http://annocpan.org/dist/Unix-Statgrab>
+
+=item * CPAN Ratings
+
+L<http://cpanratings.perl.org/s/Unix-Statgrab>
+
+=item * CPAN Search
+
+L<http://search.cpan.org/dist/Unix-Statgrab/>
+
+=back
+
+=head2 Where can I go for help?
+
+If you have a bug report, a patch or a suggestion, please open a new
+report ticket at CPAN (but please check previous reports first in case
+your issue has already been addressed). You can mail any of the module
+maintainers, but you are more assured of an answer by posting to
+the dbi-users list or reporting the issue in RT.
+
+Report tickets should contain a detailed description of the bug or
+enhancement request and at least an easily verifiable way of
+reproducing the issue or fix. Patches are always welcome, too.
+
+=head2 Where can I go for help with a concrete version?
+
+Bugs and feature requests are accepted against the latest version
+only. To get patches for earlier versions, you need to get an
+agreement with a developer of your choice - who may or not report the
+issue and a suggested fix upstream (depends on the license you have
+chosen).
+
+=head2 Business support and maintenance
+
+For business support you can contact Jens via his CPAN email
+address rehsackATcpan.org. Please keep in mind that business
+support is neither available for free nor are you eligible to
+receive any support based on the license distributed with this
+package.
+
 =head1 AUTHOR
 
 Tassilo von Parseval, E<lt>tassilo.von.parseval@rwth-aachen.deE<gt>
 
+Jens Rehsack, E<lt>rehsack AT cpan.orgE<gt>
+
 =head1 COPYRIGHT AND LICENSE
 
 Copyright (C) 2004-2005 by Tassilo von Parseval
+
+Copyright (C) 2012-2013 by Jens Rehsack
 
 This library is free software; you can redistribute it and/or modify it under
 the terms of the GNU Lesser General Public License as published by the Free
