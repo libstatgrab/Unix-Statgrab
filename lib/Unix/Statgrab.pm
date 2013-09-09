@@ -246,6 +246,33 @@ for the users of Perl's list processing features, each object has an
 C<as_list>() method which returns the statistic as list of hash items
 containing each attribute / value pair of available attributes.
 
+=head1 METHODS of sg_*_stats
+
+=over 4
+
+=item * C<entries>
+
+Provides the number of statistic objects in the returned collection.
+
+=item * C<as_list>
+
+Provides a list containing each statistic entry as a hash with the
+attribute names as key and the statistic attribute as appropriate
+value.
+
+=item * C<systime>
+
+Even if it's always an attribute (beside for C<cpu_percents>), returns
+the seconds since epoch of the time when the statistics are snapshotted.
+
+=item * I<attribute>(C<offset> I<= 0>)
+
+Returns the value of the queried attribute of the given entry of
+the statistics collection. If C<offset> exceeds the range, C<undef>
+is returned.
+
+=back
+
 =head1 FUNCTIONS
 
 =head2 drop_privileges()
