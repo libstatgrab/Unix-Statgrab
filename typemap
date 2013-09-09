@@ -16,6 +16,7 @@ sg_process_stats	    *	O_OBJECT
 sg_process_count	    *   O_OBJECT
 
 # older perls don't have these default typemaps
+LUV			    T_UV
 UV			    T_UV
 NV			    T_NV
 

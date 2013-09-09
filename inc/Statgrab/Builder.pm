@@ -20,6 +20,8 @@ use ExtUtils::ParseXS     ();
 
 sub ACTION_configure
 {
+    my $self = shift;
+
     my $autoconf = Config::AutoConf::SG->new();
     $autoconf->check_libstatgrab() or die <<EOD;
 *******************************************
@@ -30,7 +32,15 @@ To obtain it, go to
     http://www.i-scream.org/libstatgrab/
 *******************************************
 EOD
-    # $autoconf->write_config_h();
+
+
+    $autoconf->check_sizeof_IVUV_fit_stat();
+
+    my $xsfile  = "lib/Unix/Statgrab.xs";
+    my $spec    = $self->_infer_xs_spec($xsfile);
+    my $config_h = File::Spec->catfile( $spec->{src_dir}, 'config.h' );
+    $autoconf->write_config_h( $config_h );
+
     return;
 }
 

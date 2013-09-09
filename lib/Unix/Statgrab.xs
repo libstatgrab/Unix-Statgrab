@@ -7,6 +7,13 @@
 #include <statgrab.h>
 
 #include "const-c.inc"
+#include "config.h"
+
+#ifdef MATCH_UV_FIT_ULL
+#define LUV UV
+#else
+#define LUV NV
+#endif
 
 MODULE = Unix::Statgrab		PACKAGE = Unix::Statgrab
 
@@ -458,7 +465,7 @@ entries (self)
     OUTPUT:
 	RETVAL
 
-NV
+LUV
 user (self, num = 0)
 	sg_cpu_stats *self;
 	UV num;
@@ -469,7 +476,7 @@ user (self, num = 0)
     OUTPUT:
 	RETVAL
 
-NV
+LUV
 kernel (self, num = 0)
 	sg_cpu_stats *self;
 	UV num;
@@ -480,7 +487,7 @@ kernel (self, num = 0)
     OUTPUT:
 	RETVAL
 
-NV
+LUV
 idle (self, num = 0)
 	sg_cpu_stats *self;
 	UV num;
@@ -491,7 +498,7 @@ idle (self, num = 0)
     OUTPUT:
 	RETVAL
 
-NV
+LUV
 iowait (self, num = 0)
 	sg_cpu_stats *self;
 	UV num;
@@ -502,7 +509,7 @@ iowait (self, num = 0)
     OUTPUT:
 	RETVAL
 
-NV
+LUV
 swap (self, num = 0)
 	sg_cpu_stats *self;
 	UV num;
@@ -513,7 +520,7 @@ swap (self, num = 0)
     OUTPUT:
 	RETVAL
 
-NV
+LUV
 nice (self, num = 0)
 	sg_cpu_stats *self;
 	UV num;
@@ -524,7 +531,7 @@ nice (self, num = 0)
     OUTPUT:
 	RETVAL
 
-NV
+LUV
 total (self, num = 0)
 	sg_cpu_stats *self;
 	UV num;
@@ -535,7 +542,7 @@ total (self, num = 0)
     OUTPUT:
 	RETVAL
 
-NV
+LUV
 context_switches (self, num = 0)
 	sg_cpu_stats *self;
 	UV num;
@@ -546,7 +553,7 @@ context_switches (self, num = 0)
     OUTPUT:
 	RETVAL
 
-NV
+LUV
 voluntary_context_switches (self, num = 0)
 	sg_cpu_stats *self;
 	UV num;
@@ -557,7 +564,7 @@ voluntary_context_switches (self, num = 0)
     OUTPUT:
 	RETVAL
 
-NV
+LUV
 involuntary_context_switches (self, num = 0)
 	sg_cpu_stats *self;
 	UV num;
@@ -568,7 +575,7 @@ involuntary_context_switches (self, num = 0)
     OUTPUT:
 	RETVAL
 
-NV
+LUV
 syscalls (self, num = 0)
 	sg_cpu_stats *self;
 	UV num;
@@ -579,7 +586,7 @@ syscalls (self, num = 0)
     OUTPUT:
 	RETVAL
 
-NV
+LUV
 interrupts (self, num = 0)
 	sg_cpu_stats *self;
 	UV num;
@@ -590,7 +597,7 @@ interrupts (self, num = 0)
     OUTPUT:
 	RETVAL
 
-NV
+LUV
 soft_interrupts (self, num = 0)
 	sg_cpu_stats *self;
 	UV num;
@@ -769,7 +776,7 @@ disk_name (self, num = 0)
     OUTPUT:
 	RETVAL
 
-NV
+LUV
 read_bytes (self, num = 0)
 	sg_disk_io_stats *self;
 	UV num;
@@ -780,7 +787,7 @@ read_bytes (self, num = 0)
     OUTPUT:
 	RETVAL
 
-NV
+LUV
 write_bytes (self, num = 0)
 	sg_disk_io_stats *self;
 	UV num;
@@ -791,7 +798,7 @@ write_bytes (self, num = 0)
     OUTPUT:
 	RETVAL
 
-UV
+IV
 systime (self, num = 0)
 	sg_disk_io_stats *self;
 	UV num;
@@ -882,7 +889,7 @@ device_type (self, num = 0)
     OUTPUT:
 	RETVAL
 
-NV
+LUV
 size (self, num = 0)
 	sg_fs_stats *self;
 	UV num;
@@ -893,7 +900,7 @@ size (self, num = 0)
     OUTPUT:
 	RETVAL
 
-NV
+LUV
 used (self, num = 0)
 	sg_fs_stats *self;
 	UV num;
@@ -904,7 +911,7 @@ used (self, num = 0)
     OUTPUT:
 	RETVAL
 
-NV
+LUV
 free (self, num = 0)
 	sg_fs_stats *self;
 	UV num;
@@ -915,7 +922,7 @@ free (self, num = 0)
     OUTPUT:
 	RETVAL
 
-NV
+LUV
 avail (self, num = 0)
 	sg_fs_stats *self;
 	UV num;
@@ -926,7 +933,7 @@ avail (self, num = 0)
     OUTPUT:
 	RETVAL
 
-NV
+LUV
 total_inodes (self, num = 0)
 	sg_fs_stats *self;
 	UV num;
@@ -937,7 +944,7 @@ total_inodes (self, num = 0)
     OUTPUT:
 	RETVAL
 
-NV
+LUV
 used_inodes (self, num = 0)
 	sg_fs_stats *self;
 	UV num;
@@ -948,7 +955,7 @@ used_inodes (self, num = 0)
     OUTPUT:
 	RETVAL
 
-NV
+LUV
 free_inodes (self, num = 0)
 	sg_fs_stats *self;
 	UV num;
@@ -959,7 +966,7 @@ free_inodes (self, num = 0)
     OUTPUT:
 	RETVAL
 
-NV
+LUV
 avail_inodes (self, num = 0)
 	sg_fs_stats *self;
 	UV num;
@@ -970,7 +977,7 @@ avail_inodes (self, num = 0)
     OUTPUT:
 	RETVAL
 
-NV
+LUV
 io_size (self, num = 0)
 	sg_fs_stats *self;
 	UV num;
@@ -981,7 +988,7 @@ io_size (self, num = 0)
     OUTPUT:
 	RETVAL
 
-NV
+LUV
 block_size (self, num = 0)
 	sg_fs_stats *self;
 	UV num;
@@ -992,7 +999,7 @@ block_size (self, num = 0)
     OUTPUT:
 	RETVAL
 
-NV
+LUV
 total_blocks (self, num = 0)
 	sg_fs_stats *self;
 	UV num;
@@ -1003,7 +1010,7 @@ total_blocks (self, num = 0)
     OUTPUT:
 	RETVAL
 
-NV
+LUV
 free_blocks (self, num = 0)
 	sg_fs_stats *self;
 	UV num;
@@ -1014,7 +1021,7 @@ free_blocks (self, num = 0)
     OUTPUT:
 	RETVAL
 
-NV
+LUV
 used_blocks (self, num = 0)
 	sg_fs_stats *self;
 	UV num;
@@ -1025,7 +1032,7 @@ used_blocks (self, num = 0)
     OUTPUT:
 	RETVAL
 
-NV
+LUV
 avail_blocks (self, num = 0)
 	sg_fs_stats *self;
 	UV num;
@@ -1145,7 +1152,7 @@ entries (self)
     OUTPUT:
 	RETVAL
 
-NV
+LUV
 total (self, num = 0)
 	sg_mem_stats *self;
 	UV num;
@@ -1156,7 +1163,7 @@ total (self, num = 0)
     OUTPUT:
 	RETVAL
 
-NV
+LUV
 free (self, num = 0)
 	sg_mem_stats *self;
 	UV num;
@@ -1167,7 +1174,7 @@ free (self, num = 0)
     OUTPUT:
 	RETVAL
 
-NV
+LUV
 used (self, num = 0)
 	sg_mem_stats *self;
 	UV num;
@@ -1178,7 +1185,7 @@ used (self, num = 0)
     OUTPUT:
 	RETVAL
 
-NV
+LUV
 cache (self, num = 0)
 	sg_mem_stats *self;
 	UV num;
@@ -1218,7 +1225,7 @@ entries (self)
     OUTPUT:
 	RETVAL
 
-NV
+LUV
 total (self, num = 0)
 	sg_swap_stats *self;
 	UV num;
@@ -1229,7 +1236,7 @@ total (self, num = 0)
     OUTPUT:
 	RETVAL
 
-NV
+LUV
 free (self, num = 0)
 	sg_swap_stats *self;
 	UV num;
@@ -1240,7 +1247,7 @@ free (self, num = 0)
     OUTPUT:
 	RETVAL
 
-NV
+LUV
 used (self, num = 0)
 	sg_swap_stats *self;
 	UV num;
@@ -1291,7 +1298,7 @@ interface_name (self, num = 0)
     OUTPUT:
 	RETVAL
 
-NV
+LUV
 tx (self, num = 0)
 	sg_network_io_stats *self;
 	UV num;
@@ -1302,7 +1309,7 @@ tx (self, num = 0)
     OUTPUT:
 	RETVAL
     
-NV
+LUV
 rx (self, num = 0)
 	sg_network_io_stats *self;
 	UV num;
@@ -1313,7 +1320,7 @@ rx (self, num = 0)
     OUTPUT:
 	RETVAL
    
-NV
+LUV
 ipackets (self, num = 0)
 	sg_network_io_stats *self;
 	UV num;
@@ -1324,7 +1331,7 @@ ipackets (self, num = 0)
     OUTPUT:
 	RETVAL
 
-NV
+LUV
 opackets (self, num = 0)
 	sg_network_io_stats *self;
 	UV num;
@@ -1335,7 +1342,7 @@ opackets (self, num = 0)
     OUTPUT:
 	RETVAL
 
-NV
+LUV
 ierrors (self, num = 0)
 	sg_network_io_stats *self;
 	UV num;
@@ -1346,7 +1353,7 @@ ierrors (self, num = 0)
     OUTPUT:
 	RETVAL
 
-NV
+LUV
 oerrors (self, num = 0)
 	sg_network_io_stats *self;
 	UV num;
@@ -1357,7 +1364,7 @@ oerrors (self, num = 0)
     OUTPUT:
 	RETVAL
 
-NV
+LUV
 collisions (self, num = 0)
 	sg_network_io_stats *self;
 	UV num;
@@ -1426,7 +1433,7 @@ interface_name (self, num = 0)
     OUTPUT:
 	RETVAL
 
-NV
+LUV
 speed (self, num = 0)
 	sg_network_iface_stats *self;
 	UV num;
@@ -1437,7 +1444,7 @@ speed (self, num = 0)
     OUTPUT:
 	RETVAL
 
-NV
+LUV
 factor (self, num = 0)
 	sg_network_iface_stats *self;
 	UV num;
@@ -1499,7 +1506,7 @@ entries (self)
     OUTPUT:
 	RETVAL
 
-NV
+LUV
 pages_pagein (self, num = 0)
 	sg_page_stats *self;
 	UV num;
@@ -1510,7 +1517,7 @@ pages_pagein (self, num = 0)
     OUTPUT:
 	RETVAL
 
-NV
+LUV
 pages_pageout (self, num = 0)
 	sg_page_stats *self;
 	UV num;
@@ -1784,7 +1791,7 @@ egid (self, num = 0)
     OUTPUT:
 	RETVAL
 
-NV
+LUV
 context_switches (self, num = 0)
 	sg_process_stats *self;
 	UV num;
@@ -1795,7 +1802,7 @@ context_switches (self, num = 0)
     OUTPUT:
 	RETVAL
 
-NV
+LUV
 voluntary_context_switches (self, num = 0)
 	sg_process_stats *self;
 	UV num;
@@ -1806,7 +1813,7 @@ voluntary_context_switches (self, num = 0)
     OUTPUT:
 	RETVAL
 
-NV
+LUV
 involuntary_context_switches (self, num = 0)
 	sg_process_stats *self;
 	UV num;
@@ -1817,7 +1824,7 @@ involuntary_context_switches (self, num = 0)
     OUTPUT:
 	RETVAL
 
-NV
+LUV
 proc_size (self, num = 0)
 	sg_process_stats *self;
 	UV num;
@@ -1828,7 +1835,7 @@ proc_size (self, num = 0)
     OUTPUT:
 	RETVAL
 
-NV
+LUV
 proc_resident (self, num = 0)
 	sg_process_stats *self;
 	UV num;
@@ -1861,7 +1868,7 @@ time_spent (self, num = 0)
     OUTPUT:
 	RETVAL
 
-NV
+LUV
 cpu_percent (self, num = 0)
 	sg_process_stats *self;
 	UV num;
