@@ -1,6 +1,14 @@
 Revision history for Perl extension Unix::Statgrab.
 
-0.099_002
+0.101 2013-09-10
+
+0.100 2013-09-09
+    - add POD for generic methods
+    - return stats in integer representation, if valid (read: if
+      UV can hold any value of unsigned long long)
+    - add "parants" to configure_requires
+
+0.099_002 2013-09-06
     - Update POD to match current functionality
     - introduce as_list() for each object
     - Changes reformatted as per CPAN::Changes::Spec
