@@ -1,6 +1,7 @@
 Revision history for Perl extension Unix::Statgrab.
 
 0.101 2013-09-10
+    - depend on 'parent' not 'parant' (Thanks to Chris Weyl)
 
 0.100 2013-09-09
     - add POD for generic methods
