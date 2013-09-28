@@ -1,5 +1,10 @@
 Revision history for Perl extension Unix::Statgrab.
 
+0.102 2013-09-28
+    - Update repository URI - it's now officially hosted on i-scream.org
+      with a mirror on GitHub for issue tracking and easy deal with
+      pull requests
+
 0.101 2013-09-10
     - depend on 'parent' not 'parant' (Thanks to Chris Weyl)
 
