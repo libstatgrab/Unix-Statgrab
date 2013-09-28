@@ -26,7 +26,7 @@ my $builder = Statgrab::Builder->new(
                           'ExtUtils::CBuilder' => '0.27',
                           'Module::Build'      => '0.4000',
                         },
-      meta_merge => { resources => { repository => "https://github.com/rehsack/Unix-Statgrab", }, },
+      meta_merge => { resources => { repository => "https://github.com/i-scream/Unix-Statgrab", }, },
       add_to_cleanup => [ 'Unix-Statgrab-*', '*.o', 'config.h', 'config.log', ],
       test_files     => [ "t/*.t",           "xt/*.t" ],
 );
