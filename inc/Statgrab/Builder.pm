@@ -39,6 +39,8 @@ EOD
     my $spec     = $self->_infer_xs_spec($xsfile);
     my $config_h = File::Spec->catfile( $spec->{src_dir}, 'config.h' );
     $autoconf->write_config_h($config_h);
+    $self->config_data( extra_compile_flags => $autoconf->{extra_compile_flags}->{C} );
+    $self->config_data( extra_link_flags    => $autoconf->{extra_link_flags} );
 
     return;
 }
@@ -113,13 +115,20 @@ sub ACTION_code
     my $self     = shift;
     my $cbuilder = $self->cbuilder;
 
-    $self->{properties}->{extra_linker_flags} ||= [];
+    $self->{properties}->{extra_linker_flags}   ||= [];
+    $self->{properties}->{extra_compiler_flags} ||= [];
     unshift(
              @{ $self->{properties}->{extra_linker_flags} },
              split( " ", $cbuilder->{config}{ldflags} )
            );    # XXX currently silently ignored by EU::CB
-    push( @{ $self->{properties}->{extra_linker_flags} }, '-lstatgrab' )
-      ;          # XXX fetch it from $autoconf ...
+    push(
+          @{ $self->{properties}->{extra_linker_flags} },
+          @{ $self->config_data("extra_link_flags") }
+        );
+    push(
+          @{ $self->{properties}->{extra_compiler_flags} },
+          @{ $self->config_data("extra_compile_flags") }
+        );
 
     # for my $path (catdir("blib","bindoc"), catdir("blib","bin")) {
     #     mkpath $path unless -d $path;

@@ -5,6 +5,7 @@ use warnings;
 
 use parent qw(Config::AutoConf);
 use Capture::Tiny qw/capture/;
+use Text::ParseWords qw(shellwords);
 
 sub new
 {
@@ -37,7 +38,13 @@ sub pkg_config_flags
           capture { system( $pkg_config, $package, "--libs" ); };
         chomp $stdout;
         0 == $exit
-          and $self->{cache}->{$cache_name} = [ split( m/\n/, $stdout ) ]
+          and $self->{cache}->{$cache_name} = [
+            map {
+                $_ =~ s/^\s+//;
+                $_ =~ s/\s+$//;
+                Text::ParseWords::shellwords $_;
+              } split( m/\n/, $stdout )
+          ]
           and push @{ $self->{extra_link_flags} }, @{ $self->{cache}->{$cache_name} };
 
         $cache_name = $self->_cache_name($header);
@@ -45,8 +52,15 @@ sub pkg_config_flags
           capture { system( $pkg_config, $package, "--cflags" ); };
         chomp $stdout;
         0 == $exit
-          and $self->{cache}->{$cache_name} = [ split( m/\n/, $stdout ) ]
-          and push @{ $self->{extra_compile_flags}->{ $self->{lang} } }, split( m/\n/, $stdout );
+          and $self->{cache}->{$cache_name} = [
+            map {
+                $_ =~ s/^\s+//;
+                $_ =~ s/\s+$//;
+                Text::ParseWords::shellwords $_;
+              } split( m/\n/, $stdout )
+          ]
+          and push @{ $self->{extra_compile_flags}->{ $self->{lang} } },
+          @{ $self->{cache}->{$cache_name} };
     };
 }
 
