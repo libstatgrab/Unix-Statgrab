@@ -1,5 +1,11 @@
 Revision history for Perl extension Unix::Statgrab.
 
+0.103 2014-02-19
+    - learn include paths and linker flags from pkg-config, if available
+    - keep configure phase settings persistent for building stage
+    - redo meta_add using meta-spec v2
+      * includes developer deps to please ribasushi
+
 0.102 2013-09-28
     - Update repository URI - it's now officially hosted on i-scream.org
       with a mirror on GitHub for issue tracking and easy deal with
