@@ -1,5 +1,8 @@
 Revision history for Perl extension Unix::Statgrab.
 
+0.104 2014-02-20
+    - fix link targets for stats description
+
 0.103 2014-02-19
     - learn include paths and linker flags from pkg-config, if available
     - keep configure phase settings persistent for building stage
