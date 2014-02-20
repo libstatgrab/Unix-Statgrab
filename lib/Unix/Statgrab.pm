@@ -288,12 +288,12 @@ libstatgrab (and then in Unix::Statgrab, too).
 =head2 get_host_info()
 
 Returns generic information about this machine. The object it returns
-is a L<http://www.i-scream.org/libstatgrab/docs/sg_get_host_info.3.html|Unix::Statgrab::sg_host_info>.
+is a L<Unix::Statgrab::sg_host_info|http://www.i-scream.org/libstatgrab/docs/sg_get_host_info.3.html>.
 
 =head2 get_cpu_stats
 
 Returns information about this machine's usage of the CPU. The object it
-returns is a L<http://www.i-scream.org/libstatgrab/docs/sg_get_cpu_stats.3.html|Unix::Statgrab::sg_cpu_stats>.
+returns is a L<Unix::Statgrab::sg_cpu_stats|http://www.i-scream.org/libstatgrab/docs/sg_get_cpu_stats.3.html>.
 
 =head3 extra sg_cpu_stats methods
 
@@ -305,12 +305,12 @@ Provides the difference between the last measurement and the recent one.
 
   $recent->get_cpu_stats_diff($last);
 
-Returns L<http://www.i-scream.org/libstatgrab/docs/sg_get_cpu_stats.3.html|Unix::Statgrab::sg_cpu_stats>
+Returns L<Unix::Statgrab::sg_cpu_stats|http://www.i-scream.org/libstatgrab/docs/sg_get_cpu_stats.3.html>
 
 =item * C<get_cpu_percents>
 
 Provides a percentage representation of the single cpu ticks measured.
-Returns L<http://www.i-scream.org/libstatgrab/docs/sg_get_cpu_stats.3.html|Unix::Statgrab::sg_cpu_percents>
+Returns L<Unix::Statgrab::sg_cpu_percents|http://www.i-scream.org/libstatgrab/docs/sg_get_cpu_stats.3.html>
 
 =back
 
@@ -318,7 +318,7 @@ Returns L<http://www.i-scream.org/libstatgrab/docs/sg_get_cpu_stats.3.html|Unix:
 
 Delivers the disk IO per disk stored in the kernel which holds the amount of
 data transferred since bootup. The object it returns is a
-L<http://www.i-scream.org/libstatgrab/docs/sg_get_disk_io_stats.3.html|Unix::Statgrab::sg_disk_io_stats>.
+L<Unix::Statgrab::sg_disk_io_stats|http://www.i-scream.org/libstatgrab/docs/sg_get_disk_io_stats.3.html>.
 
 =head3 extra sg_disk_io_stats methods
 
@@ -330,14 +330,14 @@ Provides the difference between the last measurement and the recent one.
 
   $recent->get_disk_io_stats_diff($last);
 
-Returns L<http://www.i-scream.org/libstatgrab/docs/sg_get_disk_io_stats.3.html|Unix::Statgrab::sg_disk_io_stats>
+Returns L<Unix::Statgrab::sg_disk_io_stats|http://www.i-scream.org/libstatgrab/docs/sg_get_disk_io_stats.3.html>
 
 =back
 
 =head2 get_fs_stats
 
 Returns statistics about the mounted filesystems. The object it returns is a
-L<http://www.i-scream.org/libstatgrab/docs/sg_get_fs_stats.3.html|Unix::Statgrab::sg_fs_stats>.
+L<Unix::Statgrab::sg_fs_stats|http://www.i-scream.org/libstatgrab/docs/sg_get_fs_stats.3.html>.
 
 =head3 extra sg_fs_stats methods
 
@@ -349,30 +349,30 @@ Provides the difference between the last measurement and the recent one.
 
   $recent->get_fs_stats_diff($last);
 
-Returns L<http://www.i-scream.org/libstatgrab/docs/sg_get_fs_stats.3.html|Unix::Statgrab::sg_fs_stats>
+Returns L<Unix::Statgrab::sg_fs_stats|http://www.i-scream.org/libstatgrab/docs/sg_get_fs_stats.3.html>
 
 =back
 
 =head2 get_load_stats
 
 Returns the load average over various span of times. The object it returns is a
-L<http://www.i-scream.org/libstatgrab/docs/sg_get_load_stats.3.html|Unix::Statgrab::sg_load_stats>.
+L<Unix::Statgrab::sg_load_stats|http://www.i-scream.org/libstatgrab/docs/sg_get_load_stats.3.html>.
 
 =head2 get_mem_stats
 
 Returns statistics about memory usage. The object it returns is a
-L<http://www.i-scream.org/libstatgrab/docs/sg_get_mem_stats.3.html|Unix::Statgrab::sg_mem_stats>.
+L<Unix::Statgrab::sg_mem_stats|http://www.i-scream.org/libstatgrab/docs/sg_get_mem_stats.3.html>.
 
 =head2 get_swap_stats
 
 Returns statistics about swap usage. The object it returns is a
-L<http://www.i-scream.org/libstatgrab/docs/sg_get_swap_stats.3.html|Unix::Statgrab::sg_swap_stats>.
+L<Unix::Statgrab::sg_swap_stats|http://www.i-scream.org/libstatgrab/docs/sg_get_swap_stats.3.html>.
 
 =head2 get_network_io_stats
 
 Returns statistics about the network traffic per network interface as
 stored in the kernel. The object it returns is a
-L<http://www.i-scream.org/libstatgrab/docs/sg_get_network_io_stats.3.html|Unix::Statgrab::sg_network_io_stats>.
+L<Unix::Statgrab::sg_network_io_stats|http://www.i-scream.org/libstatgrab/docs/sg_get_network_io_stats.3.html>.
 
 =head3 extra sg_network_io_stats methods
 
@@ -384,7 +384,7 @@ Provides the difference between the last measurement and the recent one.
 
   $recent->get_network_io_stats_diff($last);
 
-Returns L<http://www.i-scream.org/libstatgrab/docs/sg_get_network_io_stats.3.html|Unix::Statgrab::sg_network_io_stats>
+Returns L<Unix::Statgrab::sg_network_io_stats|http://www.i-scream.org/libstatgrab/docs/sg_get_network_io_stats.3.html>
 
 =back
 
@@ -392,13 +392,13 @@ Returns L<http://www.i-scream.org/libstatgrab/docs/sg_get_network_io_stats.3.htm
 
 Returns statistics about each of the found network interfaces in your computer.
 The object it returns is a
-L<http://www.i-scream.org/libstatgrab/docs/sg_get_network_iface_stats.3.html|Unix::Statgrab::sg_network_iface_stats>.
+L<Unix::Statgrab::sg_network_iface_stats|http://www.i-scream.org/libstatgrab/docs/sg_get_network_iface_stats.3.html>.
 
 =head2 get_page_stats
 
 Returns the number of pages the system has paged in and out since bootup.
 The object it returns is a
-L<http://www.i-scream.org/libstatgrab/docs/sg_get_page_stats.3.html|Unix::Statgrab::sg_page_stats>.
+L<Unix::Statgrab::sg_page_stats|http://www.i-scream.org/libstatgrab/docs/sg_get_page_stats.3.html>.
 
 =head3 extra sg_page_stats methods
 
@@ -410,7 +410,7 @@ Provides the difference between the last measurement and the recent one.
 
   $recent->get_page_stats_diff($last);
 
-Returns L<http://www.i-scream.org/libstatgrab/docs/sg_get_page_stats.3.html|Unix::Statgrab::sg_page_stats>
+Returns L<Unix::Statgrab::sg_page_stats|http://www.i-scream.org/libstatgrab/docs/sg_get_page_stats.3.html>
 
 =back
 
@@ -418,19 +418,19 @@ Returns L<http://www.i-scream.org/libstatgrab/docs/sg_get_page_stats.3.html|Unix
 
 Returns loads of information about the current processes.
 The object it returns is a
-L<http://www.i-scream.org/libstatgrab/docs/sg_get_process_stats.3.html|Unix::Statgrab::sg_process_stats>.
+L<Unix::Statgrab::sg_process_stats|http://www.i-scream.org/libstatgrab/docs/sg_get_process_stats.3.html>.
 
 =head2 get_user_stats
 
 Returns session information about logged on users.
 The object it returns is a
-L<http://www.i-scream.org/libstatgrab/docs/sg_get_user_stats.3.html|Unix::Statgrab::sg_user_stats>.
+L<Unix::Statgrab::sg_user_stats|http://www.i-scream.org/libstatgrab/docs/sg_get_user_stats.3.html>.
 
 =head1 ERROR HANDLING
 
 One function C<get_error> exists that will return the last error encountered,
 if any. It's return value is an object of type
-L<http://www.i-scream.org/libstatgrab/docs/sg_get_error.3.html|Unix::Statgrab::sg_error_details>.
+L<Unix::Statgrab::sg_error_details|http://www.i-scream.org/libstatgrab/docs/sg_get_error.3.html>.
 
 =head3 extra sg_error_details methods
 
