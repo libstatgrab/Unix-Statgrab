@@ -39,7 +39,7 @@ EOD
     my $spec     = $self->_infer_xs_spec($xsfile);
     my $config_h = File::Spec->catfile( $spec->{src_dir}, 'config.h' );
     $autoconf->write_config_h($config_h);
-    $self->config_data( extra_compile_flags => $autoconf->{extra_compile_flags}->{C} );
+    $self->config_data( extra_preprocess_flags => $autoconf->{extra_preprocess_flags} );
     $self->config_data( extra_link_flags    => $autoconf->{extra_link_flags} );
 
     return;
@@ -127,7 +127,7 @@ sub ACTION_code
         );
     push(
           @{ $self->{properties}->{extra_compiler_flags} },
-          @{ $self->config_data("extra_compile_flags") }
+          @{ $self->config_data("extra_preprocess_flags") }
         );
 
     # for my $path (catdir("blib","bindoc"), catdir("blib","bin")) {

@@ -17,7 +17,7 @@ my $builder = Statgrab::Builder->new(
                           configure_requires => {
                                                   'File::Copy'       => '0',
                                                   'Module::Build'    => '0.4000',
-                                                  'Config::AutoConf' => '0.19',
+                                                  'Config::AutoConf' => '0.23',
                                                   'parent'           => 0,
                                                 },
                           build_requires => {

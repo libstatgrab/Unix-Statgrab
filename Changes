@@ -1,5 +1,8 @@
 Revision history for Perl extension Unix::Statgrab.
 
+0.105 2014-04-xx
+    - take advantage of Config::AutoConf 0.23
+
 0.104 2014-02-20
     - fix link targets for stats description
 
