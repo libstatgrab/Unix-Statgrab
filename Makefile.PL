@@ -48,7 +48,7 @@ EOD
 
 $autoconf->check_sizeof_IVUV_fit_stat();
 
-my $xsfile   = "Statgrab.xs";
+my $xsfile = "Statgrab.xs";
 my $config_h = File::Spec->catfile( dirname($xsfile), 'config.h' );
 $autoconf->write_config_h($config_h);
 _write_constants();
@@ -92,22 +92,22 @@ WriteMakefile1(
             },
         },
     },
-    NAME           => 'Unix::Statgrab',
-    VERSION_FROM   => 'lib/Unix/Statgrab.pm',
-    ABSTRACT_FROM  => 'lib/Unix/Statgrab.pm',
-    LICENSE        => 'perl',
-    AUTHOR         => [ 'Tassilo von Parseval <tassilo.von.parseval@rwth-aachen.de>', 'Jens Rehsack <sno@NetBSD.org>' ],
-    XS             => { $xsfile => "Statgrab.c" },
-    OBJECT              => q/$(O_FILES)/,
-    INC            => join(" ", @{$autoconf->{extra_preprocess_flags}}),
+    NAME          => 'Unix::Statgrab',
+    VERSION_FROM  => 'lib/Unix/Statgrab.pm',
+    ABSTRACT_FROM => 'lib/Unix/Statgrab.pm',
+    LICENSE       => 'perl',
+    AUTHOR        => [ 'Tassilo von Parseval <tassilo.von.parseval@rwth-aachen.de>', 'Jens Rehsack <sno@NetBSD.org>' ],
+    XS            => { $xsfile => "Statgrab.c" },
+    OBJECT        => q/$(O_FILES)/,
+    INC           => join( " ", @{ $autoconf->{extra_preprocess_flags} } ),
     #LDDLFLAGS   => join(" ", $Config{lddlflags}, @{$autoconf->{extra_link_flags}}),
-    EXTRALIBS      => join(" ", @{$autoconf->{extra_link_flags}}),
-    LDLOADLIBS      => join(" ", @{$autoconf->{extra_link_flags}}),
+    EXTRALIBS      => join( " ",     @{ $autoconf->{extra_link_flags} } ),
+    LDLOADLIBS     => join( " ",     @{ $autoconf->{extra_link_flags} } ),
     PREREQ_PM      => \%RUN_DEPS,
     BUILD_REQUIRES => { %BUILD_DEPS, %CONFIGURE_DEPS },
     TEST_REQUIRES  => \%TEST_DEPS,
-    clean          => { FILES => "Unix-Statgrab-* *.o config.h const-*.inc config.log" },
-    test           => { TESTS => 't/*.t xt/*.t' },
+    clean => { FILES => "Unix-Statgrab-* *.o config.h const-*.inc config.log" },
+    test  => { TESTS => 't/*.t xt/*.t' },
 );
 
 sub WriteMakefile1
@@ -161,7 +161,6 @@ sub WriteMakefile1
     WriteMakefile(%params);
 }
 
-
 sub _write_constants
 {
     my @names = (
@@ -192,7 +191,7 @@ sub _write_constants
           SG_PROCESS_STATE_UNKNOWN),
     );
 
-    my $c_const = File::Spec->catfile( dirname($xsfile), 'const-c.inc' );
+    my $c_const  = File::Spec->catfile( dirname($xsfile), 'const-c.inc' );
     my $xs_const = File::Spec->catfile( dirname($xsfile), 'const-xs.inc' );
 
     # workaround #ifdef around each constant (stupid that it's not documented)
@@ -202,12 +201,12 @@ sub _write_constants
         print $c_fh "#define $name $name\n";
     }
     ExtUtils::Constant::WriteConstants(
-                                        NAME         => 'Unix::Statgrab',
-                                        NAMES        => \@names,
-                                        DEFAULT_TYPE => 'UV',
-                                        C_FH         => $c_fh,
-                                        XS_FILE      => $xs_const,
-                                      );
+        NAME         => 'Unix::Statgrab',
+        NAMES        => \@names,
+        DEFAULT_TYPE => 'UV',
+        C_FH         => $c_fh,
+        XS_FILE      => $xs_const,
+    );
     close($c_fh);
 
     return;
