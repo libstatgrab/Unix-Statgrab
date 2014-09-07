@@ -85,7 +85,7 @@ my @constants_names = (
 	@constants_names
     );
 
-$VERSION = '0.105';
+$VERSION = '0.105_001';
 
 sub AUTOLOAD {
     # This AUTOLOAD is used to 'autoload' constants from the constant()
