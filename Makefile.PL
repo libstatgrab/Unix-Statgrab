@@ -68,7 +68,9 @@ WriteMakefile1(
                 web    => 'http://rt.cpan.org/Public/Dist/Display.html?Name=Unix-Statgrab',
                 mailto => 'bug-unix-statgrab@rt.cpan.org',
             },
-            license => 'http://dev.perl.org/licenses/',
+            license       => 'http://dev.perl.org/licenses/',
+            x_IRC         => "irc://irc.freenode.net/#libstatgrab",
+            x_MailingList => "mailto:users\@i-scream.org'",
         },
         prereqs => {
             develop => {
