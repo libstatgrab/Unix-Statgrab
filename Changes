@@ -1,5 +1,10 @@
 Revision history for Perl extension Unix::Statgrab.
 
+0.016	2015-01-06
+    - update meta-information
+    - update author tests
+    - take advantage of Config::AutoConf 0.306
+
 0.105_001 2014-09-07
     - take advantage of Config::AutoConf 0.23
     - switch to ExtUtils::MakeMaker, it seems more active maintained
