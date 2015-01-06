@@ -619,7 +619,7 @@ Jens Rehsack, E<lt>rehsack AT cpan.orgE<gt>
 
 Copyright (C) 2004-2005 by Tassilo von Parseval
 
-Copyright (C) 2012-2013 by Jens Rehsack
+Copyright (C) 2012-2015 by Jens Rehsack
 
 This library is free software; you can redistribute it and/or modify it under
 the terms of the GNU Lesser General Public License as published by the Free
