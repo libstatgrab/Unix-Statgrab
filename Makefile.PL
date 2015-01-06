@@ -91,7 +91,7 @@ WriteMakefile1(
             build   => { requires => {%BUILD_DEPS} },
             test    => { requires => {%TEST_DEPS} },
             runtime => {
-                recommends => {},
+                recommends => { 'Test::LeakTrace' => 0 },
                 requires   => {
                     %RUN_DEPS,
                     perl => '5.8.3',
