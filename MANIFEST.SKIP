@@ -27,3 +27,4 @@ tmp/
 const-.*.inc
 config\..*
 \.[co]
+\.bs
