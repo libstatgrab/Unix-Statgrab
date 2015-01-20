@@ -24,6 +24,15 @@ sub check_libstatgrab
     return $self->search_libs( "sg_get_process_stats_r", ["statgrab"] );
 }
 
+sub check_device_canonical
+{
+    # device_canonical
+    my ($self) = @_;
+    ref($self) or $self = $self->_get_instance();
+
+    $self->check_member( "sg_fs_stats.device_canonical", { prologue => join("\n", $self->_default_includes, "#include <statgrab.h>") } );
+}
+
 sub _default_headers_with_perl
 {
     my ($self) = @_;

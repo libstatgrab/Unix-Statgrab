@@ -136,7 +136,7 @@ my @sg_disk_io_stats_attrs = (qw(disk_name read_bytes write_bytes systime));
 
 sub Unix::Statgrab::sg_disk_io_stats::as_list { return $to_hash_array->( $_[0], @sg_disk_io_stats_attrs ); }
 
-my @sg_fs_stats_attrs = (qw(device_name fs_type mnt_point device_type),
+my @sg_fs_stats_attrs = (qw(device_name device_canonical fs_type mnt_point device_type),
 	qw(size used free avail total_inodes used_inodes free_inodes avail_inodes),
 	qw(io_size block_size total_blocks free_blocks used_blocks avail_blocks systime));
 

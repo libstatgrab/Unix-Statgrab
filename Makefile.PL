@@ -46,6 +46,7 @@ To obtain it, go to
 *******************************************
 EOD
 
+$autoconf->check_device_canonical();
 $autoconf->check_sizeof_IVUV_fit_stat();
 
 my $xsfile = "Statgrab.xs";

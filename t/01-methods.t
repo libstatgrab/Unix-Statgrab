@@ -59,7 +59,8 @@ my %funcs = (
     ],
     get_disk_io_stats => [qw/disk_name read_bytes write_bytes systime/],
     get_fs_stats      => [
-        qw/device_name fs_type mnt_point device_type size used free avail
+        qw/device_name device_canonical fs_type mnt_point device_type
+	  size used free avail
           total_inodes used_inodes free_inodes avail_inodes io_size
           block_size total_blocks free_blocks used_blocks avail_blocks
           systime/

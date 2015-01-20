@@ -849,6 +849,21 @@ device_name (self, num = 0)
 	RETVAL
 
 char *
+device_canonical (self, num = 0)
+	sg_fs_stats *self;
+	UV num;
+    CODE:
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
+#ifdef HAVE_DEVICE_CANONICAL
+	RETVAL = self[num].device_canonical;
+#else
+	RETVAL = self[num].device_name;
+#endif
+    OUTPUT:
+	RETVAL
+
+char *
 fs_type (self, num = 0)
 	sg_fs_stats *self;
 	UV num;
