@@ -108,8 +108,6 @@ get_fs_stats ()
     {
 	sg_fs_stats *self;
 
-	New(0, self, 1, sg_fs_stats);
-
 	if ((self = sg_get_fs_stats_r(NULL)) == NULL)
 	    XSRETURN_UNDEF;
 
@@ -175,8 +173,6 @@ get_network_io_stats ()
     {
 	sg_network_io_stats *self;
 
-	New(0, self, 1, sg_network_io_stats);
-
 	if ((self = sg_get_network_io_stats_r(NULL)) == NULL)
 	    XSRETURN_UNDEF;
 
@@ -193,8 +189,6 @@ get_network_iface_stats ()
     CODE:
     {
 	sg_network_iface_stats *self;
-
-	New(0, self, 1, sg_network_iface_stats);
 
 	if ((self = sg_get_network_iface_stats_r(NULL)) == NULL)
 	    XSRETURN_UNDEF;
@@ -244,9 +238,7 @@ get_process_stats ()
     CODE:
     {
 	sg_process_stats *self;
-	
-	New(0, self, 1, sg_process_stats);
-	
+
 	if ((self = sg_get_process_stats_r(NULL)) == NULL)
 	    XSRETURN_UNDEF;
 
