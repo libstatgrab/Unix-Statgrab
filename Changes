@@ -4,6 +4,7 @@ Revision history for Perl extension Unix::Statgrab.
     - eliminate potential memory leaks in get_fs_stats, get_network_io_stats,
       get_network_iface_stats, get_process_stats
     - add support for device_canonical
+    - update bundled ppport.h to 3.28 one
 
 0.016	2015-01-06
     - update meta-information
