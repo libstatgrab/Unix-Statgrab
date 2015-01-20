@@ -317,7 +317,7 @@ Returns L<Unix::Statgrab::sg_cpu_percents|http://www.i-scream.org/libstatgrab/do
 =head2 get_disk_io_stats
 
 Delivers the disk IO per disk stored in the kernel which holds the amount of
-data transferred since bootup. The object it returns is a
+data transferred since boot. The object it returns is a
 L<Unix::Statgrab::sg_disk_io_stats|http://www.i-scream.org/libstatgrab/docs/sg_get_disk_io_stats.3.html>.
 
 =head3 extra sg_disk_io_stats methods
@@ -587,7 +587,7 @@ If you have a bug report, a patch or a suggestion, please open a new
 report ticket at CPAN (but please check previous reports first in case
 your issue has already been addressed). You can mail any of the module
 maintainers, but you are more assured of an answer by posting to
-the dbi-users list or reporting the issue in RT.
+the i-scream-users list or reporting the issue in RT.
 
 Report tickets should contain a detailed description of the bug or
 enhancement request and at least an easily verifiable way of
