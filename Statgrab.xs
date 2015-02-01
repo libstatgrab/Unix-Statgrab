@@ -9,11 +9,88 @@
 #include "const-c.inc"
 #include "config.h"
 
+const char *sg_host_info_members[] = {
+    "os_name", "os_release", "os_version", "platform", "hostname",
+    "bitwidth", "host_state", "ncpus", "maxcpus", "uptime", "systime"
+};
+
+const char *sg_cpu_stat_names[] = {
+    "user", "kernel", "idle", "iowait", "swap", "nice", "total",
+    "context_switches", "voluntary_context_switches", "involuntary_context_switches",
+    "syscalls", "interrupts", "soft_interrupts", "systime"
+};
+
+const char *sg_cpu_percent_names[] = {
+    "user", "kernel", "idle", "iowait", "swap", "nice", "time_taken"
+};
+
+const char *sg_mem_stat_names[] = {
+    "total", "free", "used", "cache", "systime"
+};
+
+const char *sg_load_stat_names[] = {
+    "min1", "min5", "min15", "systime"
+};
+
+const char *sg_user_stat_names[] = {
+    "login_name", "record_id", "device", "hostname",
+    "pid", "login_time", "systime"
+};
+
+const char *sg_swap_stat_names[] = {
+    "total", "free", "used", "systime"
+};
+
+const char *sg_fs_stat_names[] = {
+    "device_name", "device_canonical", "fs_type", "mnt_point", "device_type", "size",
+    "used", "free", "avail", "total_inodes", "used_inodes", "free_inodes", "avail_inodes",
+    "io_size", "block_size", "total_blocks", "free_blocks", "used_blocks", "avail_blocks",
+    "systime"
+};
+
+const char *sg_disk_io_stat_names[] = {
+    "disk_name", "read_bytes", "write_bytes", "systime"
+};
+
+const char *sg_network_io_stat_names[] = {
+    "interface_name", "tx", "rx", "ipackets", "opackets",
+    "ierrors", "oerrors", "collisions", "systime"
+};
+
+const char *sg_network_iface_stat_names[] = {
+    "interface_name", "speed", "factor", "duplex", "up", "systime"
+};
+
+const char *sg_page_stat_names[] = {
+    "pages_pagein", "pages_pageout", "systime"
+};
+
+const char *sg_process_stat_names[] = {
+    "process_name", "proctitle",
+    "pid", "parent", "pgid", "sessid", "uid", "euid", "gid", "egid",
+    "context_switches", "voluntary_context_switches", "involuntary_context_switches",
+    "proc_size", "proc_resident", "start_time", "time_spent", "cpu_percent",
+    "nice", "state", "systime"
+};
+
+#ifndef lengthof
+#define lengthof(x) (sizeof(x)/sizeof((x)[0]))
+#endif
+
 #ifdef MATCH_UV_FIT_ULL
 #define LUV UV
 #else
 #define LUV NV
 #endif
+
+#define MAKE_AV_FROM_STRINGS(strings, av) do { \
+    size_t i; \
+    av = newAV(); \
+    av_extend(av, sizeof(strings)); \
+    for(i = 0; i < lengthof(strings); ++i) { \
+	av_push(av, newSVpv(strings[i], 0)); \
+    } \
+} while(0)
 
 MODULE = Unix::Statgrab		PACKAGE = Unix::Statgrab
 
@@ -440,6 +517,15 @@ uptime (self, num = 0)
 	RETVAL
 
 void
+colnames(self)
+	sg_host_info *self;
+    PPCODE:
+        AV *retval;
+	MAKE_AV_FROM_STRINGS(sg_host_info_members, retval);
+	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
+	XSRETURN(1);
+
+void
 DESTROY (self)
 	sg_host_info *self;
     CODE:
@@ -612,6 +698,15 @@ systime (self, num = 0)
 	RETVAL
 
 void
+colnames(self)
+	sg_cpu_stats *self;
+    PPCODE:
+        AV *retval;
+	MAKE_AV_FROM_STRINGS(sg_cpu_stat_names, retval);
+	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
+	XSRETURN(1);
+
+void
 DESTROY (self)
 	sg_cpu_stats *self;
     CODE:
@@ -740,6 +835,15 @@ time_taken (self, num = 0)
 	RETVAL
 
 void
+colnames(self)
+	sg_cpu_percents *self;
+    PPCODE:
+        AV *retval;
+	MAKE_AV_FROM_STRINGS(sg_cpu_percent_names, retval);
+	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
+	XSRETURN(1);
+
+void
 DESTROY (self)
 	sg_cpu_percents *self;
     CODE:
@@ -800,6 +904,15 @@ systime (self, num = 0)
 	RETVAL = self[num].systime;
     OUTPUT:
 	RETVAL
+
+void
+colnames(self)
+	sg_disk_io_stats *self;
+    PPCODE:
+        AV *retval;
+	MAKE_AV_FROM_STRINGS(sg_disk_io_stat_names, retval);
+	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
+	XSRETURN(1);
 
 void
 DESTROY (self)
@@ -1062,6 +1175,15 @@ systime (self, num = 0)
 	RETVAL
 
 void
+colnames(self)
+	sg_fs_stats *self;
+    PPCODE:
+        AV *retval;
+	MAKE_AV_FROM_STRINGS(sg_fs_stat_names, retval);
+	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
+	XSRETURN(1);
+
+void
 DESTROY (self)
 	sg_fs_stats *self;
     CODE:
@@ -1142,6 +1264,15 @@ systime (self, num = 0)
 	RETVAL
 
 void
+colnames(self)
+	sg_load_stats *self;
+    PPCODE:
+        AV *retval;
+	MAKE_AV_FROM_STRINGS(sg_load_stat_names, retval);
+	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
+	XSRETURN(1);
+
+void
 DESTROY (self)
 	sg_load_stats *self;
     CODE:
@@ -1215,6 +1346,15 @@ systime (self, num = 0)
 	RETVAL
 
 void
+colnames(self)
+	sg_mem_stats *self;
+    PPCODE:
+        AV *retval;
+	MAKE_AV_FROM_STRINGS(sg_mem_stat_names, retval);
+	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
+	XSRETURN(1);
+
+void
 DESTROY (self)
 	sg_mem_stats *self;
     CODE:
@@ -1275,6 +1415,15 @@ systime (self, num = 0)
 	RETVAL = self[num].systime;
     OUTPUT:
 	RETVAL
+
+void
+colnames(self)
+	sg_swap_stats *self;
+    PPCODE:
+        AV *retval;
+	MAKE_AV_FROM_STRINGS(sg_swap_stat_names, retval);
+	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
+	XSRETURN(1);
 
 void
 DESTROY (self)
@@ -1394,6 +1543,15 @@ systime (self, num = 0)
 	RETVAL
 
 void
+colnames(self)
+	sg_network_io_stats *self;
+    PPCODE:
+        AV *retval;
+	MAKE_AV_FROM_STRINGS(sg_network_io_stat_names, retval);
+	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
+	XSRETURN(1);
+
+void
 DESTROY (self)
 	sg_network_io_stats *self;
     CODE:
@@ -1496,6 +1654,15 @@ systime (self, num = 0)
 	RETVAL
 
 void
+colnames(self)
+	sg_network_iface_stats *self;
+    PPCODE:
+        AV *retval;
+	MAKE_AV_FROM_STRINGS(sg_network_iface_stat_names, retval);
+	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
+	XSRETURN(1);
+
+void
 DESTROY (self)
 	sg_network_iface_stats *self;
     CODE:
@@ -1546,6 +1713,15 @@ systime (self, num = 0)
     OUTPUT:
 	RETVAL
 	
+void
+colnames(self)
+	sg_page_stats *self;
+    PPCODE:
+        AV *retval;
+	MAKE_AV_FROM_STRINGS(sg_page_stat_names, retval);
+	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
+	XSRETURN(1);
+
 void
 DESTROY (self)
 	sg_page_stats *self;
@@ -1663,6 +1839,15 @@ systime (self, num = 0)
 	RETVAL
 
 void
+colnames(self)
+	sg_user_stats *self;
+    PPCODE:
+        AV *retval;
+	MAKE_AV_FROM_STRINGS(sg_user_stat_names, retval);
+	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
+	XSRETURN(1);
+
+void
 DESTROY (self)
 	sg_user_stats *self;
     CODE:
@@ -1679,14 +1864,6 @@ entries (self)
 	RETVAL = sg_get_nelements(self);
     OUTPUT:
 	RETVAL
-
-void
-DESTROY (self)
-	sg_process_stats *self;
-    CODE:
-    {
-	sg_free_process_stats(self);
-    }
 	
 char *
 process_name (self, num = 0)
@@ -1918,3 +2095,20 @@ systime (self, num = 0)
 	RETVAL = self[num].systime;
     OUTPUT:
 	RETVAL
+
+void
+colnames(self)
+	sg_process_stats *self;
+    PPCODE:
+        AV *retval;
+	MAKE_AV_FROM_STRINGS(sg_process_stat_names, retval);
+	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
+	XSRETURN(1);
+
+void
+DESTROY (self)
+	sg_process_stats *self;
+    CODE:
+    {
+	sg_free_process_stats(self);
+    }

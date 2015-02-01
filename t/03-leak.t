@@ -76,6 +76,7 @@ foreach my $func ( sort keys %funcs, keys %errs )
                   or croak( get_error()->strperror() );
 
                 my @stats = $current->as_list();
+		$current->can("colnames") and $current->colnames();
             };
         },
         "$func doesn't leak"

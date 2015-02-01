@@ -124,96 +124,57 @@ my $to_table = sub {
     @table;
 };
 
-my @sg_cpu_stats_attrs = (
-    qw(user kernel idle iowait swap nice total),
-    qw(context_switches voluntary_context_switches involuntary_context_switches syscalls),
-    qw(interrupts soft_interrupts systime)
-);
+sub Unix::Statgrab::sg_cpu_stats::as_list { return $to_hash_array->( $_[0], @{$_[0]->colnames} ); }
+sub Unix::Statgrab::sg_cpu_stats::as_dataset { return $to_dataset->( $_[0], @{$_[0]->colnames} ); }
+sub Unix::Statgrab::sg_cpu_stats::as_table { return $to_table->( $_[0], @{$_[0]->colnames} ); }
 
-sub Unix::Statgrab::sg_cpu_stats::as_list { return $to_hash_array->( $_[0], @sg_cpu_stats_attrs ); }
-sub Unix::Statgrab::sg_cpu_stats::as_dataset { return $to_dataset->( $_[0], @sg_cpu_stats_attrs ); }
-sub Unix::Statgrab::sg_cpu_stats::as_table { return $to_table->( $_[0], @sg_cpu_stats_attrs ); }
+sub Unix::Statgrab::sg_cpu_percents::as_list { return $to_hash_array->( $_[0], @{$_[0]->colnames} ); }
+sub Unix::Statgrab::sg_cpu_percents::as_dataset { return $to_dataset->( $_[0], @{$_[0]->colnames} ); }
+sub Unix::Statgrab::sg_cpu_percents::as_table { return $to_table->( $_[0], @{$_[0]->colnames} ); }
 
-my @sg_cpu_percent_attrs = (qw(user kernel idle iowait swap nice time_taken));
+sub Unix::Statgrab::sg_host_info::as_list { return $to_hash_array->( $_[0], @{$_[0]->colnames} ); }
+sub Unix::Statgrab::sg_host_info::as_dataset { return $to_dataset->( $_[0], @{$_[0]->colnames} ); }
+sub Unix::Statgrab::sg_host_info::as_table { return $to_table->( $_[0], @{$_[0]->colnames} ); }
 
-sub Unix::Statgrab::sg_cpu_percents::as_list { return $to_hash_array->( $_[0], @sg_cpu_percent_attrs ); }
-sub Unix::Statgrab::sg_cpu_percents::as_dataset { return $to_dataset->( $_[0], @sg_cpu_percent_attrs ); }
-sub Unix::Statgrab::sg_cpu_percents::as_table { return $to_table->( $_[0], @sg_cpu_percent_attrs ); }
+sub Unix::Statgrab::sg_disk_io_stats::as_list { return $to_hash_array->( $_[0], @{$_[0]->colnames} ); }
+sub Unix::Statgrab::sg_disk_io_stats::as_dataset { return $to_dataset->( $_[0], @{$_[0]->colnames} ); }
+sub Unix::Statgrab::sg_disk_io_stats::as_table { return $to_table->( $_[0], @{$_[0]->colnames} ); }
 
-my @sg_host_info_attrs =
-  ( qw(os_name os_release os_version platform hostname), qw(bitwidth host_state ncpus maxcpus uptime systime) );
+sub Unix::Statgrab::sg_fs_stats::as_list { return $to_hash_array->( $_[0], @{$_[0]->colnames} ); }
+sub Unix::Statgrab::sg_fs_stats::as_dataset { return $to_dataset->( $_[0], @{$_[0]->colnames} ); }
+sub Unix::Statgrab::sg_fs_stats::as_table { return $to_table->( $_[0], @{$_[0]->colnames} ); }
 
-sub Unix::Statgrab::sg_host_info::as_list { return $to_hash_array->( $_[0], @sg_host_info_attrs ); }
-sub Unix::Statgrab::sg_host_info::as_dataset { return $to_dataset->( $_[0], @sg_host_info_attrs ); }
-sub Unix::Statgrab::sg_host_info::as_table { return $to_table->( $_[0], @sg_host_info_attrs ); }
+sub Unix::Statgrab::sg_load_stats::as_list { return $to_hash_array->( $_[0], @{$_[0]->colnames} ); }
+sub Unix::Statgrab::sg_load_stats::as_dataset { return $to_dataset->( $_[0], @{$_[0]->colnames} ); }
+sub Unix::Statgrab::sg_load_stats::as_table { return $to_table->( $_[0], @{$_[0]->colnames} ); }
 
-my @sg_disk_io_stats_attrs = (qw(disk_name read_bytes write_bytes systime));
+sub Unix::Statgrab::sg_mem_stats::as_list { return $to_hash_array->( $_[0], @{$_[0]->colnames} ); }
+sub Unix::Statgrab::sg_mem_stats::as_dataset { return $to_dataset->( $_[0], @{$_[0]->colnames} ); }
+sub Unix::Statgrab::sg_mem_stats::as_table { return $to_table->( $_[0], @{$_[0]->colnames} ); }
 
-sub Unix::Statgrab::sg_disk_io_stats::as_list { return $to_hash_array->( $_[0], @sg_disk_io_stats_attrs ); }
-sub Unix::Statgrab::sg_disk_io_stats::as_dataset { return $to_dataset->( $_[0], @sg_disk_io_stats_attrs ); }
-sub Unix::Statgrab::sg_disk_io_stats::as_table { return $to_table->( $_[0], @sg_disk_io_stats_attrs ); }
+sub Unix::Statgrab::sg_swap_stats::as_list { return $to_hash_array->( $_[0], @{$_[0]->colnames} ); }
+sub Unix::Statgrab::sg_swap_stats::as_dataset { return $to_dataset->( $_[0], @{$_[0]->colnames} ); }
+sub Unix::Statgrab::sg_swap_stats::as_table { return $to_table->( $_[0], @{$_[0]->colnames} ); }
 
-my @sg_fs_stats_attrs = (
-    qw(device_name device_canonical fs_type mnt_point device_type),
-    qw(size used free avail total_inodes used_inodes free_inodes avail_inodes),
-    qw(io_size block_size total_blocks free_blocks used_blocks avail_blocks systime)
-);
+sub Unix::Statgrab::sg_network_io_stats::as_list { return $to_hash_array->( $_[0], @{$_[0]->colnames} ); }
+sub Unix::Statgrab::sg_network_io_stats::as_dataset { return $to_dataset->( $_[0], @{$_[0]->colnames} ); }
+sub Unix::Statgrab::sg_network_io_stats::as_table { return $to_table->( $_[0], @{$_[0]->colnames} ); }
 
-sub Unix::Statgrab::sg_fs_stats::as_list { return $to_hash_array->( $_[0], @sg_fs_stats_attrs ); }
-sub Unix::Statgrab::sg_fs_stats::as_dataset { return $to_dataset->( $_[0], @sg_fs_stats_attrs ); }
-sub Unix::Statgrab::sg_fs_stats::as_table { return $to_table->( $_[0], @sg_fs_stats_attrs ); }
+sub Unix::Statgrab::sg_network_iface_stats::as_list { return $to_hash_array->( $_[0], @{$_[0]->colnames} ); }
+sub Unix::Statgrab::sg_network_iface_stats::as_dataset { return $to_dataset->( $_[0], @{$_[0]->colnames} ); }
+sub Unix::Statgrab::sg_network_iface_stats::as_table { return $to_table->( $_[0], @{$_[0]->colnames} ); }
 
-my @sg_load_stats_attrs = (qw(min1 min5 min15 systime));
+sub Unix::Statgrab::sg_page_stats::as_list { return $to_hash_array->( $_[0], @{$_[0]->colnames} ); }
+sub Unix::Statgrab::sg_page_stats::as_dataset { return $to_dataset->( $_[0], @{$_[0]->colnames} ); }
+sub Unix::Statgrab::sg_page_stats::as_table { return $to_table->( $_[0], @{$_[0]->colnames} ); }
 
-sub Unix::Statgrab::sg_load_stats::as_list { return $to_hash_array->( $_[0], @sg_load_stats_attrs ); }
-sub Unix::Statgrab::sg_load_stats::as_dataset { return $to_dataset->( $_[0], @sg_load_stats_attrs ); }
-sub Unix::Statgrab::sg_load_stats::as_table { return $to_table->( $_[0], @sg_load_stats_attrs ); }
+sub Unix::Statgrab::sg_user_stats::as_list { return $to_hash_array->( $_[0], @{$_[0]->colnames} ); }
+sub Unix::Statgrab::sg_user_stats::as_dataset { return $to_dataset->( $_[0], @{$_[0]->colnames} ); }
+sub Unix::Statgrab::sg_user_stats::as_table { return $to_table->( $_[0], @{$_[0]->colnames} ); }
 
-my @sg_mem_stats_attrs = (qw(total free used cache systime));
-
-sub Unix::Statgrab::sg_mem_stats::as_list { return $to_hash_array->( $_[0], @sg_mem_stats_attrs ); }
-sub Unix::Statgrab::sg_mem_stats::as_dataset { return $to_dataset->( $_[0], @sg_mem_stats_attrs ); }
-sub Unix::Statgrab::sg_mem_stats::as_table { return $to_table->( $_[0], @sg_mem_stats_attrs ); }
-
-my @sg_swap_stats_attrs = (qw(total free used systime));
-
-sub Unix::Statgrab::sg_swap_stats::as_list { return $to_hash_array->( $_[0], @sg_swap_stats_attrs ); }
-sub Unix::Statgrab::sg_swap_stats::as_dataset { return $to_dataset->( $_[0], @sg_swap_stats_attrs ); }
-sub Unix::Statgrab::sg_swap_stats::as_table { return $to_table->( $_[0], @sg_swap_stats_attrs ); }
-
-my @sg_network_io_stats_attrs = ( qw(interface_name tx rx ipackets opackets), qw(ierrors oerrors collisions systime) );
-
-sub Unix::Statgrab::sg_network_io_stats::as_list { return $to_hash_array->( $_[0], @sg_network_io_stats_attrs ); }
-sub Unix::Statgrab::sg_network_io_stats::as_dataset { return $to_dataset->( $_[0], @sg_network_io_stats_attrs ); }
-sub Unix::Statgrab::sg_network_io_stats::as_table { return $to_table->( $_[0], @sg_network_io_stats_attrs ); }
-
-my @sg_network_iface_stats_attrs = (qw(interface_name speed factor duplex up systime));
-
-sub Unix::Statgrab::sg_network_iface_stats::as_list { return $to_hash_array->( $_[0], @sg_network_iface_stats_attrs ); }
-sub Unix::Statgrab::sg_network_iface_stats::as_dataset { return $to_dataset->( $_[0], @sg_network_iface_stats_attrs ); }
-sub Unix::Statgrab::sg_network_iface_stats::as_table { return $to_table->( $_[0], @sg_network_iface_stats_attrs ); }
-
-my @sg_page_stats_attrs = (qw(pages_pagein pages_pageout systime));
-
-sub Unix::Statgrab::sg_page_stats::as_list { return $to_hash_array->( $_[0], @sg_page_stats_attrs ); }
-sub Unix::Statgrab::sg_page_stats::as_dataset { return $to_dataset->( $_[0], @sg_page_stats_attrs ); }
-sub Unix::Statgrab::sg_page_stats::as_table { return $to_table->( $_[0], @sg_page_stats_attrs ); }
-
-my @sg_user_stats_attrs = (qw(login_name record_id device hostname pid login_time systime));
-
-sub Unix::Statgrab::sg_user_stats::as_list { return $to_hash_array->( $_[0], @sg_user_stats_attrs ); }
-sub Unix::Statgrab::sg_user_stats::as_dataset { return $to_dataset->( $_[0], @sg_user_stats_attrs ); }
-sub Unix::Statgrab::sg_user_stats::as_table { return $to_table->( $_[0], @sg_user_stats_attrs ); }
-
-my @sg_process_stats_attrs = (
-    qw(process_name proctitle pid parent pgid sessid uid euid gid egid),
-    qw(context_switches voluntary_context_switches involuntary_context_switches),
-    qw(proc_size proc_resident start_time time_spent cpu_percent nice state systime)
-);
-
-sub Unix::Statgrab::sg_process_stats::as_list { return $to_hash_array->( $_[0], @sg_process_stats_attrs ); }
-sub Unix::Statgrab::sg_process_stats::as_dataset { return $to_dataset->( $_[0], @sg_process_stats_attrs ); }
-sub Unix::Statgrab::sg_process_stats::as_table { return $to_table->( $_[0], @sg_process_stats_attrs ); }
+sub Unix::Statgrab::sg_process_stats::as_list { return $to_hash_array->( $_[0], @{$_[0]->colnames} ); }
+sub Unix::Statgrab::sg_process_stats::as_dataset { return $to_dataset->( $_[0], @{$_[0]->colnames} ); }
+sub Unix::Statgrab::sg_process_stats::as_table { return $to_table->( $_[0], @{$_[0]->colnames} ); }
 
 # Preloaded methods go here.
 

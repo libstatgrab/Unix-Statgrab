@@ -95,18 +95,19 @@ my %methods = (
 
 sub check_methods
 {
-    my ( $o, $methods ) = @_;
+    my ( $o ) = @_;
     ( my $func = ref($o) ) =~ s/Unix::Statgrab::sg_(\w+).*$/$1/g;
-    defined( $funcs{ "get_" . $func } )
-      and ok( $o->entries(), "Unix::Statgrab::sg_${func}->entries" );
-    foreach my $method (@$methods)
+    my ($entries, @cols);
+    ok( $o->entries(), "Unix::Statgrab::sg_${func}->entries" );
+    ok( @cols = @{$o->colnames}, "Unix::Statgrab::sg_${func}->colnames" );
+    foreach my $method (@cols)
     {
         ok( defined( $o->$method() ), "Unix::Statgrab::sg_$func->$method" );
     }
 }
 
 # we only check that nothing segfaults
-foreach my $func ( sort keys %funcs )
+foreach my $func ( sort @{$Unix::Statgrab::EXPORT_TAGS{stats}} )
 {
   SKIP:
     {
@@ -114,7 +115,7 @@ foreach my $func ( sort keys %funcs )
         ok( $sub, "Unix::Statgrab->can('$func')" ) or skip("Can't invoke unknow stats-call $func");
         my $o = &{$sub}();
         ok( $o, "Unix::Statgrab::$func" ) or skip("Can't invoke methods on non-object");
-        check_methods( $o, $funcs{$func} );
+        check_methods( $o );
         if ( defined( $methods{$func} ) )
         {
             foreach my $inh_func ( sort keys %{ $methods{$func} } )
