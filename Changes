@@ -1,5 +1,11 @@
 Revision history for Perl extension Unix::Statgrab.
 
+0.108_001	2015-02-03
+    - add full flavored struct accessors and implement all in XS, supports now
+      colnames, fetchrow_arrayref, fetchall_arrayref, fetchrow_hashref, fetchall_hashref,
+      fetchall_hash fetchall_array fetchall_table
+    - as_list is deprecated in favor of fetchall_hash
+
 0.107	2015-01-20
     - eliminate potential memory leaks in get_fs_stats, get_network_io_stats,
       get_network_iface_stats, get_process_stats
