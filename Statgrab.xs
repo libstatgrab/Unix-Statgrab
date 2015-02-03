@@ -9,7 +9,7 @@
 #include "const-c.inc"
 #include "config.h"
 
-const char *sg_host_info_members[] = {
+const char *sg_host_info_names[] = {
     "os_name", "os_release", "os_version", "platform", "hostname",
     "bitwidth", "host_state", "ncpus", "maxcpus", "uptime", "systime"
 };
@@ -86,9 +86,20 @@ const char *sg_process_stat_names[] = {
 #define MAKE_AV_FROM_STRINGS(strings, av) do { \
     size_t i; \
     av = newAV(); \
-    av_extend(av, sizeof(strings)); \
+    av_extend(av, lengthof(strings)); \
     for(i = 0; i < lengthof(strings); ++i) { \
-	av_push(av, newSVpv(strings[i], 0)); \
+	av_store(av, i, newSVpv(strings[i], strlen(strings[i]))); \
+    } \
+} while(0)
+
+#define FETCH_ALL_ROWS(stats, FETCH_ROW, av, XV) do { \
+    size_t i, n; \
+    av = newAV(); \
+    av_extend(av, n = sg_get_nelements(stats)); \
+    for(i = 0; i < n; ++i) { \
+	XV *row; \
+	FETCH_ROW(stats, i, row); \
+	av_store(av, i, newRV_noinc((SV *)row)); \
     } \
 } while(0)
 
@@ -521,7 +532,83 @@ colnames(self)
 	sg_host_info *self;
     PPCODE:
         AV *retval;
-	MAKE_AV_FROM_STRINGS(sg_host_info_members, retval);
+	MAKE_AV_FROM_STRINGS(sg_host_info_names, retval);
+	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
+	XSRETURN(1);
+
+#define HOST_INFO_ARRAY_ROW(self, entry, av) \
+    do { \
+	av = newAV(); \
+	av_extend(av, sizeof(sg_host_info_names)); \
+	AvFILLp(av) = -1; \
+	av_store(av, ++AvFILLp(av), newSVpv(self[entry].os_name, strlen(self[entry].os_name))); \
+	av_store(av, ++AvFILLp(av), newSVpv(self[entry].os_release, strlen(self[entry].os_release))); \
+	av_store(av, ++AvFILLp(av), newSVpv(self[entry].os_version, strlen(self[entry].os_version))); \
+	av_store(av, ++AvFILLp(av), newSVpv(self[entry].platform, strlen(self[entry].platform))); \
+	av_store(av, ++AvFILLp(av), newSVpv(self[entry].hostname, strlen(self[entry].hostname))); \
+	av_store(av, ++AvFILLp(av), newSVuv(self[entry].bitwidth)); \
+	av_store(av, ++AvFILLp(av), newSVuv(self[entry].host_state)); \
+	av_store(av, ++AvFILLp(av), newSVuv(self[entry].ncpus)); \
+	av_store(av, ++AvFILLp(av), newSVuv(self[entry].maxcpus)); \
+	av_store(av, ++AvFILLp(av), newSViv(self[entry].uptime)); \
+	av_store(av, ++AvFILLp(av), newSViv(self[entry].systime)); \
+    } while(0);
+
+#define HOST_INFO_HASH_ROW(self, entry, hv) \
+    do { \
+	hv = newHV(); \
+	hv_store(hv, sg_host_info_names[0], strlen(sg_host_info_names[0]), newSVpv(self[entry].os_name, strlen(self[entry].os_name)), 0); \
+	hv_store(hv, sg_host_info_names[1], strlen(sg_host_info_names[1]), newSVpv(self[entry].os_release, strlen(self[entry].os_release)), 0); \
+	hv_store(hv, sg_host_info_names[2], strlen(sg_host_info_names[2]), newSVpv(self[entry].os_version, strlen(self[entry].os_version)), 0); \
+	hv_store(hv, sg_host_info_names[3], strlen(sg_host_info_names[3]), newSVpv(self[entry].platform, strlen(self[entry].platform)), 0); \
+	hv_store(hv, sg_host_info_names[4], strlen(sg_host_info_names[4]), newSVpv(self[entry].hostname, strlen(self[entry].hostname)), 0); \
+	hv_store(hv, sg_host_info_names[5], strlen(sg_host_info_names[5]), newSVuv(self[entry].bitwidth), 0); \
+	hv_store(hv, sg_host_info_names[6], strlen(sg_host_info_names[6]), newSVuv(self[entry].host_state), 0); \
+	hv_store(hv, sg_host_info_names[7], strlen(sg_host_info_names[7]), newSVuv(self[entry].ncpus), 0); \
+	hv_store(hv, sg_host_info_names[8], strlen(sg_host_info_names[8]), newSVuv(self[entry].maxcpus), 0); \
+	hv_store(hv, sg_host_info_names[9], strlen(sg_host_info_names[9]), newSViv(self[entry].uptime), 0); \
+	hv_store(hv, sg_host_info_names[10], strlen(sg_host_info_names[10]), newSViv(self[entry].systime), 0); \
+    } while(0);
+
+void
+fetchrow_arrayref(self, num = 0)
+	sg_host_info *self;
+	UV num;
+    PPCODE:
+        AV *retval;
+	/* XXX add fill row macro here */
+	HOST_INFO_ARRAY_ROW(self, num, retval);
+	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
+	XSRETURN(1);
+
+void
+fetchall_arrayref(self)
+	sg_host_info *self;
+    PPCODE:
+        AV *retval;
+	/* XXX add fill row macro here */
+	FETCH_ALL_ROWS(self, HOST_INFO_ARRAY_ROW, retval, AV);
+	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
+	XSRETURN(1);
+
+void
+fetchrow_hashref(self, num = 0)
+	sg_host_info *self;
+	UV num;
+    PPCODE:
+        HV *retval;
+	/* XXX add fill row macro here */
+	HOST_INFO_HASH_ROW(self, num, retval);
+	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
+	XSRETURN(1);
+
+void
+fetchall_hashref(self)
+	sg_host_info *self;
+    PPCODE:
+        AV *retval;
+	/* XXX add fill row macro here */
+	FETCH_ALL_ROWS(self, HOST_INFO_HASH_ROW, retval, HV);
 	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
 	XSRETURN(1);
 
@@ -706,6 +793,94 @@ colnames(self)
 	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
 	XSRETURN(1);
 
+#define CPU_STATS_ARRAY_ROW(self, entry, av) \
+    do { \
+	SV **ary; \
+	size_t j; \
+	av = newAV(); \
+	av_extend(av, lengthof(sg_cpu_stat_names)); \
+	ary = AvARRAY(av); \
+	AvFILLp(av) = lengthof(sg_cpu_stat_names)-1; \
+	for( j = 0; j < lengthof(sg_cpu_stat_names); ++j ) \
+	    ary[j] = newSV(0); \
+	sv_setuv(ary[0], self[entry].user); \
+	sv_setuv(ary[1], self[entry].kernel); \
+	sv_setuv(ary[2], self[entry].idle); \
+	sv_setuv(ary[3], self[entry].iowait); \
+	sv_setuv(ary[4], self[entry].swap); \
+	sv_setuv(ary[5], self[entry].nice); \
+	sv_setuv(ary[6], self[entry].total); \
+	sv_setuv(ary[7], self[entry].context_switches); \
+	sv_setuv(ary[8], self[entry].voluntary_context_switches); \
+	sv_setuv(ary[9], self[entry].involuntary_context_switches); \
+	sv_setuv(ary[10], self[entry].syscalls); \
+	sv_setuv(ary[11], self[entry].interrupts); \
+	sv_setuv(ary[12], self[entry].soft_interrupts); \
+	sv_setiv(ary[13], self[entry].systime); \
+    } while(0)
+
+#define CPU_STATS_HASH_ROW(self, entry, hv) \
+    do { \
+	hv = newHV(); \
+	hv_store(hv, sg_cpu_stat_names[0], strlen(sg_cpu_stat_names[0]), newSVuv(self[entry].user), 0); \
+	hv_store(hv, sg_cpu_stat_names[1], strlen(sg_cpu_stat_names[1]), newSVuv(self[entry].kernel), 0); \
+	hv_store(hv, sg_cpu_stat_names[2], strlen(sg_cpu_stat_names[2]), newSVuv(self[entry].idle), 0); \
+	hv_store(hv, sg_cpu_stat_names[3], strlen(sg_cpu_stat_names[3]), newSVuv(self[entry].iowait), 0); \
+	hv_store(hv, sg_cpu_stat_names[4], strlen(sg_cpu_stat_names[4]), newSVuv(self[entry].swap), 0); \
+	hv_store(hv, sg_cpu_stat_names[5], strlen(sg_cpu_stat_names[5]), newSVuv(self[entry].nice), 0); \
+	hv_store(hv, sg_cpu_stat_names[6], strlen(sg_cpu_stat_names[6]), newSVuv(self[entry].total), 0); \
+	hv_store(hv, sg_cpu_stat_names[7], strlen(sg_cpu_stat_names[7]), newSVuv(self[entry].context_switches), 0); \
+	hv_store(hv, sg_cpu_stat_names[8], strlen(sg_cpu_stat_names[8]), newSVuv(self[entry].voluntary_context_switches), 0); \
+	hv_store(hv, sg_cpu_stat_names[9], strlen(sg_cpu_stat_names[9]), newSVuv(self[entry].involuntary_context_switches), 0); \
+	hv_store(hv, sg_cpu_stat_names[10], strlen(sg_cpu_stat_names[10]), newSVuv(self[entry].syscalls), 0); \
+	hv_store(hv, sg_cpu_stat_names[11], strlen(sg_cpu_stat_names[11]), newSVuv(self[entry].interrupts), 0); \
+	hv_store(hv, sg_cpu_stat_names[12], strlen(sg_cpu_stat_names[12]), newSVuv(self[entry].soft_interrupts), 0); \
+	hv_store(hv, sg_cpu_stat_names[13], strlen(sg_cpu_stat_names[13]), newSViv(self[entry].systime), 0); \
+    } while(0)
+
+void
+fetchrow_arrayref(self, num = 0)
+	sg_cpu_stats *self;
+	UV num;
+    CODE:
+        AV *retval;
+	/* XXX add fill row macro here */
+	CPU_STATS_ARRAY_ROW(self, num, retval);
+	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
+	XSRETURN(1);
+
+void
+fetchall_arrayref(self)
+	sg_cpu_stats *self;
+    CODE:
+        AV *retval;
+	/* XXX add fill row macro here */
+	FETCH_ALL_ROWS(self, CPU_STATS_ARRAY_ROW, retval, AV);
+	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
+	XSRETURN(1);
+
+void
+fetchrow_hashref(self, num = 0)
+	sg_cpu_stats *self;
+	UV num;
+    CODE:
+        HV *retval;
+	/* XXX add fill row macro here */
+	CPU_STATS_HASH_ROW(self, num, retval);
+	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
+	XSRETURN(1);
+
+void
+fetchall_hashref(self)
+	sg_cpu_stats *self;
+    CODE:
+        AV *retval;
+	/* XXX add fill row macro here */
+	FETCH_ALL_ROWS(self, CPU_STATS_HASH_ROW, retval, HV);
+	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
+	XSRETURN(1);
+
+
 void
 DESTROY (self)
 	sg_cpu_stats *self;
@@ -751,7 +926,7 @@ MODULE = Unix::Statgrab		PACKAGE = Unix::Statgrab::sg_cpu_percents
 
 UV
 entries (self)
-	sg_cpu_stats *self;
+	sg_cpu_percents *self;
     CODE:
 	RETVAL = sg_get_nelements(self);
     OUTPUT:
@@ -843,6 +1018,79 @@ colnames(self)
 	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
 	XSRETURN(1);
 
+#define CPU_PERCENTS_ARRAY_ROW(self, entry, av) \
+    do { \
+	SV **ary; \
+	size_t j; \
+	av = newAV(); \
+	av_extend(av, lengthof(sg_cpu_percent_names)); \
+	ary = AvARRAY(av); \
+	AvFILLp(av) = lengthof(sg_cpu_percent_names)-1; \
+	for( j = 0; j < lengthof(sg_cpu_percent_names); ++j ) \
+	    ary[j] = newSV(0); \
+	sv_setnv(ary[0], self[entry].user); \
+	sv_setnv(ary[1], self[entry].kernel); \
+	sv_setnv(ary[2], self[entry].idle); \
+	sv_setnv(ary[3], self[entry].iowait); \
+	sv_setnv(ary[4], self[entry].swap); \
+	sv_setnv(ary[5], self[entry].nice); \
+	sv_setiv(ary[6], self[entry].time_taken); \
+    } while(0)
+
+#define CPU_PERCENTS_HASH_ROW(self, entry, hv) \
+    do { \
+	hv = newHV(); \
+	hv_store(hv, sg_cpu_percent_names[0], strlen(sg_cpu_percent_names[0]), newSVnv(self[entry].user), 0); \
+	hv_store(hv, sg_cpu_percent_names[1], strlen(sg_cpu_percent_names[1]), newSVnv(self[entry].kernel), 0); \
+	hv_store(hv, sg_cpu_percent_names[2], strlen(sg_cpu_percent_names[2]), newSVnv(self[entry].idle), 0); \
+	hv_store(hv, sg_cpu_percent_names[3], strlen(sg_cpu_percent_names[3]), newSVnv(self[entry].iowait), 0); \
+	hv_store(hv, sg_cpu_percent_names[4], strlen(sg_cpu_percent_names[4]), newSVnv(self[entry].swap), 0); \
+	hv_store(hv, sg_cpu_percent_names[5], strlen(sg_cpu_percent_names[5]), newSVnv(self[entry].nice), 0); \
+	hv_store(hv, sg_cpu_percent_names[6], strlen(sg_cpu_percent_names[6]), newSViv(self[entry].time_taken), 0); \
+    } while(0)
+
+void
+fetchrow_arrayref(self, num = 0)
+	sg_cpu_percents *self;
+	UV num;
+    CODE:
+        AV *retval;
+	/* XXX add fill row macro here */
+	CPU_PERCENTS_ARRAY_ROW(self, num, retval);
+	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
+	XSRETURN(1);
+
+void
+fetchall_arrayref(self)
+	sg_cpu_percents *self;
+    CODE:
+        AV *retval;
+	/* XXX add fill row macro here */
+	FETCH_ALL_ROWS(self, CPU_PERCENTS_ARRAY_ROW, retval, AV);
+	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
+	XSRETURN(1);
+
+void
+fetchrow_hashref(self, num = 0)
+	sg_cpu_percents *self;
+	UV num;
+    CODE:
+        HV *retval;
+	/* XXX add fill row macro here */
+	CPU_PERCENTS_HASH_ROW(self, num, retval);
+	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
+	XSRETURN(1);
+
+void
+fetchall_hashref(self)
+	sg_cpu_percents *self;
+    CODE:
+        AV *retval;
+	/* XXX add fill row macro here */
+	FETCH_ALL_ROWS(self, CPU_PERCENTS_HASH_ROW, retval, HV);
+	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
+	XSRETURN(1);
+
 void
 DESTROY (self)
 	sg_cpu_percents *self;
@@ -914,6 +1162,73 @@ colnames(self)
 	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
 	XSRETURN(1);
 
+#define DISK_IO_STATS_ARRAY_ROW(self, entry, av) \
+    do { \
+	SV **ary; \
+	size_t j; \
+	av = newAV(); \
+	av_extend(av, lengthof(sg_disk_io_stat_names)); \
+	ary = AvARRAY(av); \
+	AvFILLp(av) = lengthof(sg_disk_io_stat_names)-1; \
+	for( j = 0; j < lengthof(sg_disk_io_stat_names); ++j ) \
+	    ary[j] = newSV(0); \
+	sv_setpv(ary[0], self[entry].disk_name); \
+	sv_setuv(ary[1], self[entry].read_bytes); \
+	sv_setuv(ary[2], self[entry].write_bytes); \
+	sv_setiv(ary[3], self[entry].systime); \
+    } while(0)
+
+#define DISK_IO_STATS_HASH_ROW(self, entry, hv) \
+    do { \
+	hv = newHV(); \
+	hv_store(hv, sg_disk_io_stat_names[0], strlen(sg_disk_io_stat_names[0]), newSVpv(self[entry].disk_name, strlen(self[entry].disk_name)), 0); \
+	hv_store(hv, sg_disk_io_stat_names[1], strlen(sg_disk_io_stat_names[1]), newSVuv(self[entry].read_bytes), 0); \
+	hv_store(hv, sg_disk_io_stat_names[2], strlen(sg_disk_io_stat_names[2]), newSVuv(self[entry].write_bytes), 0); \
+	hv_store(hv, sg_disk_io_stat_names[3], strlen(sg_disk_io_stat_names[3]), newSViv(self[entry].systime), 0); \
+    } while(0)
+
+void
+fetchrow_arrayref(self, num = 0)
+	sg_disk_io_stats *self;
+	UV num;
+    CODE:
+        AV *retval;
+	/* XXX add fill row macro here */
+	DISK_IO_STATS_ARRAY_ROW(self, num, retval);
+	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
+	XSRETURN(1);
+
+void
+fetchall_arrayref(self)
+	sg_disk_io_stats *self;
+    CODE:
+        AV *retval;
+	/* XXX add fill row macro here */
+	FETCH_ALL_ROWS(self, DISK_IO_STATS_ARRAY_ROW, retval, AV);
+	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
+	XSRETURN(1);
+
+void
+fetchrow_hashref(self, num = 0)
+	sg_disk_io_stats *self;
+	UV num;
+    CODE:
+        HV *retval;
+	/* XXX add fill row macro here */
+	DISK_IO_STATS_HASH_ROW(self, num, retval);
+	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
+	XSRETURN(1);
+
+void
+fetchall_hashref(self)
+	sg_disk_io_stats *self;
+    CODE:
+        AV *retval;
+	/* XXX add fill row macro here */
+	FETCH_ALL_ROWS(self, DISK_IO_STATS_HASH_ROW, retval, HV);
+	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
+	XSRETURN(1);
+
 void
 DESTROY (self)
 	sg_disk_io_stats *self;
@@ -942,6 +1257,10 @@ get_disk_io_stats_diff (now, last)
 
 MODULE = Unix::Statgrab		PACKAGE = Unix::Statgrab::sg_fs_stats
 
+#ifndef HAVE_DEVICE_CANONICAL
+#define device_canonical device_name
+#endif
+
 UV
 entries (self)
 	sg_fs_stats *self;
@@ -968,11 +1287,7 @@ device_canonical (self, num = 0)
     CODE:
 	if (num >= sg_get_nelements(self))
 	    XSRETURN_UNDEF;
-#ifdef HAVE_DEVICE_CANONICAL
 	RETVAL = self[num].device_canonical;
-#else
-	RETVAL = self[num].device_name;
-#endif
     OUTPUT:
 	RETVAL
 
@@ -1183,6 +1498,105 @@ colnames(self)
 	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
 	XSRETURN(1);
 
+#define FS_STATS_ARRAY_ROW(self, entry, av) \
+    do { \
+	SV **ary; \
+	size_t j; \
+	av = newAV(); \
+	av_extend(av, lengthof(sg_fs_stat_names)); \
+	ary = AvARRAY(av); \
+	AvFILLp(av) = lengthof(sg_fs_stat_names)-1; \
+	for( j = 0; j < lengthof(sg_fs_stat_names); ++j ) \
+	    ary[j] = newSV(0); \
+	sv_setpv(ary[0], self[entry].device_name); \
+	sv_setpv(ary[1], self[entry].device_canonical); \
+	sv_setpv(ary[2], self[entry].fs_type); \
+	sv_setpv(ary[3], self[entry].mnt_point); \
+	sv_setuv(ary[4], self[entry].device_type); \
+	sv_setiv(ary[5], self[entry].size); \
+	sv_setiv(ary[6], self[entry].used); \
+	sv_setiv(ary[7], self[entry].free); \
+	sv_setiv(ary[8], self[entry].avail); \
+	sv_setiv(ary[9], self[entry].total_inodes); \
+	sv_setuv(ary[10], self[entry].used_inodes); \
+	sv_setuv(ary[11], self[entry].free_inodes); \
+	sv_setuv(ary[12], self[entry].avail_inodes); \
+	sv_setuv(ary[13], self[entry].io_size); \
+	sv_setuv(ary[14], self[entry].block_size); \
+	sv_setiv(ary[15], self[entry].total_blocks); \
+	sv_setiv(ary[16], self[entry].free_blocks); \
+	sv_setnv(ary[17], self[entry].used_blocks); \
+	sv_setiv(ary[18], self[entry].avail_blocks); \
+	sv_setiv(ary[19], self[entry].systime); \
+    } while(0)
+
+#define FS_STATS_HASH_ROW(self, entry, hv) \
+    do { \
+	hv = newHV(); \
+	hv_store(hv, sg_fs_stat_names[0], strlen(sg_fs_stat_names[0]), newSVpv(self[entry].device_name, strlen(self[entry].device_name)), 0); \
+	hv_store(hv, sg_fs_stat_names[1], strlen(sg_fs_stat_names[1]), newSVpv(self[entry].device_canonical, strlen(self[entry].device_canonical)), 0); \
+	hv_store(hv, sg_fs_stat_names[2], strlen(sg_fs_stat_names[2]), newSVpv(self[entry].fs_type, strlen(self[entry].fs_type)), 0); \
+	hv_store(hv, sg_fs_stat_names[3], strlen(sg_fs_stat_names[3]), newSVpv(self[entry].mnt_point, strlen(self[entry].mnt_point)), 0); \
+	hv_store(hv, sg_fs_stat_names[4], strlen(sg_fs_stat_names[4]), newSVuv(self[entry].device_type), 0); \
+	hv_store(hv, sg_fs_stat_names[5], strlen(sg_fs_stat_names[5]), newSVuv(self[entry].size), 0); \
+	hv_store(hv, sg_fs_stat_names[6], strlen(sg_fs_stat_names[6]), newSVuv(self[entry].used), 0); \
+	hv_store(hv, sg_fs_stat_names[7], strlen(sg_fs_stat_names[7]), newSVuv(self[entry].free), 0); \
+	hv_store(hv, sg_fs_stat_names[8], strlen(sg_fs_stat_names[8]), newSVuv(self[entry].avail), 0); \
+	hv_store(hv, sg_fs_stat_names[9], strlen(sg_fs_stat_names[9]), newSVuv(self[entry].total_inodes), 0); \
+	hv_store(hv, sg_fs_stat_names[10], strlen(sg_fs_stat_names[10]), newSVuv(self[entry].used_inodes), 0); \
+	hv_store(hv, sg_fs_stat_names[11], strlen(sg_fs_stat_names[11]), newSVuv(self[entry].free_inodes), 0); \
+	hv_store(hv, sg_fs_stat_names[12], strlen(sg_fs_stat_names[12]), newSVuv(self[entry].avail_inodes), 0); \
+	hv_store(hv, sg_fs_stat_names[13], strlen(sg_fs_stat_names[13]), newSVuv(self[entry].io_size), 0); \
+	hv_store(hv, sg_fs_stat_names[14], strlen(sg_fs_stat_names[14]), newSVuv(self[entry].block_size), 0); \
+	hv_store(hv, sg_fs_stat_names[15], strlen(sg_fs_stat_names[15]), newSVuv(self[entry].total_blocks), 0); \
+	hv_store(hv, sg_fs_stat_names[16], strlen(sg_fs_stat_names[16]), newSVuv(self[entry].free_blocks), 0); \
+	hv_store(hv, sg_fs_stat_names[17], strlen(sg_fs_stat_names[17]), newSVuv(self[entry].used_blocks), 0); \
+	hv_store(hv, sg_fs_stat_names[18], strlen(sg_fs_stat_names[18]), newSVuv(self[entry].avail_blocks), 0); \
+	hv_store(hv, sg_fs_stat_names[19], strlen(sg_fs_stat_names[19]), newSViv(self[entry].systime), 0); \
+    } while(0)
+
+void
+fetchrow_arrayref(self, num = 0)
+	sg_fs_stats *self;
+	UV num;
+    CODE:
+        AV *retval;
+	/* XXX add fill row macro here */
+	FS_STATS_ARRAY_ROW(self, num, retval);
+	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
+	XSRETURN(1);
+
+void
+fetchall_arrayref(self)
+	sg_fs_stats *self;
+    CODE:
+        AV *retval;
+	/* XXX add fill row macro here */
+	FETCH_ALL_ROWS(self, FS_STATS_ARRAY_ROW, retval, AV);
+	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
+	XSRETURN(1);
+
+void
+fetchrow_hashref(self, num = 0)
+	sg_fs_stats *self;
+	UV num;
+    CODE:
+        HV *retval;
+	/* XXX add fill row macro here */
+	FS_STATS_HASH_ROW(self, num, retval);
+	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
+	XSRETURN(1);
+
+void
+fetchall_hashref(self)
+	sg_fs_stats *self;
+    CODE:
+        AV *retval;
+	/* XXX add fill row macro here */
+	FETCH_ALL_ROWS(self, FS_STATS_HASH_ROW, retval, HV);
+	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
+	XSRETURN(1);
+
 void
 DESTROY (self)
 	sg_fs_stats *self;
@@ -1208,6 +1622,8 @@ get_fs_stats_diff (now, last)
 	sv_setref_pv(ST(0), "Unix::Statgrab::sg_fs_stats", (void*)self);
 	XSRETURN(1);
     }
+
+#undef device_canonical
 
 MODULE = Unix::Statgrab	    PACKAGE = Unix::Statgrab::sg_load_stats
 
@@ -1269,6 +1685,73 @@ colnames(self)
     PPCODE:
         AV *retval;
 	MAKE_AV_FROM_STRINGS(sg_load_stat_names, retval);
+	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
+	XSRETURN(1);
+
+#define LOAD_STATS_ARRAY_ROW(self, entry, av) \
+    do { \
+	SV **ary; \
+	size_t j; \
+	av = newAV(); \
+	av_extend(av, lengthof(sg_load_stat_names)); \
+	ary = AvARRAY(av); \
+	AvFILLp(av) = lengthof(sg_load_stat_names)-1; \
+	for( j = 0; j < lengthof(sg_load_stat_names); ++j ) \
+	    ary[j] = newSV(0); \
+	sv_setnv(ary[0], self[entry].min1); \
+	sv_setnv(ary[1], self[entry].min5); \
+	sv_setnv(ary[2], self[entry].min15); \
+	sv_setiv(ary[3], self[entry].systime); \
+    } while(0)
+
+#define LOAD_STATS_HASH_ROW(self, entry, hv) \
+    do { \
+	hv = newHV(); \
+	hv_store(hv, sg_load_stat_names[0], strlen(sg_load_stat_names[0]), newSVnv(self[entry].min1), 0); \
+	hv_store(hv, sg_load_stat_names[1], strlen(sg_load_stat_names[1]), newSVnv(self[entry].min5), 0); \
+	hv_store(hv, sg_load_stat_names[2], strlen(sg_load_stat_names[2]), newSVnv(self[entry].min15), 0); \
+	hv_store(hv, sg_load_stat_names[3], strlen(sg_load_stat_names[3]), newSViv(self[entry].systime), 0); \
+    } while(0)
+
+void
+fetchrow_arrayref(self, num = 0)
+	sg_load_stats *self;
+	UV num;
+    CODE:
+        AV *retval;
+	/* XXX add fill row macro here */
+	LOAD_STATS_ARRAY_ROW(self, num, retval);
+	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
+	XSRETURN(1);
+
+void
+fetchall_arrayref(self)
+	sg_load_stats *self;
+    CODE:
+        AV *retval;
+	/* XXX add fill row macro here */
+	FETCH_ALL_ROWS(self, LOAD_STATS_ARRAY_ROW, retval, AV);
+	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
+	XSRETURN(1);
+
+void
+fetchrow_hashref(self, num = 0)
+	sg_load_stats *self;
+	UV num;
+    CODE:
+        HV *retval;
+	/* XXX add fill row macro here */
+	LOAD_STATS_HASH_ROW(self, num, retval);
+	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
+	XSRETURN(1);
+
+void
+fetchall_hashref(self)
+	sg_load_stats *self;
+    CODE:
+        AV *retval;
+	/* XXX add fill row macro here */
+	FETCH_ALL_ROWS(self, LOAD_STATS_HASH_ROW, retval, HV);
 	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
 	XSRETURN(1);
 
@@ -1354,6 +1837,75 @@ colnames(self)
 	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
 	XSRETURN(1);
 
+#define MEM_STATS_ARRAY_ROW(self, entry, av) \
+    do { \
+	SV **ary; \
+	size_t j; \
+	av = newAV(); \
+	av_extend(av, lengthof(sg_mem_stat_names)); \
+	ary = AvARRAY(av); \
+	AvFILLp(av) = lengthof(sg_mem_stat_names)-1; \
+	for( j = 0; j < lengthof(sg_mem_stat_names); ++j ) \
+	    ary[j] = newSV(0); \
+	sv_setuv(ary[0], self[entry].total); \
+	sv_setuv(ary[1], self[entry].free); \
+	sv_setuv(ary[2], self[entry].used); \
+	sv_setuv(ary[3], self[entry].cache); \
+	sv_setiv(ary[4], self[entry].systime); \
+    } while(0)
+
+#define MEM_STATS_HASH_ROW(self, entry, hv) \
+    do { \
+	hv = newHV(); \
+	hv_store(hv, sg_mem_stat_names[0], strlen(sg_mem_stat_names[0]), newSVuv(self[entry].total), 0); \
+	hv_store(hv, sg_mem_stat_names[1], strlen(sg_mem_stat_names[1]), newSVuv(self[entry].free), 0); \
+	hv_store(hv, sg_mem_stat_names[2], strlen(sg_mem_stat_names[2]), newSVuv(self[entry].used), 0); \
+	hv_store(hv, sg_mem_stat_names[3], strlen(sg_mem_stat_names[3]), newSVuv(self[entry].cache), 0); \
+	hv_store(hv, sg_mem_stat_names[4], strlen(sg_mem_stat_names[4]), newSViv(self[entry].systime), 0); \
+    } while(0)
+
+void
+fetchrow_arrayref(self, num = 0)
+	sg_mem_stats *self;
+	UV num;
+    CODE:
+        AV *retval;
+	/* XXX add fill row macro here */
+	MEM_STATS_ARRAY_ROW(self, num, retval);
+	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
+	XSRETURN(1);
+
+void
+fetchall_arrayref(self)
+	sg_mem_stats *self;
+    CODE:
+        AV *retval;
+	/* XXX add fill row macro here */
+	FETCH_ALL_ROWS(self, MEM_STATS_ARRAY_ROW, retval, AV);
+	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
+	XSRETURN(1);
+
+void
+fetchrow_hashref(self, num = 0)
+	sg_mem_stats *self;
+	UV num;
+    CODE:
+        HV *retval;
+	/* XXX add fill row macro here */
+	MEM_STATS_HASH_ROW(self, num, retval);
+	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
+	XSRETURN(1);
+
+void
+fetchall_hashref(self)
+	sg_mem_stats *self;
+    CODE:
+        AV *retval;
+	/* XXX add fill row macro here */
+	FETCH_ALL_ROWS(self, MEM_STATS_HASH_ROW, retval, HV);
+	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
+	XSRETURN(1);
+
 void
 DESTROY (self)
 	sg_mem_stats *self;
@@ -1422,6 +1974,73 @@ colnames(self)
     PPCODE:
         AV *retval;
 	MAKE_AV_FROM_STRINGS(sg_swap_stat_names, retval);
+	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
+	XSRETURN(1);
+
+#define SWAP_STATS_ARRAY_ROW(self, entry, av) \
+    do { \
+	SV **ary; \
+	size_t j; \
+	av = newAV(); \
+	av_extend(av, lengthof(sg_swap_stat_names)); \
+	ary = AvARRAY(av); \
+	AvFILLp(av) = lengthof(sg_swap_stat_names)-1; \
+	for( j = 0; j < lengthof(sg_swap_stat_names); ++j ) \
+	    ary[j] = newSV(0); \
+	sv_setuv(ary[0], self[entry].total); \
+	sv_setuv(ary[1], self[entry].free); \
+	sv_setuv(ary[2], self[entry].used); \
+	sv_setiv(ary[3], self[entry].systime); \
+    } while(0)
+
+#define SWAP_STATS_HASH_ROW(self, entry, hv) \
+    do { \
+	hv = newHV(); \
+	hv_store(hv, sg_swap_stat_names[0], strlen(sg_swap_stat_names[0]), newSVuv(self[entry].total), 0); \
+	hv_store(hv, sg_swap_stat_names[1], strlen(sg_swap_stat_names[1]), newSVuv(self[entry].free), 0); \
+	hv_store(hv, sg_swap_stat_names[2], strlen(sg_swap_stat_names[2]), newSVuv(self[entry].used), 0); \
+	hv_store(hv, sg_swap_stat_names[3], strlen(sg_swap_stat_names[3]), newSViv(self[entry].systime), 0); \
+    } while(0)
+
+void
+fetchrow_arrayref(self, num = 0)
+	sg_swap_stats *self;
+	UV num;
+    CODE:
+        AV *retval;
+	/* XXX add fill row macro here */
+	SWAP_STATS_ARRAY_ROW(self, num, retval);
+	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
+	XSRETURN(1);
+
+void
+fetchall_arrayref(self)
+	sg_swap_stats *self;
+    CODE:
+        AV *retval;
+	/* XXX add fill row macro here */
+	FETCH_ALL_ROWS(self, SWAP_STATS_ARRAY_ROW, retval, AV);
+	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
+	XSRETURN(1);
+
+void
+fetchrow_hashref(self, num = 0)
+	sg_swap_stats *self;
+	UV num;
+    CODE:
+        HV *retval;
+	/* XXX add fill row macro here */
+	SWAP_STATS_HASH_ROW(self, num, retval);
+	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
+	XSRETURN(1);
+
+void
+fetchall_hashref(self)
+	sg_swap_stats *self;
+    CODE:
+        AV *retval;
+	/* XXX add fill row macro here */
+	FETCH_ALL_ROWS(self, SWAP_STATS_HASH_ROW, retval, HV);
 	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
 	XSRETURN(1);
 
@@ -1551,6 +2170,83 @@ colnames(self)
 	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
 	XSRETURN(1);
 
+#define NETWORK_IO_STATS_ARRAY_ROW(self, entry, av) \
+    do { \
+	SV **ary; \
+	size_t j; \
+	av = newAV(); \
+	av_extend(av, lengthof(sg_network_io_stat_names)); \
+	ary = AvARRAY(av); \
+	AvFILLp(av) = lengthof(sg_network_io_stat_names)-1; \
+	for( j = 0; j < lengthof(sg_network_io_stat_names); ++j ) \
+	    ary[j] = newSV(0); \
+	sv_setpv(ary[0], self[entry].interface_name); \
+	sv_setuv(ary[1], self[entry].tx); \
+	sv_setuv(ary[2], self[entry].rx); \
+	sv_setuv(ary[3], self[entry].ipackets); \
+	sv_setuv(ary[4], self[entry].opackets); \
+	sv_setuv(ary[5], self[entry].ierrors); \
+	sv_setuv(ary[6], self[entry].oerrors); \
+	sv_setuv(ary[7], self[entry].collisions); \
+	sv_setiv(ary[8], self[entry].systime); \
+    } while(0)
+
+#define NETWORK_IO_STATS_HASH_ROW(self, entry, hv) \
+    do { \
+	hv = newHV(); \
+	hv_store(hv, sg_network_io_stat_names[0], strlen(sg_network_io_stat_names[0]), newSVpv(self[entry].interface_name, strlen(self[entry].interface_name)), 0); \
+	hv_store(hv, sg_network_io_stat_names[1], strlen(sg_network_io_stat_names[1]), newSVuv(self[entry].tx), 0); \
+	hv_store(hv, sg_network_io_stat_names[2], strlen(sg_network_io_stat_names[2]), newSVuv(self[entry].rx), 0); \
+	hv_store(hv, sg_network_io_stat_names[3], strlen(sg_network_io_stat_names[3]), newSVuv(self[entry].ipackets), 0); \
+	hv_store(hv, sg_network_io_stat_names[4], strlen(sg_network_io_stat_names[4]), newSVuv(self[entry].opackets), 0); \
+	hv_store(hv, sg_network_io_stat_names[5], strlen(sg_network_io_stat_names[5]), newSVuv(self[entry].ierrors), 0); \
+	hv_store(hv, sg_network_io_stat_names[6], strlen(sg_network_io_stat_names[6]), newSVuv(self[entry].oerrors), 0); \
+	hv_store(hv, sg_network_io_stat_names[7], strlen(sg_network_io_stat_names[7]), newSVuv(self[entry].collisions), 0); \
+	hv_store(hv, sg_network_io_stat_names[8], strlen(sg_network_io_stat_names[8]), newSViv(self[entry].systime), 0); \
+    } while(0)
+
+void
+fetchrow_arrayref(self, num = 0)
+	sg_network_io_stats *self;
+	UV num;
+    CODE:
+        AV *retval;
+	/* XXX add fill row macro here */
+	NETWORK_IO_STATS_ARRAY_ROW(self, num, retval);
+	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
+	XSRETURN(1);
+
+void
+fetchall_arrayref(self)
+	sg_network_io_stats *self;
+    CODE:
+        AV *retval;
+	/* XXX add fill row macro here */
+	FETCH_ALL_ROWS(self, NETWORK_IO_STATS_ARRAY_ROW, retval, AV);
+	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
+	XSRETURN(1);
+
+void
+fetchrow_hashref(self, num = 0)
+	sg_network_io_stats *self;
+	UV num;
+    CODE:
+        HV *retval;
+	/* XXX add fill row macro here */
+	NETWORK_IO_STATS_HASH_ROW(self, num, retval);
+	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
+	XSRETURN(1);
+
+void
+fetchall_hashref(self)
+	sg_network_io_stats *self;
+    CODE:
+        AV *retval;
+	/* XXX add fill row macro here */
+	FETCH_ALL_ROWS(self, NETWORK_IO_STATS_HASH_ROW, retval, HV);
+	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
+	XSRETURN(1);
+
 void
 DESTROY (self)
 	sg_network_io_stats *self;
@@ -1662,6 +2358,77 @@ colnames(self)
 	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
 	XSRETURN(1);
 
+#define NETWORK_IFACE_STATS_ARRAY_ROW(self, entry, av) \
+    do { \
+	SV **ary; \
+	size_t j; \
+	av = newAV(); \
+	av_extend(av, lengthof(sg_network_iface_stat_names)); \
+	ary = AvARRAY(av); \
+	AvFILLp(av) = lengthof(sg_network_iface_stat_names)-1; \
+	for( j = 0; j < lengthof(sg_network_iface_stat_names); ++j ) \
+	    ary[j] = newSV(0); \
+	sv_setpv(ary[0], self[entry].interface_name); \
+	sv_setuv(ary[1], self[entry].speed); \
+	sv_setuv(ary[2], self[entry].factor); \
+	sv_setuv(ary[3], self[entry].duplex); \
+	sv_setuv(ary[4], self[entry].up); \
+	sv_setiv(ary[5], self[entry].systime); \
+    } while(0)
+
+#define NETWORK_IFACE_STATS_HASH_ROW(self, entry, hv) \
+    do { \
+	hv = newHV(); \
+	hv_store(hv, sg_network_iface_stat_names[0], strlen(sg_network_iface_stat_names[0]), newSVpv(self[entry].interface_name, strlen(self[entry].interface_name)), 0); \
+	hv_store(hv, sg_network_iface_stat_names[1], strlen(sg_network_iface_stat_names[1]), newSVuv(self[entry].speed), 0); \
+	hv_store(hv, sg_network_iface_stat_names[2], strlen(sg_network_iface_stat_names[2]), newSVuv(self[entry].factor), 0); \
+	hv_store(hv, sg_network_iface_stat_names[3], strlen(sg_network_iface_stat_names[3]), newSVuv(self[entry].duplex), 0); \
+	hv_store(hv, sg_network_iface_stat_names[4], strlen(sg_network_iface_stat_names[4]), newSVuv(self[entry].up), 0); \
+	hv_store(hv, sg_network_iface_stat_names[5], strlen(sg_network_iface_stat_names[5]), newSViv(self[entry].systime), 0); \
+    } while(0)
+
+void
+fetchrow_arrayref(self, num = 0)
+	sg_network_iface_stats *self;
+	UV num;
+    CODE:
+        AV *retval;
+	/* XXX add fill row macro here */
+	NETWORK_IFACE_STATS_ARRAY_ROW(self, num, retval);
+	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
+	XSRETURN(1);
+
+void
+fetchall_arrayref(self)
+	sg_network_iface_stats *self;
+    CODE:
+        AV *retval;
+	/* XXX add fill row macro here */
+	FETCH_ALL_ROWS(self, NETWORK_IFACE_STATS_ARRAY_ROW, retval, AV);
+	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
+	XSRETURN(1);
+
+void
+fetchrow_hashref(self, num = 0)
+	sg_network_iface_stats *self;
+	UV num;
+    CODE:
+        HV *retval;
+	/* XXX add fill row macro here */
+	NETWORK_IFACE_STATS_HASH_ROW(self, num, retval);
+	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
+	XSRETURN(1);
+
+void
+fetchall_hashref(self)
+	sg_network_iface_stats *self;
+    CODE:
+        AV *retval;
+	/* XXX add fill row macro here */
+	FETCH_ALL_ROWS(self, NETWORK_IFACE_STATS_HASH_ROW, retval, HV);
+	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
+	XSRETURN(1);
+
 void
 DESTROY (self)
 	sg_network_iface_stats *self;
@@ -1719,6 +2486,71 @@ colnames(self)
     PPCODE:
         AV *retval;
 	MAKE_AV_FROM_STRINGS(sg_page_stat_names, retval);
+	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
+	XSRETURN(1);
+
+#define PAGE_STATS_ARRAY_ROW(self, entry, av) \
+    do { \
+	SV **ary; \
+	size_t j; \
+	av = newAV(); \
+	av_extend(av, lengthof(sg_page_stat_names)); \
+	ary = AvARRAY(av); \
+	AvFILLp(av) = lengthof(sg_page_stat_names)-1; \
+	for( j = 0; j < lengthof(sg_page_stat_names); ++j ) \
+	    ary[j] = newSV(0); \
+	sv_setuv(ary[0], self[entry].pages_pagein); \
+	sv_setuv(ary[1], self[entry].pages_pageout); \
+	sv_setiv(ary[2], self[entry].systime); \
+    } while(0)
+
+#define PAGE_STATS_HASH_ROW(self, entry, hv) \
+    do { \
+	hv = newHV(); \
+	hv_store(hv, sg_page_stat_names[0], strlen(sg_page_stat_names[0]), newSVuv(self[entry].pages_pagein), 0); \
+	hv_store(hv, sg_page_stat_names[1], strlen(sg_page_stat_names[1]), newSVuv(self[entry].pages_pageout), 0); \
+	hv_store(hv, sg_page_stat_names[2], strlen(sg_page_stat_names[2]), newSViv(self[entry].systime), 0); \
+    } while(0)
+
+void
+fetchrow_arrayref(self, num = 0)
+	sg_page_stats *self;
+	UV num;
+    CODE:
+        AV *retval;
+	/* XXX add fill row macro here */
+	PAGE_STATS_ARRAY_ROW(self, num, retval);
+	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
+	XSRETURN(1);
+
+void
+fetchall_arrayref(self)
+	sg_page_stats *self;
+    CODE:
+        AV *retval;
+	/* XXX add fill row macro here */
+	FETCH_ALL_ROWS(self, PAGE_STATS_ARRAY_ROW, retval, AV);
+	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
+	XSRETURN(1);
+
+void
+fetchrow_hashref(self, num = 0)
+	sg_page_stats *self;
+	UV num;
+    CODE:
+        HV *retval;
+	/* XXX add fill row macro here */
+	PAGE_STATS_HASH_ROW(self, num, retval);
+	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
+	XSRETURN(1);
+
+void
+fetchall_hashref(self)
+	sg_page_stats *self;
+    CODE:
+        AV *retval;
+	/* XXX add fill row macro here */
+	FETCH_ALL_ROWS(self, PAGE_STATS_HASH_ROW, retval, HV);
 	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
 	XSRETURN(1);
 
@@ -1844,6 +2676,79 @@ colnames(self)
     PPCODE:
         AV *retval;
 	MAKE_AV_FROM_STRINGS(sg_user_stat_names, retval);
+	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
+	XSRETURN(1);
+
+#define USER_STATS_ARRAY_ROW(self, entry, av) \
+    do { \
+	SV **ary; \
+	size_t j; \
+	av = newAV(); \
+	av_extend(av, lengthof(sg_user_stat_names)); \
+	ary = AvARRAY(av); \
+	AvFILLp(av) = lengthof(sg_user_stat_names)-1; \
+	for( j = 0; j < lengthof(sg_user_stat_names); ++j ) \
+	    ary[j] = newSV(0); \
+	sv_setpv(ary[0], self[entry].login_name); \
+	sv_setpvn(ary[1], self[entry].record_id, self[entry].record_id_size); \
+	sv_setpv(ary[2], self[entry].device); \
+	sv_setpv(ary[3], self[entry].hostname); \
+	sv_setiv(ary[4], self[entry].pid); \
+	sv_setiv(ary[5], self[entry].login_time); \
+	sv_setiv(ary[6], self[entry].systime); \
+    } while(0)
+
+#define USER_STATS_HASH_ROW(self, entry, hv) \
+    do { \
+	hv = newHV(); \
+	hv_store(hv, sg_user_stat_names[0], strlen(sg_user_stat_names[0]), newSVpv(self[entry].login_name, strlen(self[entry].login_name)), 0); \
+	hv_store(hv, sg_user_stat_names[1], strlen(sg_user_stat_names[1]), newSVpv(self[entry].record_id, self[entry].record_id_size), 0); \
+	hv_store(hv, sg_user_stat_names[2], strlen(sg_user_stat_names[2]), newSVpv(self[entry].device, strlen(self[entry].device)), 0); \
+	hv_store(hv, sg_user_stat_names[3], strlen(sg_user_stat_names[3]), newSVpv(self[entry].hostname, strlen(self[entry].hostname)), 0); \
+	hv_store(hv, sg_user_stat_names[4], strlen(sg_user_stat_names[4]), newSViv(self[entry].pid), 0); \
+	hv_store(hv, sg_user_stat_names[5], strlen(sg_user_stat_names[5]), newSViv(self[entry].login_time), 0); \
+	hv_store(hv, sg_user_stat_names[6], strlen(sg_user_stat_names[6]), newSViv(self[entry].systime), 0); \
+    } while(0)
+
+void
+fetchrow_arrayref(self, num = 0)
+	sg_user_stats *self;
+	UV num;
+    CODE:
+        AV *retval;
+	/* XXX add fill row macro here */
+	USER_STATS_ARRAY_ROW(self, num, retval);
+	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
+	XSRETURN(1);
+
+void
+fetchall_arrayref(self)
+	sg_user_stats *self;
+    CODE:
+        AV *retval;
+	/* XXX add fill row macro here */
+	FETCH_ALL_ROWS(self, USER_STATS_ARRAY_ROW, retval, AV);
+	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
+	XSRETURN(1);
+
+void
+fetchrow_hashref(self, num = 0)
+	sg_user_stats *self;
+	UV num;
+    CODE:
+        HV *retval;
+	/* XXX add fill row macro here */
+	USER_STATS_HASH_ROW(self, num, retval);
+	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
+	XSRETURN(1);
+
+void
+fetchall_hashref(self)
+	sg_user_stats *self;
+    CODE:
+        AV *retval;
+	/* XXX add fill row macro here */
+	FETCH_ALL_ROWS(self, USER_STATS_HASH_ROW, retval, HV);
 	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
 	XSRETURN(1);
 
@@ -2102,6 +3007,107 @@ colnames(self)
     PPCODE:
         AV *retval;
 	MAKE_AV_FROM_STRINGS(sg_process_stat_names, retval);
+	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
+	XSRETURN(1);
+
+#define PROCESS_STATS_ARRAY_ROW(self, entry, av) \
+    do { \
+	SV **ary; \
+	size_t j; \
+	av = newAV(); \
+	av_extend(av, lengthof(sg_process_stat_names)); \
+	ary = AvARRAY(av); \
+	AvFILLp(av) = lengthof(sg_process_stat_names)-1; \
+	for( j = 0; j < lengthof(sg_process_stat_names); ++j ) \
+	    ary[j] = newSV(0); \
+	sv_setpv(ary[0], self[entry].process_name); \
+	sv_setpv(ary[1], self[entry].proctitle); \
+	sv_setiv(ary[2], self[entry].pid); \
+	sv_setiv(ary[3], self[entry].parent); \
+	sv_setiv(ary[4], self[entry].pgid); \
+	sv_setiv(ary[5], self[entry].sessid); \
+	sv_setiv(ary[6], self[entry].uid); \
+	sv_setiv(ary[7], self[entry].euid); \
+	sv_setiv(ary[8], self[entry].gid); \
+	sv_setiv(ary[9], self[entry].egid); \
+	sv_setuv(ary[10], self[entry].context_switches); \
+	sv_setuv(ary[11], self[entry].voluntary_context_switches); \
+	sv_setuv(ary[12], self[entry].involuntary_context_switches); \
+	sv_setuv(ary[13], self[entry].proc_size); \
+	sv_setuv(ary[14], self[entry].proc_resident); \
+	sv_setiv(ary[15], self[entry].start_time); \
+	sv_setiv(ary[16], self[entry].time_spent); \
+	sv_setnv(ary[17], self[entry].cpu_percent); \
+	sv_setiv(ary[18], self[entry].nice); \
+	sv_setuv(ary[19], self[entry].state); \
+	sv_setiv(ary[20], self[entry].systime); \
+    } while(0)
+
+#define PROCESS_STATS_HASH_ROW(self, entry, hv) \
+    do { \
+	hv = newHV(); \
+	hv_store(hv, sg_process_stat_names[0], strlen(sg_process_stat_names[0]), newSVpv(self[entry].process_name, strlen(self[entry].process_name)), 0); \
+	hv_store(hv, sg_process_stat_names[1], strlen(sg_process_stat_names[1]), newSVpv(self[entry].proctitle, strlen(self[entry].proctitle)), 0); \
+	hv_store(hv, sg_process_stat_names[2], strlen(sg_process_stat_names[2]), newSViv(self[entry].pid), 0); \
+	hv_store(hv, sg_process_stat_names[3], strlen(sg_process_stat_names[3]), newSViv(self[entry].parent), 0); \
+	hv_store(hv, sg_process_stat_names[4], strlen(sg_process_stat_names[4]), newSViv(self[entry].pgid), 0); \
+	hv_store(hv, sg_process_stat_names[5], strlen(sg_process_stat_names[5]), newSViv(self[entry].sessid), 0); \
+	hv_store(hv, sg_process_stat_names[6], strlen(sg_process_stat_names[6]), newSViv(self[entry].uid), 0); \
+	hv_store(hv, sg_process_stat_names[7], strlen(sg_process_stat_names[7]), newSViv(self[entry].euid), 0); \
+	hv_store(hv, sg_process_stat_names[8], strlen(sg_process_stat_names[8]), newSViv(self[entry].gid), 0); \
+	hv_store(hv, sg_process_stat_names[9], strlen(sg_process_stat_names[9]), newSViv(self[entry].egid), 0); \
+	hv_store(hv, sg_process_stat_names[10], strlen(sg_process_stat_names[10]), newSVuv(self[entry].context_switches), 0); \
+	hv_store(hv, sg_process_stat_names[11], strlen(sg_process_stat_names[11]), newSVuv(self[entry].voluntary_context_switches), 0); \
+	hv_store(hv, sg_process_stat_names[12], strlen(sg_process_stat_names[12]), newSVuv(self[entry].involuntary_context_switches), 0); \
+	hv_store(hv, sg_process_stat_names[13], strlen(sg_process_stat_names[13]), newSVuv(self[entry].proc_size), 0); \
+	hv_store(hv, sg_process_stat_names[14], strlen(sg_process_stat_names[14]), newSVuv(self[entry].proc_resident), 0); \
+	hv_store(hv, sg_process_stat_names[15], strlen(sg_process_stat_names[15]), newSViv(self[entry].start_time), 0); \
+	hv_store(hv, sg_process_stat_names[16], strlen(sg_process_stat_names[16]), newSViv(self[entry].time_spent), 0); \
+	hv_store(hv, sg_process_stat_names[17], strlen(sg_process_stat_names[17]), newSVnv(self[entry].cpu_percent), 0); \
+	hv_store(hv, sg_process_stat_names[18], strlen(sg_process_stat_names[18]), newSViv(self[entry].nice), 0); \
+	hv_store(hv, sg_process_stat_names[19], strlen(sg_process_stat_names[19]), newSVuv(self[entry].state), 0); \
+	hv_store(hv, sg_process_stat_names[20], strlen(sg_process_stat_names[20]), newSViv(self[entry].systime), 0); \
+    } while(0)
+
+void
+fetchrow_arrayref(self, num = 0)
+	sg_process_stats *self;
+	UV num;
+    CODE:
+        AV *retval;
+	/* XXX add fill row macro here */
+	PROCESS_STATS_ARRAY_ROW(self, num, retval);
+	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
+	XSRETURN(1);
+
+void
+fetchall_arrayref(self)
+	sg_process_stats *self;
+    CODE:
+        AV *retval;
+	/* XXX add fill row macro here */
+	FETCH_ALL_ROWS(self, PROCESS_STATS_ARRAY_ROW, retval, AV);
+	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
+	XSRETURN(1);
+
+void
+fetchrow_hashref(self, num = 0)
+	sg_process_stats *self;
+	UV num;
+    CODE:
+        HV *retval;
+	/* XXX add fill row macro here */
+	PROCESS_STATS_HASH_ROW(self, num, retval);
+	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
+	XSRETURN(1);
+
+void
+fetchall_hashref(self)
+	sg_process_stats *self;
+    CODE:
+        AV *retval;
+	/* XXX add fill row macro here */
+	FETCH_ALL_ROWS(self, PROCESS_STATS_HASH_ROW, retval, HV);
 	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
 	XSRETURN(1);
 

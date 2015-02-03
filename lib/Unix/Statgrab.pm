@@ -73,7 +73,7 @@ my @stats = qw(
 @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 @EXPORT    = ( @{ $EXPORT_TAGS{'all'} } );
 
-$VERSION = '0.108';
+$VERSION = '0.108_001';
 
 sub AUTOLOAD
 {
@@ -94,87 +94,70 @@ sub AUTOLOAD
 
 bootstrap Unix::Statgrab $VERSION;
 
-my $to_hash_array = sub {
-    my ( $self, @keys ) = @_;
-    my $entries = $self->entries;
-    my @ary_hash;
-    foreach my $entry ( 0 .. $entries - 1 )
-    {
-        my %kv = map { $_ => $self->$_($entry); } @keys;
-        push( @ary_hash, \%kv );
-    }
-    @ary_hash;
-};
+sub Unix::Statgrab::sg_cpu_stats::as_list { @{$_[0]->fetchall_hashref}; }
+sub Unix::Statgrab::sg_cpu_stats::fetchall_hash { @{$_[0]->fetchall_hashref}; }
+sub Unix::Statgrab::sg_cpu_stats::fetchall_array { @{$_[0]->fetchall_arrayref}; }
+sub Unix::Statgrab::sg_cpu_stats::fetchall_table { ( $_[0]->colnames, @{$_[0]->fetchall_arrayref} ) }
 
-my $to_dataset = sub {
-    my ( $self, @keys ) = @_;
-    my $entries = $self->entries;
-    my @dataset;
-    foreach my $entry ( 0 .. $entries - 1 )
-    {
-        my @kv = map { $self->$_($entry); } @keys;
-        push( @dataset, \@kv );
-    }
-    @dataset;
-};
+sub Unix::Statgrab::sg_cpu_percents::as_list { @{$_[0]->fetchall_hashref}; }
+sub Unix::Statgrab::sg_cpu_percents::fetchall_hash { @{$_[0]->fetchall_hashref}; }
+sub Unix::Statgrab::sg_cpu_percents::fetchall_array { @{$_[0]->fetchall_arrayref}; }
+sub Unix::Statgrab::sg_cpu_percents::fetchall_table { ( $_[0]->colnames, @{$_[0]->fetchall_arrayref} ) }
 
-my $to_table = sub {
-    my ( $self, @keys ) = @_;
-    my @table = ( [@keys], $to_dataset->( $self, @keys ) );
-    @table;
-};
+sub Unix::Statgrab::sg_host_info::as_list { @{$_[0]->fetchall_hashref}; }
+sub Unix::Statgrab::sg_host_info::fetchall_hash { @{$_[0]->fetchall_hashref}; }
+sub Unix::Statgrab::sg_host_info::fetchall_array { @{$_[0]->fetchall_arrayref}; }
+sub Unix::Statgrab::sg_host_info::fetchall_table { ( $_[0]->colnames, @{$_[0]->fetchall_arrayref} ) }
 
-sub Unix::Statgrab::sg_cpu_stats::as_list { return $to_hash_array->( $_[0], @{$_[0]->colnames} ); }
-sub Unix::Statgrab::sg_cpu_stats::as_dataset { return $to_dataset->( $_[0], @{$_[0]->colnames} ); }
-sub Unix::Statgrab::sg_cpu_stats::as_table { return $to_table->( $_[0], @{$_[0]->colnames} ); }
+sub Unix::Statgrab::sg_disk_io_stats::as_list { @{$_[0]->fetchall_hashref}; }
+sub Unix::Statgrab::sg_disk_io_stats::fetchall_hash { @{$_[0]->fetchall_hashref}; }
+sub Unix::Statgrab::sg_disk_io_stats::fetchall_array { @{$_[0]->fetchall_arrayref}; }
+sub Unix::Statgrab::sg_disk_io_stats::fetchall_table { ( $_[0]->colnames, @{$_[0]->fetchall_arrayref} ) }
 
-sub Unix::Statgrab::sg_cpu_percents::as_list { return $to_hash_array->( $_[0], @{$_[0]->colnames} ); }
-sub Unix::Statgrab::sg_cpu_percents::as_dataset { return $to_dataset->( $_[0], @{$_[0]->colnames} ); }
-sub Unix::Statgrab::sg_cpu_percents::as_table { return $to_table->( $_[0], @{$_[0]->colnames} ); }
+sub Unix::Statgrab::sg_fs_stats::as_list { @{$_[0]->fetchall_hashref}; }
+sub Unix::Statgrab::sg_fs_stats::fetchall_hash { @{$_[0]->fetchall_hashref}; }
+sub Unix::Statgrab::sg_fs_stats::fetchall_array { @{$_[0]->fetchall_arrayref}; }
+sub Unix::Statgrab::sg_fs_stats::fetchall_table { ( $_[0]->colnames, @{$_[0]->fetchall_arrayref} ) }
 
-sub Unix::Statgrab::sg_host_info::as_list { return $to_hash_array->( $_[0], @{$_[0]->colnames} ); }
-sub Unix::Statgrab::sg_host_info::as_dataset { return $to_dataset->( $_[0], @{$_[0]->colnames} ); }
-sub Unix::Statgrab::sg_host_info::as_table { return $to_table->( $_[0], @{$_[0]->colnames} ); }
+sub Unix::Statgrab::sg_load_stats::as_list { @{$_[0]->fetchall_hashref}; }
+sub Unix::Statgrab::sg_load_stats::fetchall_hash { @{$_[0]->fetchall_hashref}; }
+sub Unix::Statgrab::sg_load_stats::fetchall_array { @{$_[0]->fetchall_arrayref}; }
+sub Unix::Statgrab::sg_load_stats::fetchall_table { ( $_[0]->colnames, @{$_[0]->fetchall_arrayref} ) }
 
-sub Unix::Statgrab::sg_disk_io_stats::as_list { return $to_hash_array->( $_[0], @{$_[0]->colnames} ); }
-sub Unix::Statgrab::sg_disk_io_stats::as_dataset { return $to_dataset->( $_[0], @{$_[0]->colnames} ); }
-sub Unix::Statgrab::sg_disk_io_stats::as_table { return $to_table->( $_[0], @{$_[0]->colnames} ); }
+sub Unix::Statgrab::sg_mem_stats::as_list { @{$_[0]->fetchall_hashref}; }
+sub Unix::Statgrab::sg_mem_stats::fetchall_hash { @{$_[0]->fetchall_hashref}; }
+sub Unix::Statgrab::sg_mem_stats::fetchall_array { @{$_[0]->fetchall_arrayref}; }
+sub Unix::Statgrab::sg_mem_stats::fetchall_table { ( $_[0]->colnames, @{$_[0]->fetchall_arrayref} ) }
 
-sub Unix::Statgrab::sg_fs_stats::as_list { return $to_hash_array->( $_[0], @{$_[0]->colnames} ); }
-sub Unix::Statgrab::sg_fs_stats::as_dataset { return $to_dataset->( $_[0], @{$_[0]->colnames} ); }
-sub Unix::Statgrab::sg_fs_stats::as_table { return $to_table->( $_[0], @{$_[0]->colnames} ); }
+sub Unix::Statgrab::sg_swap_stats::as_list { @{$_[0]->fetchall_hashref}; }
+sub Unix::Statgrab::sg_swap_stats::fetchall_hash { @{$_[0]->fetchall_hashref}; }
+sub Unix::Statgrab::sg_swap_stats::fetchall_array { @{$_[0]->fetchall_arrayref}; }
+sub Unix::Statgrab::sg_swap_stats::fetchall_table { ( $_[0]->colnames, @{$_[0]->fetchall_arrayref} ) }
 
-sub Unix::Statgrab::sg_load_stats::as_list { return $to_hash_array->( $_[0], @{$_[0]->colnames} ); }
-sub Unix::Statgrab::sg_load_stats::as_dataset { return $to_dataset->( $_[0], @{$_[0]->colnames} ); }
-sub Unix::Statgrab::sg_load_stats::as_table { return $to_table->( $_[0], @{$_[0]->colnames} ); }
+sub Unix::Statgrab::sg_network_io_stats::as_list { @{$_[0]->fetchall_hashref}; }
+sub Unix::Statgrab::sg_network_io_stats::fetchall_hash { @{$_[0]->fetchall_hashref}; }
+sub Unix::Statgrab::sg_network_io_stats::fetchall_array { @{$_[0]->fetchall_arrayref}; }
+sub Unix::Statgrab::sg_network_io_stats::fetchall_table { ( $_[0]->colnames, @{$_[0]->fetchall_arrayref} ) }
 
-sub Unix::Statgrab::sg_mem_stats::as_list { return $to_hash_array->( $_[0], @{$_[0]->colnames} ); }
-sub Unix::Statgrab::sg_mem_stats::as_dataset { return $to_dataset->( $_[0], @{$_[0]->colnames} ); }
-sub Unix::Statgrab::sg_mem_stats::as_table { return $to_table->( $_[0], @{$_[0]->colnames} ); }
+sub Unix::Statgrab::sg_network_iface_stats::as_list { @{$_[0]->fetchall_hashref}; }
+sub Unix::Statgrab::sg_network_iface_stats::fetchall_hash { @{$_[0]->fetchall_hashref}; }
+sub Unix::Statgrab::sg_network_iface_stats::fetchall_array { @{$_[0]->fetchall_arrayref}; }
+sub Unix::Statgrab::sg_network_iface_stats::fetchall_table { ( $_[0]->colnames, @{$_[0]->fetchall_arrayref} ) }
 
-sub Unix::Statgrab::sg_swap_stats::as_list { return $to_hash_array->( $_[0], @{$_[0]->colnames} ); }
-sub Unix::Statgrab::sg_swap_stats::as_dataset { return $to_dataset->( $_[0], @{$_[0]->colnames} ); }
-sub Unix::Statgrab::sg_swap_stats::as_table { return $to_table->( $_[0], @{$_[0]->colnames} ); }
+sub Unix::Statgrab::sg_page_stats::as_list { @{$_[0]->fetchall_hashref}; }
+sub Unix::Statgrab::sg_page_stats::fetchall_hash { @{$_[0]->fetchall_hashref}; }
+sub Unix::Statgrab::sg_page_stats::fetchall_array { @{$_[0]->fetchall_arrayref}; }
+sub Unix::Statgrab::sg_page_stats::fetchall_table { ( $_[0]->colnames, @{$_[0]->fetchall_arrayref} ) }
 
-sub Unix::Statgrab::sg_network_io_stats::as_list { return $to_hash_array->( $_[0], @{$_[0]->colnames} ); }
-sub Unix::Statgrab::sg_network_io_stats::as_dataset { return $to_dataset->( $_[0], @{$_[0]->colnames} ); }
-sub Unix::Statgrab::sg_network_io_stats::as_table { return $to_table->( $_[0], @{$_[0]->colnames} ); }
+sub Unix::Statgrab::sg_user_stats::as_list { @{$_[0]->fetchall_hashref}; }
+sub Unix::Statgrab::sg_user_stats::fetchall_hash { @{$_[0]->fetchall_hashref}; }
+sub Unix::Statgrab::sg_user_stats::fetchall_array { @{$_[0]->fetchall_arrayref}; }
+sub Unix::Statgrab::sg_user_stats::fetchall_table { ( $_[0]->colnames, @{$_[0]->fetchall_arrayref} ) }
 
-sub Unix::Statgrab::sg_network_iface_stats::as_list { return $to_hash_array->( $_[0], @{$_[0]->colnames} ); }
-sub Unix::Statgrab::sg_network_iface_stats::as_dataset { return $to_dataset->( $_[0], @{$_[0]->colnames} ); }
-sub Unix::Statgrab::sg_network_iface_stats::as_table { return $to_table->( $_[0], @{$_[0]->colnames} ); }
-
-sub Unix::Statgrab::sg_page_stats::as_list { return $to_hash_array->( $_[0], @{$_[0]->colnames} ); }
-sub Unix::Statgrab::sg_page_stats::as_dataset { return $to_dataset->( $_[0], @{$_[0]->colnames} ); }
-sub Unix::Statgrab::sg_page_stats::as_table { return $to_table->( $_[0], @{$_[0]->colnames} ); }
-
-sub Unix::Statgrab::sg_user_stats::as_list { return $to_hash_array->( $_[0], @{$_[0]->colnames} ); }
-sub Unix::Statgrab::sg_user_stats::as_dataset { return $to_dataset->( $_[0], @{$_[0]->colnames} ); }
-sub Unix::Statgrab::sg_user_stats::as_table { return $to_table->( $_[0], @{$_[0]->colnames} ); }
-
-sub Unix::Statgrab::sg_process_stats::as_list { return $to_hash_array->( $_[0], @{$_[0]->colnames} ); }
-sub Unix::Statgrab::sg_process_stats::as_dataset { return $to_dataset->( $_[0], @{$_[0]->colnames} ); }
-sub Unix::Statgrab::sg_process_stats::as_table { return $to_table->( $_[0], @{$_[0]->colnames} ); }
+sub Unix::Statgrab::sg_process_stats::as_list { @{$_[0]->fetchall_hashref}; }
+sub Unix::Statgrab::sg_process_stats::fetchall_hash { @{$_[0]->fetchall_hashref}; }
+sub Unix::Statgrab::sg_process_stats::fetchall_array { @{$_[0]->fetchall_arrayref}; }
+sub Unix::Statgrab::sg_process_stats::fetchall_table { ( $_[0]->colnames, @{$_[0]->fetchall_arrayref} ) }
 
 # Preloaded methods go here.
 
@@ -252,11 +235,51 @@ containing each attribute / value pair of available attributes.
 
 Provides the number of statistic objects in the returned collection.
 
-=item * C<as_list>
+=item * C<colnames>
 
-Provides a list containing each statistic entry as a hash with the
+Provides an arrayref containing each statistic attribute name in the
+same order as it's position in the stat-struct.
+
+=item * C<fetchrow_arrayref(offset = 0)>
+
+Provides an arrayref containing each statistic entry of the specified
+row in the same order as it's position in the stat-struct.
+
+=item * C<fetchall_arrayref>
+
+Provides an arrayref containing an item for each row as an arrayref.
+
+=item * C<fetchall_array>
+
+Provides list containing an item for each row as an arrayref.
+
+=item * C<fetchall_table>
+
+Provides list containing an item for each row as an arrayref headed
+by the arrayref containing the column names.
+
+=item * C<fetchrow_hashref(offset = 0)>
+
+Provides a hashref containing each statistic entry as a hash with the
+attribute names as key and the statistic attribute as appropriate
+value of the specified row.
+
+=item * C<fetchall_hashref>
+
+Provides an arrayref containing each statistic entry as a hashref with
+the attribute names as key and the statistic attribute as appropriate
+value.
+
+=item * C<fetchall_hash>
+
+Provides a list containing each statistic entry as a hashref with the
 attribute names as key and the statistic attribute as appropriate
 value.
+
+=item * C<as_list>
+
+B<Deprecated> alias for C<fetchall_hash>. Don't use in new projects and
+move away from it in existing code. Will be removed after 2020-12-31.
 
 =item * C<systime>
 

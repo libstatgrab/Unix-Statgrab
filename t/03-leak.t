@@ -12,75 +12,109 @@ $have_test_leak_trace or plan skip_all => "Need Test::LeakTrace";
 Test::LeakTrace->import;
 
 my %funcs = (
-    get_host_info => [
-        qw/os_name os_release os_version platform hostname
-          bitwidth host_state ncpus maxcpus uptime systime/
-    ],
-    get_cpu_stats => [
-        qw/user kernel idle iowait swap nice total
-          context_switches voluntary_context_switches
-          involuntary_context_switches syscalls
-          interrupts soft_interrupts systime/
-    ],
-    get_disk_io_stats => [qw/disk_name read_bytes write_bytes systime/],
-    get_fs_stats      => [
-        qw/device_name fs_type mnt_point device_type size used free avail
-          total_inodes used_inodes free_inodes avail_inodes io_size
-          block_size total_blocks free_blocks used_blocks avail_blocks
-          systime/
-    ],
-    get_load_stats          => [qw/min1 min5 min15 systime/],
-    get_mem_stats           => [qw/total free used cache systime/],
-    get_swap_stats          => [qw/total free used systime/],
-    get_network_io_stats    => [qw/interface_name tx rx ipackets opackets ierrors oerrors collisions systime/],
-    get_network_iface_stats => [qw/interface_name speed factor duplex up systime/],
-    get_page_stats          => [qw/pages_pagein pages_pageout systime/],
-    get_process_stats       => [
-        qw/process_name proctitle pid parent pgid sessid context_switches
-          voluntary_context_switches involuntary_context_switches proc_size
-          proc_resident start_time time_spent cpu_percent nice state systime/
-    ],
-    get_user_stats => [qw/login_name record_id device hostname pid login_time systime/],
+    get_host_info           => [],
+    get_cpu_stats           => [qw/get_cpu_stats_diff get_cpu_percents/],
+    get_disk_io_stats       => [qw/get_disk_io_stats_diff/],
+    get_fs_stats            => [qw/get_fs_stats_diff/],
+    get_load_stats          => [],
+    get_mem_stats           => [],
+    get_swap_stats          => [],
+    get_network_io_stats    => [qw/get_network_io_stats_diff/],
+    get_network_iface_stats => [],
+    get_page_stats          => [qw/get_page_stats_diff/],
+    get_process_stats       => [],
+    get_user_stats          => [],
 );
 
 my %errs = (
     get_error => [qw/error error_name error_value error_arg strperror/],
 );
 
-my %methods = (
-    get_cpu_stats => {
-        get_cpu_stats_diff => $funcs{get_cpu_stats},
-        get_cpu_percents   => [qw/user kernel idle iowait swap nice time_taken/],
-    },
-    get_disk_io_stats => {
-        get_disk_io_stats_diff => $funcs{get_disk_io_stats},
-    },
-    get_fs_stats => {
-        get_fs_stats_diff => $funcs{get_fs_stats},
-    },
-    get_network_io_stats => {
-        get_network_io_stats_diff => $funcs{get_network_io_stats},
-    },
-    get_page_stats => {
-        get_page_stats_diff => $funcs{get_page_stats},
-    },
-);
-
-foreach my $func ( sort keys %funcs, keys %errs )
+sub check_accessors
 {
-    Test::LeakTrace::no_leaks_ok(
-        sub {
-            eval {
-		my $sub = Unix::Statgrab->can($func);
-                my $current = $sub->()
-                  or croak( get_error()->strperror() );
-
-                my @stats = $current->as_list();
-		$current->can("colnames") and $current->colnames();
-            };
-        },
-        "$func doesn't leak"
-    );
+    my ( $func, $stat ) = @_;
+  SKIP:
+    {
+        Test::LeakTrace::no_leaks_ok(
+            sub {
+                eval { my $colnames = $stat->colnames(); };
+                $@ and warn "$func: " . $@;
+            },
+            "Unix::Statgrab::${func} doesn't leak"
+        );
+        my @colnames = @{ $stat->colnames };
+        foreach my $cn (@colnames)
+        {
+            Test::LeakTrace::no_leaks_ok(
+                sub {
+                    eval { my $d = $stat->$cn(); };
+                },
+                "Unix::Statgrab::${func}::${cn} doesn't leak"
+            );
+        }
+    }
 }
+
+sub check_cumulative
+{
+    my ( $func, $stat ) = @_;
+    foreach my $cum (qw(fetchrow_arrayref fetchall_arrayref fetchrow_hashref fetchall_hashref))
+    {
+        Test::LeakTrace::no_leaks_ok(
+            sub {
+                eval { my $d = $stat->$cum(); };
+            },
+            "Unix::Statgrab::${func}::${cum} doesn't leak"
+        );
+    }
+    foreach my $cum (qw(fetchall_hash fetchall_array fetchall_table))
+    {
+        Test::LeakTrace::no_leaks_ok(
+            sub {
+                eval { my @d = $stat->$cum(); };
+            },
+            "Unix::Statgrab::${func}::${cum} doesn't leak"
+        );
+    }
+}
+
+sub check_func
+{
+    my $func = shift;
+  SKIP:
+    {
+        my $sub = Unix::Statgrab->can($func);
+        $sub or skip( "Unix::Statgrab cannot $func", 2 );
+        Test::LeakTrace::no_leaks_ok(
+            sub {
+                eval {
+                    my $current = $sub->();
+                    $current or do { my $e = get_error(); diag( $e->strperror() ); croak( $e->strperror() ); } while (0);
+                };
+                $@ and warn "$func: " . $@;
+            },
+            "Unix::Statgrab::${func} doesn't leak"
+        );
+        my $stat = $sub->();
+        check_accessors( $func, $stat );
+        check_cumulative( $func, $stat );
+        foreach my $below ( @{ $funcs{$func} } )
+        {
+	    my @args;
+	    $below =~ m/_diff$/ and push @args, $sub->();
+            my $bs = $stat->$below(@args);
+            ok( $bs, "Unix::Statgrab::${func}::${bs}" );
+            check_accessors( $below, $bs );
+            check_cumulative( $below, $bs );
+        }
+    }
+}
+
+foreach my $func ( sort keys %funcs )
+{
+    check_func($func);
+}
+
+# XXX check get_error
 
 done_testing;
