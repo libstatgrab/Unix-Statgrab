@@ -84,7 +84,7 @@ Canonical name of the device the filesystem statistics belong to
 
 =head2 fs_type
 
-Filesystem type (as string), eg. "zfs"
+Filesystem type (as string), e.g. "zfs"
 
 =head2 mnt_point
 

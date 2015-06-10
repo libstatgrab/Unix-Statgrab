@@ -68,7 +68,7 @@ Returns list of column names: C<< (interface_name tx rx ipackets opackets ierror
 
 =head2 interface_name
 
-The name known to the operating system. (eg. on linux it might be eth0, on AIX en0 and on FreeBSD fxp0)
+The name known to the operating system. (e.g. on linux it might be eth0, on AIX en0 and on FreeBSD fxp0)
 
 =head2 tx
 

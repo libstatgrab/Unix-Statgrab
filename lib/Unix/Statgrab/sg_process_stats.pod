@@ -117,11 +117,11 @@ The number of context switches of this process (voluntary and involuntary).
 
 =head2 voluntary_context_switches
 
-The number of voluntary context switches of this process (eg. by calling C<sched_yield()>, C<sleep()> or C<nanosleep()>). 
+The number of voluntary context switches of this process (e.g. by calling C<sched_yield()>, C<sleep()> or C<nanosleep()>). 
 
 =head2 involuntary_context_switches
 
-The number of involuntary context switches of this process (eg. time slice exhausted or signal sent).
+The number of involuntary context switches of this process (e.g. time slice exhausted or signal sent).
 
 =head2 proc_size
 

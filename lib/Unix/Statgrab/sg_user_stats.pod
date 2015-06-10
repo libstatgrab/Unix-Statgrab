@@ -76,11 +76,11 @@ Record identifier of host database containing login information
 
 =head2 device
 
-Device name (eg. "pts/0") of the tty assigned to the login session
+Device name (e.g. "pts/0") of the tty assigned to the login session
 
 =head2 hostname
 
-(remote) Hostname from where the user is logged on, eg. "infoterm7.some.kind.of.domain.local", "localhost", "10.42.17.4" or ":0.0" (in case it's a local logon via new xterm) 
+(remote) Hostname from where the user is logged on, e.g. "infoterm7.some.kind.of.domain.local", "localhost", "10.42.17.4" or ":0.0" (in case it's a local logon via new xterm) 
 
 =head2 pid
 

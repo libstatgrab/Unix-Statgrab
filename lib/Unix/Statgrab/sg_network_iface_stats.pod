@@ -68,7 +68,7 @@ Returns list of column names: C<< (interface_name speed factor duplex up systime
 
 =head2 interface_name
 
-The name of the interface known to the operating system. (eg. on linux it might be eth0)
+The name of the interface known to the operating system. (e.g. on linux it might be eth0)
 
 =head2 speed
 
@@ -76,7 +76,7 @@ The speed of the interface, in factor/sec
 
 =head2 factor
 
-The factor for the speed in bit/sec - eg. 1'000'000 for megabit/sec
+The factor for the speed in bit/sec - e.g. 1'000'000 for megabit/sec
 
 =head2 duplex
 
