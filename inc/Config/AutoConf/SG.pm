@@ -33,16 +33,6 @@ sub check_device_canonical
     $self->check_member( "sg_fs_stats.device_canonical", { prologue => join("\n", $self->_default_includes, "#include <statgrab.h>") } );
 }
 
-sub _default_headers_with_perl
-{
-    my ($self) = @_;
-
-    my $include_perl = "#include <EXTERN.h>\n#include <perl.h>";
-    my $includes = join( "\n", $self->_default_includes, $include_perl );
-
-    return $includes;
-}
-
 my %TYPE_ASSO = (
                   UV => "unsigned long long",
                   IV => "long long"
@@ -52,7 +42,7 @@ sub _check_sizeof_type_fit_stat
 {
     my ( $self, $type ) = @_;
 
-    my $includes    = $self->_default_headers_with_perl();
+    my $includes    = $self->_default_includes_with_perl();
     my $match_check = "sizeof($type) == sizeof($TYPE_ASSO{$type})";
     my $conftest    = $self->lang_build_bool_test( $includes, $match_check );
 
