@@ -227,73 +227,6 @@ for the users of Perl's list processing features, each object has an
 C<as_list>() method which returns the statistic as list of hash items
 containing each attribute / value pair of available attributes.
 
-=head1 METHODS of sg_*_stats
-
-=over 4
-
-=item * C<entries>
-
-Provides the number of statistic objects in the returned collection.
-
-=item * C<colnames>
-
-Provides an arrayref containing each statistic attribute name in the
-same order as it's position in the stat-struct.
-
-=item * C<fetchrow_arrayref(offset = 0)>
-
-Provides an arrayref containing each statistic entry of the specified
-row in the same order as it's position in the stat-struct.
-
-=item * C<fetchall_arrayref>
-
-Provides an arrayref containing an item for each row as an arrayref.
-
-=item * C<fetchall_array>
-
-Provides list containing an item for each row as an arrayref.
-
-=item * C<fetchall_table>
-
-Provides list containing an item for each row as an arrayref headed
-by the arrayref containing the column names.
-
-=item * C<fetchrow_hashref(offset = 0)>
-
-Provides a hashref containing each statistic entry as a hash with the
-attribute names as key and the statistic attribute as appropriate
-value of the specified row.
-
-=item * C<fetchall_hashref>
-
-Provides an arrayref containing each statistic entry as a hashref with
-the attribute names as key and the statistic attribute as appropriate
-value.
-
-=item * C<fetchall_hash>
-
-Provides a list containing each statistic entry as a hashref with the
-attribute names as key and the statistic attribute as appropriate
-value.
-
-=item * C<as_list>
-
-B<Deprecated> alias for C<fetchall_hash>. Don't use in new projects and
-move away from it in existing code. Will be removed after 2020-12-31.
-
-=item * C<systime>
-
-Even if it's always an attribute (beside for C<cpu_percents>), returns
-the seconds since epoch of the time when the statistics are snapshotted.
-
-=item * I<attribute>(C<offset> I<= 0>)
-
-Returns the value of the queried attribute of the given entry of
-the statistics collection. If C<offset> exceeds the range, C<undef>
-is returned.
-
-=back
-
 =head1 FUNCTIONS
 
 =head2 drop_privileges()
@@ -309,166 +242,74 @@ libstatgrab (and then in Unix::Statgrab, too).
 =head2 get_host_info()
 
 Returns generic information about this machine. The object it returns
-is a L<Unix::Statgrab::sg_host_info|http://www.i-scream.org/libstatgrab/docs/sg_get_host_info.3.html>.
+is a L<Unix::Statgrab::sg_host_info>.
 
 =head2 get_cpu_stats
 
 Returns information about this machine's usage of the CPU. The object it
-returns is a L<Unix::Statgrab::sg_cpu_stats|http://www.i-scream.org/libstatgrab/docs/sg_get_cpu_stats.3.html>.
-
-=head3 extra sg_cpu_stats methods
-
-=over 4
-
-=item * C<get_cpu_stats_diff>
-
-Provides the difference between the last measurement and the recent one.
-
-  $recent->get_cpu_stats_diff($last);
-
-Returns L<Unix::Statgrab::sg_cpu_stats|http://www.i-scream.org/libstatgrab/docs/sg_get_cpu_stats.3.html>
-
-=item * C<get_cpu_percents>
-
-Provides a percentage representation of the single cpu ticks measured.
-Returns L<Unix::Statgrab::sg_cpu_percents|http://www.i-scream.org/libstatgrab/docs/sg_get_cpu_stats.3.html>
-
-=back
+returns is an L<Unix::Statgrab::sg_cpu_stats>.
 
 =head2 get_disk_io_stats
 
 Delivers the disk IO per disk stored in the kernel which holds the amount of
 data transferred since boot. The object it returns is a
-L<Unix::Statgrab::sg_disk_io_stats|http://www.i-scream.org/libstatgrab/docs/sg_get_disk_io_stats.3.html>.
-
-=head3 extra sg_disk_io_stats methods
-
-=over 4
-
-=item * C<get_disk_io_stats_diff>
-
-Provides the difference between the last measurement and the recent one.
-
-  $recent->get_disk_io_stats_diff($last);
-
-Returns L<Unix::Statgrab::sg_disk_io_stats|http://www.i-scream.org/libstatgrab/docs/sg_get_disk_io_stats.3.html>
-
-=back
+L<Unix::Statgrab::sg_disk_io_stats>.
 
 =head2 get_fs_stats
 
 Returns statistics about the mounted filesystems. The object it returns is a
-L<Unix::Statgrab::sg_fs_stats|http://www.i-scream.org/libstatgrab/docs/sg_get_fs_stats.3.html>.
-
-=head3 extra sg_fs_stats methods
-
-=over 4
-
-=item * C<get_fs_stats_diff>
-
-Provides the difference between the last measurement and the recent one.
-
-  $recent->get_fs_stats_diff($last);
-
-Returns L<Unix::Statgrab::sg_fs_stats|http://www.i-scream.org/libstatgrab/docs/sg_get_fs_stats.3.html>
-
-=back
+L<Unix::Statgrab::sg_fs_stats>.
 
 =head2 get_load_stats
 
 Returns the load average over various span of times. The object it returns is a
-L<Unix::Statgrab::sg_load_stats|http://www.i-scream.org/libstatgrab/docs/sg_get_load_stats.3.html>.
+L<Unix::Statgrab::sg_load_stats>.
 
 =head2 get_mem_stats
 
 Returns statistics about memory usage. The object it returns is a
-L<Unix::Statgrab::sg_mem_stats|http://www.i-scream.org/libstatgrab/docs/sg_get_mem_stats.3.html>.
+L<Unix::Statgrab::sg_mem_stats>.
 
 =head2 get_swap_stats
 
 Returns statistics about swap usage. The object it returns is a
-L<Unix::Statgrab::sg_swap_stats|http://www.i-scream.org/libstatgrab/docs/sg_get_swap_stats.3.html>.
+L<Unix::Statgrab::sg_swap_stats>.
 
 =head2 get_network_io_stats
 
 Returns statistics about the network traffic per network interface as
 stored in the kernel. The object it returns is a
-L<Unix::Statgrab::sg_network_io_stats|http://www.i-scream.org/libstatgrab/docs/sg_get_network_io_stats.3.html>.
-
-=head3 extra sg_network_io_stats methods
-
-=over 4
-
-=item * C<get_network_io_stats_diff>
-
-Provides the difference between the last measurement and the recent one.
-
-  $recent->get_network_io_stats_diff($last);
-
-Returns L<Unix::Statgrab::sg_network_io_stats|http://www.i-scream.org/libstatgrab/docs/sg_get_network_io_stats.3.html>
-
-=back
+L<Unix::Statgrab::sg_network_io_stats>.
 
 =head2 get_network_iface_stats
 
 Returns statistics about each of the found network interfaces in your computer.
 The object it returns is a
-L<Unix::Statgrab::sg_network_iface_stats|http://www.i-scream.org/libstatgrab/docs/sg_get_network_iface_stats.3.html>.
+L<Unix::Statgrab::sg_network_iface_stats>.
 
 =head2 get_page_stats
 
 Returns the number of pages the system has paged in and out since bootup.
 The object it returns is a
-L<Unix::Statgrab::sg_page_stats|http://www.i-scream.org/libstatgrab/docs/sg_get_page_stats.3.html>.
-
-=head3 extra sg_page_stats methods
-
-=over 4
-
-=item * C<get_page_stats_diff>
-
-Provides the difference between the last measurement and the recent one.
-
-  $recent->get_page_stats_diff($last);
-
-Returns L<Unix::Statgrab::sg_page_stats|http://www.i-scream.org/libstatgrab/docs/sg_get_page_stats.3.html>
-
-=back
+L<Unix::Statgrab::sg_page_stats>.
 
 =head2 get_process_stats
 
 Returns loads of information about the current processes.
 The object it returns is a
-L<Unix::Statgrab::sg_process_stats|http://www.i-scream.org/libstatgrab/docs/sg_get_process_stats.3.html>.
+L<Unix::Statgrab::sg_process_stats>.
 
 =head2 get_user_stats
 
 Returns session information about logged on users.
 The object it returns is a
-L<Unix::Statgrab::sg_user_stats|http://www.i-scream.org/libstatgrab/docs/sg_get_user_stats.3.html>.
+L<Unix::Statgrab::sg_user_stats>.
 
 =head1 ERROR HANDLING
 
 One function C<get_error> exists that will return the last error encountered,
 if any. It's return value is an object of type
-L<Unix::Statgrab::sg_error_details|http://www.i-scream.org/libstatgrab/docs/sg_get_error.3.html>.
-
-=head3 extra sg_error_details methods
-
-=over 4
-
-=item * C<error_name>
-
-Returns a textual representation for the C<error> numeric value. The textual
-representation is delivered by the libstatgrab function C<sg_str_error>.
-
-=item * C<strperror>
-
-Returns a textual representation for the C<sg_error_details> object. The
-textual representation is delivered by the libstatgrab function
-C<sg_strperror>.
-
-=back
+L<Unix::Statgrab::sg_error_details>.
 
 =head1 EXPORT
 
