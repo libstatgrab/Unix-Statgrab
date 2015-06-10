@@ -95,10 +95,7 @@ WriteMakefile1(
                 requires   => {%TEST_DEPS}
             },
             runtime => {
-                requires => {
-                    %RUN_DEPS,
-                    perl => '5.8.3',
-                },
+                requires => { %RUN_DEPS },
             },
         },
     },
