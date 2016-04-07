@@ -19,6 +19,7 @@ sub check_libstatgrab
 {
     my ($self) = @_;
     ref($self) or $self = $self->_get_instance();
+    $self->{config}->{cc} or $self->check_prog_cc();
     $self->pkg_config_package_flags( "libstatgrab" );
 
     return $self->search_libs( "sg_get_process_stats_r", ["statgrab"] );
