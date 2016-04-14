@@ -1,6 +1,8 @@
 ## in a separate test file
 use Test::More;
-
+BEGIN {
+  $] >= 5.008 or plan skip_all => "Test::Spelling requires perl 5.8";
+}
 use Test::Spelling;
 
 add_stopwords(<DATA>);
