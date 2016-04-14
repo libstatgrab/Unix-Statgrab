@@ -1,5 +1,16 @@
 Revision history for Perl extension Unix::Statgrab.
 
+0.110_001	2016-04-14
+    - harden tests
+      * eval around all statgrab calls & don't prove result when exception catched
+      * check for result and error, if no result received
+    - harden passing strings from libstatgrab to perl
+    - improve author tests and so improve documentation
+
+0.109	2015-07-10
+    - documentation improvements using pod and spelling checker
+    - remove upstream included "_default_headers_with_perl" C::AC method
+
 0.108_001	2015-02-03
     - add full flavored struct accessors and implement all in XS, supports now
       colnames, fetchrow_arrayref, fetchall_arrayref, fetchrow_hashref, fetchall_hashref,
