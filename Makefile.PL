@@ -20,7 +20,7 @@ my %RUN_DEPS = (
 );
 my %CONFIGURE_DEPS = (
     'ExtUtils::MakeMaker' => 0,
-    'ExtUtils::Constant'  => 0,
+    'ExtUtils::Constant'  => '0.21',
     'Capture::Tiny'       => '0.06',
     'ExtUtils::CBuilder'  => '0.27',
     'Config::AutoConf'    => '0.308',
