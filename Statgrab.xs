@@ -2,6 +2,8 @@
 #include "perl.h"
 #include "XSUB.h"
 
+#define NEED_newSVpvn_flags
+
 #include "ppport.h"
 
 #include <statgrab.h>
@@ -83,12 +85,17 @@ const char *sg_process_stat_names[] = {
 #define LUV NV
 #endif
 
+static STRLEN SAFE_STRLEN(const char *s)
+{
+    return s ? strlen(s) : 0;
+}
+
 #define MAKE_AV_FROM_STRINGS(strings, av) do { \
     size_t i; \
     av = newAV(); \
     av_extend(av, lengthof(strings)); \
     for(i = 0; i < lengthof(strings); ++i) { \
-	av_store(av, i, newSVpv(strings[i], strlen(strings[i]))); \
+	av_store(av, i, newSVpvn(strings[i], SAFE_STRLEN(strings[i]))); \
     } \
 } while(0)
 
@@ -541,11 +548,11 @@ colnames(self)
 	av = newAV(); \
 	av_extend(av, sizeof(sg_host_info_names)); \
 	AvFILLp(av) = -1; \
-	av_store(av, ++AvFILLp(av), newSVpv(self[entry].os_name, strlen(self[entry].os_name))); \
-	av_store(av, ++AvFILLp(av), newSVpv(self[entry].os_release, strlen(self[entry].os_release))); \
-	av_store(av, ++AvFILLp(av), newSVpv(self[entry].os_version, strlen(self[entry].os_version))); \
-	av_store(av, ++AvFILLp(av), newSVpv(self[entry].platform, strlen(self[entry].platform))); \
-	av_store(av, ++AvFILLp(av), newSVpv(self[entry].hostname, strlen(self[entry].hostname))); \
+	av_store(av, ++AvFILLp(av), newSVpvn(self[entry].os_name, SAFE_STRLEN(self[entry].os_name))); \
+	av_store(av, ++AvFILLp(av), newSVpvn(self[entry].os_release, SAFE_STRLEN(self[entry].os_release))); \
+	av_store(av, ++AvFILLp(av), newSVpvn(self[entry].os_version, SAFE_STRLEN(self[entry].os_version))); \
+	av_store(av, ++AvFILLp(av), newSVpvn(self[entry].platform, SAFE_STRLEN(self[entry].platform))); \
+	av_store(av, ++AvFILLp(av), newSVpvn(self[entry].hostname, SAFE_STRLEN(self[entry].hostname))); \
 	av_store(av, ++AvFILLp(av), newSVuv(self[entry].bitwidth)); \
 	av_store(av, ++AvFILLp(av), newSVuv(self[entry].host_state)); \
 	av_store(av, ++AvFILLp(av), newSVuv(self[entry].ncpus)); \
@@ -557,11 +564,11 @@ colnames(self)
 #define HOST_INFO_HASH_ROW(self, entry, hv) \
     do { \
 	hv = newHV(); \
-	hv_store(hv, sg_host_info_names[0], strlen(sg_host_info_names[0]), newSVpv(self[entry].os_name, strlen(self[entry].os_name)), 0); \
-	hv_store(hv, sg_host_info_names[1], strlen(sg_host_info_names[1]), newSVpv(self[entry].os_release, strlen(self[entry].os_release)), 0); \
-	hv_store(hv, sg_host_info_names[2], strlen(sg_host_info_names[2]), newSVpv(self[entry].os_version, strlen(self[entry].os_version)), 0); \
-	hv_store(hv, sg_host_info_names[3], strlen(sg_host_info_names[3]), newSVpv(self[entry].platform, strlen(self[entry].platform)), 0); \
-	hv_store(hv, sg_host_info_names[4], strlen(sg_host_info_names[4]), newSVpv(self[entry].hostname, strlen(self[entry].hostname)), 0); \
+	hv_store(hv, sg_host_info_names[0], strlen(sg_host_info_names[0]), newSVpvn(self[entry].os_name, SAFE_STRLEN(self[entry].os_name)), 0); \
+	hv_store(hv, sg_host_info_names[1], strlen(sg_host_info_names[1]), newSVpvn(self[entry].os_release, SAFE_STRLEN(self[entry].os_release)), 0); \
+	hv_store(hv, sg_host_info_names[2], strlen(sg_host_info_names[2]), newSVpvn(self[entry].os_version, SAFE_STRLEN(self[entry].os_version)), 0); \
+	hv_store(hv, sg_host_info_names[3], strlen(sg_host_info_names[3]), newSVpvn(self[entry].platform, SAFE_STRLEN(self[entry].platform)), 0); \
+	hv_store(hv, sg_host_info_names[4], strlen(sg_host_info_names[4]), newSVpvn(self[entry].hostname, SAFE_STRLEN(self[entry].hostname)), 0); \
 	hv_store(hv, sg_host_info_names[5], strlen(sg_host_info_names[5]), newSVuv(self[entry].bitwidth), 0); \
 	hv_store(hv, sg_host_info_names[6], strlen(sg_host_info_names[6]), newSVuv(self[entry].host_state), 0); \
 	hv_store(hv, sg_host_info_names[7], strlen(sg_host_info_names[7]), newSVuv(self[entry].ncpus), 0); \
@@ -1181,7 +1188,7 @@ colnames(self)
 #define DISK_IO_STATS_HASH_ROW(self, entry, hv) \
     do { \
 	hv = newHV(); \
-	hv_store(hv, sg_disk_io_stat_names[0], strlen(sg_disk_io_stat_names[0]), newSVpv(self[entry].disk_name, strlen(self[entry].disk_name)), 0); \
+	hv_store(hv, sg_disk_io_stat_names[0], strlen(sg_disk_io_stat_names[0]), newSVpvn(self[entry].disk_name, SAFE_STRLEN(self[entry].disk_name)), 0); \
 	hv_store(hv, sg_disk_io_stat_names[1], strlen(sg_disk_io_stat_names[1]), newSVuv(self[entry].read_bytes), 0); \
 	hv_store(hv, sg_disk_io_stat_names[2], strlen(sg_disk_io_stat_names[2]), newSVuv(self[entry].write_bytes), 0); \
 	hv_store(hv, sg_disk_io_stat_names[3], strlen(sg_disk_io_stat_names[3]), newSViv(self[entry].systime), 0); \
@@ -1533,10 +1540,10 @@ colnames(self)
 #define FS_STATS_HASH_ROW(self, entry, hv) \
     do { \
 	hv = newHV(); \
-	hv_store(hv, sg_fs_stat_names[0], strlen(sg_fs_stat_names[0]), newSVpv(self[entry].device_name, strlen(self[entry].device_name)), 0); \
-	hv_store(hv, sg_fs_stat_names[1], strlen(sg_fs_stat_names[1]), newSVpv(self[entry].device_canonical, strlen(self[entry].device_canonical)), 0); \
-	hv_store(hv, sg_fs_stat_names[2], strlen(sg_fs_stat_names[2]), newSVpv(self[entry].fs_type, strlen(self[entry].fs_type)), 0); \
-	hv_store(hv, sg_fs_stat_names[3], strlen(sg_fs_stat_names[3]), newSVpv(self[entry].mnt_point, strlen(self[entry].mnt_point)), 0); \
+	hv_store(hv, sg_fs_stat_names[0], strlen(sg_fs_stat_names[0]), newSVpvn(self[entry].device_name, SAFE_STRLEN(self[entry].device_name)), 0); \
+	hv_store(hv, sg_fs_stat_names[1], strlen(sg_fs_stat_names[1]), newSVpvn(self[entry].device_canonical, SAFE_STRLEN(self[entry].device_canonical)), 0); \
+	hv_store(hv, sg_fs_stat_names[2], strlen(sg_fs_stat_names[2]), newSVpvn(self[entry].fs_type, SAFE_STRLEN(self[entry].fs_type)), 0); \
+	hv_store(hv, sg_fs_stat_names[3], strlen(sg_fs_stat_names[3]), newSVpvn(self[entry].mnt_point, SAFE_STRLEN(self[entry].mnt_point)), 0); \
 	hv_store(hv, sg_fs_stat_names[4], strlen(sg_fs_stat_names[4]), newSVuv(self[entry].device_type), 0); \
 	hv_store(hv, sg_fs_stat_names[5], strlen(sg_fs_stat_names[5]), newSVuv(self[entry].size), 0); \
 	hv_store(hv, sg_fs_stat_names[6], strlen(sg_fs_stat_names[6]), newSVuv(self[entry].used), 0); \
@@ -2194,7 +2201,7 @@ colnames(self)
 #define NETWORK_IO_STATS_HASH_ROW(self, entry, hv) \
     do { \
 	hv = newHV(); \
-	hv_store(hv, sg_network_io_stat_names[0], strlen(sg_network_io_stat_names[0]), newSVpv(self[entry].interface_name, strlen(self[entry].interface_name)), 0); \
+	hv_store(hv, sg_network_io_stat_names[0], strlen(sg_network_io_stat_names[0]), newSVpvn(self[entry].interface_name, SAFE_STRLEN(self[entry].interface_name)), 0); \
 	hv_store(hv, sg_network_io_stat_names[1], strlen(sg_network_io_stat_names[1]), newSVuv(self[entry].tx), 0); \
 	hv_store(hv, sg_network_io_stat_names[2], strlen(sg_network_io_stat_names[2]), newSVuv(self[entry].rx), 0); \
 	hv_store(hv, sg_network_io_stat_names[3], strlen(sg_network_io_stat_names[3]), newSVuv(self[entry].ipackets), 0); \
@@ -2379,7 +2386,7 @@ colnames(self)
 #define NETWORK_IFACE_STATS_HASH_ROW(self, entry, hv) \
     do { \
 	hv = newHV(); \
-	hv_store(hv, sg_network_iface_stat_names[0], strlen(sg_network_iface_stat_names[0]), newSVpv(self[entry].interface_name, strlen(self[entry].interface_name)), 0); \
+	hv_store(hv, sg_network_iface_stat_names[0], strlen(sg_network_iface_stat_names[0]), newSVpvn(self[entry].interface_name, SAFE_STRLEN(self[entry].interface_name)), 0); \
 	hv_store(hv, sg_network_iface_stat_names[1], strlen(sg_network_iface_stat_names[1]), newSVuv(self[entry].speed), 0); \
 	hv_store(hv, sg_network_iface_stat_names[2], strlen(sg_network_iface_stat_names[2]), newSVuv(self[entry].factor), 0); \
 	hv_store(hv, sg_network_iface_stat_names[3], strlen(sg_network_iface_stat_names[3]), newSVuv(self[entry].duplex), 0); \
@@ -2701,10 +2708,10 @@ colnames(self)
 #define USER_STATS_HASH_ROW(self, entry, hv) \
     do { \
 	hv = newHV(); \
-	hv_store(hv, sg_user_stat_names[0], strlen(sg_user_stat_names[0]), newSVpv(self[entry].login_name, strlen(self[entry].login_name)), 0); \
-	hv_store(hv, sg_user_stat_names[1], strlen(sg_user_stat_names[1]), newSVpv(self[entry].record_id, self[entry].record_id_size), 0); \
-	hv_store(hv, sg_user_stat_names[2], strlen(sg_user_stat_names[2]), newSVpv(self[entry].device, strlen(self[entry].device)), 0); \
-	hv_store(hv, sg_user_stat_names[3], strlen(sg_user_stat_names[3]), newSVpv(self[entry].hostname, strlen(self[entry].hostname)), 0); \
+	hv_store(hv, sg_user_stat_names[0], strlen(sg_user_stat_names[0]), newSVpvn(self[entry].login_name, SAFE_STRLEN(self[entry].login_name)), 0); \
+	hv_store(hv, sg_user_stat_names[1], strlen(sg_user_stat_names[1]), newSVpvn(self[entry].record_id, self[entry].record_id_size), 0); \
+	hv_store(hv, sg_user_stat_names[2], strlen(sg_user_stat_names[2]), newSVpvn(self[entry].device, SAFE_STRLEN(self[entry].device)), 0); \
+	hv_store(hv, sg_user_stat_names[3], strlen(sg_user_stat_names[3]), newSVpvn(self[entry].hostname, SAFE_STRLEN(self[entry].hostname)), 0); \
 	hv_store(hv, sg_user_stat_names[4], strlen(sg_user_stat_names[4]), newSViv(self[entry].pid), 0); \
 	hv_store(hv, sg_user_stat_names[5], strlen(sg_user_stat_names[5]), newSViv(self[entry].login_time), 0); \
 	hv_store(hv, sg_user_stat_names[6], strlen(sg_user_stat_names[6]), newSViv(self[entry].systime), 0); \
@@ -3046,8 +3053,8 @@ colnames(self)
 #define PROCESS_STATS_HASH_ROW(self, entry, hv) \
     do { \
 	hv = newHV(); \
-	hv_store(hv, sg_process_stat_names[0], strlen(sg_process_stat_names[0]), newSVpv(self[entry].process_name, strlen(self[entry].process_name)), 0); \
-	hv_store(hv, sg_process_stat_names[1], strlen(sg_process_stat_names[1]), newSVpv(self[entry].proctitle, strlen(self[entry].proctitle)), 0); \
+	hv_store(hv, sg_process_stat_names[0], strlen(sg_process_stat_names[0]), newSVpvn(self[entry].process_name, SAFE_STRLEN(self[entry].process_name)), 0); \
+	hv_store(hv, sg_process_stat_names[1], strlen(sg_process_stat_names[1]), newSVpvn(self[entry].proctitle, SAFE_STRLEN(self[entry].proctitle)), 0); \
 	hv_store(hv, sg_process_stat_names[2], strlen(sg_process_stat_names[2]), newSViv(self[entry].pid), 0); \
 	hv_store(hv, sg_process_stat_names[3], strlen(sg_process_stat_names[3]), newSViv(self[entry].parent), 0); \
 	hv_store(hv, sg_process_stat_names[4], strlen(sg_process_stat_names[4]), newSViv(self[entry].pgid), 0); \
