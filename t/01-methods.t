@@ -60,16 +60,15 @@ my %funcs = (
     get_disk_io_stats => [qw/disk_name read_bytes write_bytes systime/],
     get_fs_stats      => [
         qw/device_name device_canonical fs_type mnt_point device_type
-	  size used free avail
+          size used free avail
           total_inodes used_inodes free_inodes avail_inodes io_size
           block_size total_blocks free_blocks used_blocks avail_blocks
           systime/
     ],
-    get_load_stats => [qw/min1 min5 min15 systime/],
-    get_mem_stats  => [qw/total free used cache systime/],
-    get_swap_stats => [qw/total free used systime/],
-    get_network_io_stats =>
-      [qw/interface_name tx rx ipackets opackets ierrors oerrors collisions systime/],
+    get_load_stats          => [qw/min1 min5 min15 systime/],
+    get_mem_stats           => [qw/total free used cache systime/],
+    get_swap_stats          => [qw/total free used systime/],
+    get_network_io_stats    => [qw/interface_name tx rx ipackets opackets ierrors oerrors collisions systime/],
     get_network_iface_stats => [qw/interface_name speed factor duplex up systime/],
     get_page_stats          => [qw/pages_pagein pages_pageout systime/],
     get_process_stats       => [
@@ -78,28 +77,40 @@ my %funcs = (
           proc_resident start_time time_spent cpu_percent nice state systime/
     ],
     get_user_stats => [qw/login_name record_id device hostname pid login_time systime/],
-            );
+);
 
-my %errs = ( get_error => [qw/error error_name error_value error_arg strperror/], );
+my %errs = (
+    get_error => [qw/error error_name error_value error_arg strperror/],
+);
 
 my %methods = (
-             get_cpu_stats => {
-                             get_cpu_stats_diff => $funcs{get_cpu_stats},
-                             get_cpu_percents => [qw/user kernel idle iowait swap nice time_taken/],
-             },
-             get_disk_io_stats    => { get_disk_io_stats_diff    => $funcs{get_disk_io_stats}, },
-             get_fs_stats         => { get_fs_stats_diff         => $funcs{get_fs_stats}, },
-             get_network_io_stats => { get_network_io_stats_diff => $funcs{get_network_io_stats}, },
-             get_page_stats       => { get_page_stats_diff       => $funcs{get_page_stats}, },
+    get_cpu_stats => {
+        get_cpu_stats_diff => $funcs{get_cpu_stats},
+        get_cpu_percents   => [qw/user kernel idle iowait swap nice time_taken/],
+    },
+    get_disk_io_stats => {
+        get_disk_io_stats_diff => $funcs{get_disk_io_stats},
+    },
+    get_fs_stats => {
+        get_fs_stats_diff => $funcs{get_fs_stats},
+    },
+    get_network_io_stats => {
+        get_network_io_stats_diff => $funcs{get_network_io_stats},
+    },
+    get_page_stats => {
+        get_page_stats_diff => $funcs{get_page_stats},
+    },
 );
 
 sub check_methods
 {
-    my ( $o ) = @_;
+    my ($o) = @_;
     ( my $func = ref($o) ) =~ s/Unix::Statgrab::sg_(\w+).*$/$1/g;
-    my ($entries, @cols);
-    ok( $o->entries(), "Unix::Statgrab::sg_${func}->entries" );
-    ok( @cols = @{$o->colnames}, "Unix::Statgrab::sg_${func}->colnames" );
+    my $entries = $o->entries();
+    ok( defined $entries, "Unix::Statgrab::sg_${func}->entries" );
+    my @cols = @{ $o->colnames };
+    ok( @cols, "Unix::Statgrab::sg_${func}->colnames" );
+    $entries or return;    # diskless system, no logins, ...
     foreach my $method (@cols)
     {
         ok( defined( $o->$method() ), "Unix::Statgrab::sg_$func->$method" );
@@ -107,34 +118,31 @@ sub check_methods
 }
 
 # we only check that nothing segfaults
-foreach my $func ( sort @{$Unix::Statgrab::EXPORT_TAGS{stats}} )
+SKIP:
+foreach my $func ( sort @{ $Unix::Statgrab::EXPORT_TAGS{stats} } )
 {
-  SKIP:
+    my $sub = Unix::Statgrab->can($func);
+    ok( $sub, "Unix::Statgrab->can('$func')" ) or skip("Can't invoke unknow stats-call $func");
+    my $o = eval { $sub->(); };
+    $@ and skip "$func: " . $@, 1;
+    $o or do { my $e = get_error(); skip "$func: " . $e->strperror(), 1 } while (0);
+    ok( $o, "Unix::Statgrab::$func" ) or skip("Can't invoke methods on non-object");
+    check_methods($o);
+    if ( defined( $methods{$func} ) )
     {
-        my $sub = Unix::Statgrab->can($func);
-        ok( $sub, "Unix::Statgrab->can('$func')" ) or skip("Can't invoke unknow stats-call $func");
-        my $o = &{$sub}();
-        ok( $o, "Unix::Statgrab::$func" ) or skip("Can't invoke methods on non-object");
-        check_methods( $o );
-        if ( defined( $methods{$func} ) )
+      SKIP:
+        foreach my $inh_func ( sort keys %{ $methods{$func} } )
         {
-            foreach my $inh_func ( sort keys %{ $methods{$func} } )
-            {
-                my $inh_sub = $o->can($inh_func);
-                ok( $inh_sub, "Unix::Statgrab->can('$inh_func')" ) or next;
-                my $inh_o;
-                if ( $methods{$func}{$inh_func} == $funcs{$func} )
-                {
-                    my $n = &{$sub}();
-                    $inh_o = &{$inh_sub}( $n, $o );
-                }
-                else
-                {
-                    $inh_o = &{$inh_sub}($o);
-                }
-                ok( $inh_o, "Unix::Statgrab::$func" ) or next;
-                check_methods( $inh_o, $methods{$func}{$inh_func} );
-            }
+            my $inh_sub = $o->can($inh_func);
+            ok( $inh_sub, "Unix::Statgrab->can('$inh_func')" ) or next;
+            my $inh_s =
+              $methods{$func}{$inh_func} == $funcs{$func}
+              ? sub { my $n = $sub->(); $inh_sub->( $n, $o ); }
+              : sub { $inh_sub->($o); };
+            my $inh_o = eval { $inh_s->(); };
+            $@ or skip "$inh_func: $@", 1;
+            ok( $inh_o, "Unix::Statgrab::$func" ) or next;
+            check_methods( $inh_o, $methods{$func}{$inh_func} );
         }
     }
 }

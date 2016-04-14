@@ -33,25 +33,22 @@ my %errs = (
 sub check_accessors
 {
     my ( $func, $stat ) = @_;
-  SKIP:
+    Test::LeakTrace::no_leaks_ok(
+        sub {
+            eval { my $colnames = $stat->colnames(); };
+            $@ and warn "$func: " . $@;
+        },
+        "Unix::Statgrab::${func} doesn't leak"
+    );
+    my @colnames = @{ $stat->colnames };
+    foreach my $cn (@colnames)
     {
         Test::LeakTrace::no_leaks_ok(
             sub {
-                eval { my $colnames = $stat->colnames(); };
-                $@ and warn "$func: " . $@;
+                eval { my $d = $stat->$cn(); };
             },
-            "Unix::Statgrab::${func} doesn't leak"
+            "Unix::Statgrab::${func}::${cn} doesn't leak"
         );
-        my @colnames = @{ $stat->colnames };
-        foreach my $cn (@colnames)
-        {
-            Test::LeakTrace::no_leaks_ok(
-                sub {
-                    eval { my $d = $stat->$cn(); };
-                },
-                "Unix::Statgrab::${func}::${cn} doesn't leak"
-            );
-        }
     }
 }
 
@@ -95,14 +92,19 @@ sub check_func
             },
             "Unix::Statgrab::${func} doesn't leak"
         );
-        my $stat = $sub->();
+        my $stat = eval { $sub->(); };
+        $@ and skip "$func: " . $@, 1;
+        $stat or do { my $e = get_error(); skip "$func: " . $e->strperror(), 1 } while (0);
         check_accessors( $func, $stat );
         check_cumulative( $func, $stat );
+      SKIP:
         foreach my $below ( @{ $funcs{$func} } )
         {
-	    my @args;
-	    $below =~ m/_diff$/ and push @args, $sub->();
-            my $bs = $stat->$below(@args);
+            my @args;
+            $below =~ m/_diff$/ and push @args, $sub->();
+            my $bs = eval { $stat->$below(@args); };
+            $@ and skip "$below: $@", 1;
+            $bs or do { my $e = get_error(); skip "$func: " . $e->strperror(), 1 } while (0);
             ok( $bs, "Unix::Statgrab::${func}::${bs}" );
             check_accessors( $below, $bs );
             check_cumulative( $below, $bs );
