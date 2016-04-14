@@ -73,7 +73,7 @@ my @stats = qw(
 @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 @EXPORT    = ( @{ $EXPORT_TAGS{'all'} } );
 
-$VERSION = '0.109';
+$VERSION = '0.110_001';
 
 sub AUTOLOAD
 {
