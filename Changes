@@ -1,10 +1,15 @@
 Revision history for Perl extension Unix::Statgrab.
 
+0.110_002	2016-04-20
+    - harden passing strings from libstatgrab to perl when fetching stats
+      as array
+
 0.110_001	2016-04-14
     - harden tests
       * eval around all statgrab calls & don't prove result when exception catched
       * check for result and error, if no result received
-    - harden passing strings from libstatgrab to perl
+    - harden passing strings from libstatgrab to perl when fetching stats
+      as hash
     - improve author tests and so improve documentation
 
 0.109	2015-07-10
