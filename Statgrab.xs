@@ -90,6 +90,8 @@ static STRLEN SAFE_STRLEN(const char *s)
     return s ? strlen(s) : 0;
 }
 
+#define sv_setpvn_IF(sv,str,len) (str)?sv_setpvn((sv),(str),(len)):((void)0)
+
 #define MAKE_AV_FROM_STRINGS(strings, av) do { \
     size_t i; \
     av = newAV(); \
@@ -1179,7 +1181,7 @@ colnames(self)
 	AvFILLp(av) = lengthof(sg_disk_io_stat_names)-1; \
 	for( j = 0; j < lengthof(sg_disk_io_stat_names); ++j ) \
 	    ary[j] = newSV(0); \
-	sv_setpv(ary[0], self[entry].disk_name); \
+	sv_setpvn_IF(ary[0], self[entry].disk_name, SAFE_STRLEN(self[entry].disk_name)); \
 	sv_setuv(ary[1], self[entry].read_bytes); \
 	sv_setuv(ary[2], self[entry].write_bytes); \
 	sv_setiv(ary[3], self[entry].systime); \
@@ -1515,10 +1517,10 @@ colnames(self)
 	AvFILLp(av) = lengthof(sg_fs_stat_names)-1; \
 	for( j = 0; j < lengthof(sg_fs_stat_names); ++j ) \
 	    ary[j] = newSV(0); \
-	sv_setpv(ary[0], self[entry].device_name); \
-	sv_setpv(ary[1], self[entry].device_canonical); \
-	sv_setpv(ary[2], self[entry].fs_type); \
-	sv_setpv(ary[3], self[entry].mnt_point); \
+	sv_setpvn_IF(ary[0], self[entry].device_name, SAFE_STRLEN(self[entry].device_name)); \
+	sv_setpvn_IF(ary[1], self[entry].device_canonical, SAFE_STRLEN(self[entry].device_canonical)); \
+	sv_setpvn_IF(ary[2], self[entry].fs_type, SAFE_STRLEN(self[entry].fs_type)); \
+	sv_setpvn_IF(ary[3], self[entry].mnt_point, SAFE_STRLEN(self[entry].mnt_point)); \
 	sv_setuv(ary[4], self[entry].device_type); \
 	sv_setiv(ary[5], self[entry].size); \
 	sv_setiv(ary[6], self[entry].used); \
@@ -2187,7 +2189,7 @@ colnames(self)
 	AvFILLp(av) = lengthof(sg_network_io_stat_names)-1; \
 	for( j = 0; j < lengthof(sg_network_io_stat_names); ++j ) \
 	    ary[j] = newSV(0); \
-	sv_setpv(ary[0], self[entry].interface_name); \
+	sv_setpvn_IF(ary[0], self[entry].interface_name, SAFE_STRLEN(self[entry].interface_name)); \
 	sv_setuv(ary[1], self[entry].tx); \
 	sv_setuv(ary[2], self[entry].rx); \
 	sv_setuv(ary[3], self[entry].ipackets); \
@@ -2375,7 +2377,7 @@ colnames(self)
 	AvFILLp(av) = lengthof(sg_network_iface_stat_names)-1; \
 	for( j = 0; j < lengthof(sg_network_iface_stat_names); ++j ) \
 	    ary[j] = newSV(0); \
-	sv_setpv(ary[0], self[entry].interface_name); \
+	sv_setpvn_IF(ary[0], self[entry].interface_name, SAFE_STRLEN(self[entry].interface_name)); \
 	sv_setuv(ary[1], self[entry].speed); \
 	sv_setuv(ary[2], self[entry].factor); \
 	sv_setuv(ary[3], self[entry].duplex); \
@@ -2696,10 +2698,10 @@ colnames(self)
 	AvFILLp(av) = lengthof(sg_user_stat_names)-1; \
 	for( j = 0; j < lengthof(sg_user_stat_names); ++j ) \
 	    ary[j] = newSV(0); \
-	sv_setpv(ary[0], self[entry].login_name); \
-	sv_setpvn(ary[1], self[entry].record_id, self[entry].record_id_size); \
-	sv_setpv(ary[2], self[entry].device); \
-	sv_setpv(ary[3], self[entry].hostname); \
+	sv_setpvn_IF(ary[0], self[entry].login_name, SAFE_STRLEN(self[entry].login_name)); \
+	sv_setpvn_IF(ary[1], self[entry].record_id, self[entry].record_id_size); \
+	sv_setpvn_IF(ary[2], self[entry].device, SAFE_STRLEN(self[entry].device)); \
+	sv_setpvn_IF(ary[3], self[entry].hostname, SAFE_STRLEN(self[entry].hostname)); \
 	sv_setiv(ary[4], self[entry].pid); \
 	sv_setiv(ary[5], self[entry].login_time); \
 	sv_setiv(ary[6], self[entry].systime); \
@@ -3027,8 +3029,8 @@ colnames(self)
 	AvFILLp(av) = lengthof(sg_process_stat_names)-1; \
 	for( j = 0; j < lengthof(sg_process_stat_names); ++j ) \
 	    ary[j] = newSV(0); \
-	sv_setpv(ary[0], self[entry].process_name); \
-	sv_setpv(ary[1], self[entry].proctitle); \
+	sv_setpvn_IF(ary[0], self[entry].process_name, SAFE_STRLEN(self[entry].process_name)); \
+	sv_setpvn_IF(ary[1], self[entry].proctitle, SAFE_STRLEN(self[entry].proctitle)); \
 	sv_setiv(ary[2], self[entry].pid); \
 	sv_setiv(ary[3], self[entry].parent); \
 	sv_setiv(ary[4], self[entry].pgid); \
