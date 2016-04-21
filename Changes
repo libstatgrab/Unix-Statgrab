@@ -1,5 +1,9 @@
 Revision history for Perl extension Unix::Statgrab.
 
+0.110_003	2016-04-21
+    - add missing prove whether requested row exists in stat or not for
+      fetchrow_hashref and fetchrow_arrayref calls
+
 0.110_002	2016-04-20
     - harden passing strings from libstatgrab to perl when fetching stats
       as array
