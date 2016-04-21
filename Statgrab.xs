@@ -585,6 +585,8 @@ fetchrow_arrayref(self, num = 0)
 	UV num;
     PPCODE:
         AV *retval;
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
 	/* XXX add fill row macro here */
 	HOST_INFO_ARRAY_ROW(self, num, retval);
 	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
@@ -606,6 +608,8 @@ fetchrow_hashref(self, num = 0)
 	UV num;
     PPCODE:
         HV *retval;
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
 	/* XXX add fill row macro here */
 	HOST_INFO_HASH_ROW(self, num, retval);
 	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
@@ -853,6 +857,8 @@ fetchrow_arrayref(self, num = 0)
 	UV num;
     CODE:
         AV *retval;
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
 	/* XXX add fill row macro here */
 	CPU_STATS_ARRAY_ROW(self, num, retval);
 	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
@@ -874,6 +880,8 @@ fetchrow_hashref(self, num = 0)
 	UV num;
     CODE:
         HV *retval;
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
 	/* XXX add fill row macro here */
 	CPU_STATS_HASH_ROW(self, num, retval);
 	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
@@ -1064,6 +1072,8 @@ fetchrow_arrayref(self, num = 0)
 	UV num;
     CODE:
         AV *retval;
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
 	/* XXX add fill row macro here */
 	CPU_PERCENTS_ARRAY_ROW(self, num, retval);
 	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
@@ -1085,6 +1095,8 @@ fetchrow_hashref(self, num = 0)
 	UV num;
     CODE:
         HV *retval;
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
 	/* XXX add fill row macro here */
 	CPU_PERCENTS_HASH_ROW(self, num, retval);
 	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
@@ -1202,6 +1214,8 @@ fetchrow_arrayref(self, num = 0)
 	UV num;
     CODE:
         AV *retval;
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
 	/* XXX add fill row macro here */
 	DISK_IO_STATS_ARRAY_ROW(self, num, retval);
 	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
@@ -1223,6 +1237,8 @@ fetchrow_hashref(self, num = 0)
 	UV num;
     CODE:
         HV *retval;
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
 	/* XXX add fill row macro here */
 	DISK_IO_STATS_HASH_ROW(self, num, retval);
 	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
@@ -1570,6 +1586,8 @@ fetchrow_arrayref(self, num = 0)
 	UV num;
     CODE:
         AV *retval;
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
 	/* XXX add fill row macro here */
 	FS_STATS_ARRAY_ROW(self, num, retval);
 	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
@@ -1591,6 +1609,8 @@ fetchrow_hashref(self, num = 0)
 	UV num;
     CODE:
         HV *retval;
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
 	/* XXX add fill row macro here */
 	FS_STATS_HASH_ROW(self, num, retval);
 	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
@@ -1728,6 +1748,8 @@ fetchrow_arrayref(self, num = 0)
 	UV num;
     CODE:
         AV *retval;
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
 	/* XXX add fill row macro here */
 	LOAD_STATS_ARRAY_ROW(self, num, retval);
 	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
@@ -1749,6 +1771,8 @@ fetchrow_hashref(self, num = 0)
 	UV num;
     CODE:
         HV *retval;
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
 	/* XXX add fill row macro here */
 	LOAD_STATS_HASH_ROW(self, num, retval);
 	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
@@ -1879,6 +1903,8 @@ fetchrow_arrayref(self, num = 0)
 	UV num;
     CODE:
         AV *retval;
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
 	/* XXX add fill row macro here */
 	MEM_STATS_ARRAY_ROW(self, num, retval);
 	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
@@ -1900,6 +1926,8 @@ fetchrow_hashref(self, num = 0)
 	UV num;
     CODE:
         HV *retval;
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
 	/* XXX add fill row macro here */
 	MEM_STATS_HASH_ROW(self, num, retval);
 	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
@@ -2017,6 +2045,8 @@ fetchrow_arrayref(self, num = 0)
 	UV num;
     CODE:
         AV *retval;
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
 	/* XXX add fill row macro here */
 	SWAP_STATS_ARRAY_ROW(self, num, retval);
 	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
@@ -2038,6 +2068,8 @@ fetchrow_hashref(self, num = 0)
 	UV num;
     CODE:
         HV *retval;
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
 	/* XXX add fill row macro here */
 	SWAP_STATS_HASH_ROW(self, num, retval);
 	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
@@ -2220,6 +2252,8 @@ fetchrow_arrayref(self, num = 0)
 	UV num;
     CODE:
         AV *retval;
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
 	/* XXX add fill row macro here */
 	NETWORK_IO_STATS_ARRAY_ROW(self, num, retval);
 	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
@@ -2241,6 +2275,8 @@ fetchrow_hashref(self, num = 0)
 	UV num;
     CODE:
         HV *retval;
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
 	/* XXX add fill row macro here */
 	NETWORK_IO_STATS_HASH_ROW(self, num, retval);
 	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
@@ -2402,6 +2438,8 @@ fetchrow_arrayref(self, num = 0)
 	UV num;
     CODE:
         AV *retval;
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
 	/* XXX add fill row macro here */
 	NETWORK_IFACE_STATS_ARRAY_ROW(self, num, retval);
 	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
@@ -2423,6 +2461,8 @@ fetchrow_hashref(self, num = 0)
 	UV num;
     CODE:
         HV *retval;
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
 	/* XXX add fill row macro here */
 	NETWORK_IFACE_STATS_HASH_ROW(self, num, retval);
 	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
@@ -2527,6 +2567,8 @@ fetchrow_arrayref(self, num = 0)
 	UV num;
     CODE:
         AV *retval;
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
 	/* XXX add fill row macro here */
 	PAGE_STATS_ARRAY_ROW(self, num, retval);
 	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
@@ -2548,6 +2590,8 @@ fetchrow_hashref(self, num = 0)
 	UV num;
     CODE:
         HV *retval;
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
 	/* XXX add fill row macro here */
 	PAGE_STATS_HASH_ROW(self, num, retval);
 	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
@@ -2725,6 +2769,8 @@ fetchrow_arrayref(self, num = 0)
 	UV num;
     CODE:
         AV *retval;
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
 	/* XXX add fill row macro here */
 	USER_STATS_ARRAY_ROW(self, num, retval);
 	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
@@ -2746,6 +2792,8 @@ fetchrow_hashref(self, num = 0)
 	UV num;
     CODE:
         HV *retval;
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
 	/* XXX add fill row macro here */
 	USER_STATS_HASH_ROW(self, num, retval);
 	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
@@ -3084,6 +3132,8 @@ fetchrow_arrayref(self, num = 0)
 	UV num;
     CODE:
         AV *retval;
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
 	/* XXX add fill row macro here */
 	PROCESS_STATS_ARRAY_ROW(self, num, retval);
 	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
@@ -3105,6 +3155,8 @@ fetchrow_hashref(self, num = 0)
 	UV num;
     CODE:
         HV *retval;
+	if (num >= sg_get_nelements(self))
+	    XSRETURN_UNDEF;
 	/* XXX add fill row macro here */
 	PROCESS_STATS_HASH_ROW(self, num, retval);
 	ST(0) = sv_2mortal (newRV_noinc ((SV *)retval));
