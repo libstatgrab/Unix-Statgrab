@@ -1,5 +1,8 @@
 Revision history for Perl extension Unix::Statgrab.
 
+0.111	2016-05-01
+    - Release 0.110_003 without further changes
+
 0.110_003	2016-04-21
     - add missing prove whether requested row exists in stat or not for
       fetchrow_hashref and fetchrow_arrayref calls
