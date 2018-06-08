@@ -16,6 +16,7 @@ AnnoCPAN
 CPAN
 cpan
 Jens
+LGPL
 Parseval
 Rehsack
 Tassilo
