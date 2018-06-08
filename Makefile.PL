@@ -57,7 +57,8 @@ _write_constants();
 WriteMakefile1(
     MIN_PERL_VERSION => '5.008003',
     META_ADD         => {
-        'meta-spec' => { version => 2 },
+        license     => ['perl_5', 'lgpl_2_1'],
+        'meta-spec' => {version => 2},
         resources   => {
             homepage   => 'https://metacpan.org/release/Unix-Statgrab',
             repository => {
@@ -69,7 +70,6 @@ WriteMakefile1(
                 web    => 'http://rt.cpan.org/Public/Dist/Display.html?Name=Unix-Statgrab',
                 mailto => 'bug-Unix-Statgrab@rt.cpan.org',
             },
-            license       => 'http://dev.perl.org/licenses/',
             x_IRC         => "irc://irc.freenode.net/#libstatgrab",
             x_MailingList => "mailto:users\@i-scream.org'",
         },
