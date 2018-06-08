@@ -211,3 +211,26 @@ sub _write_constants
 
     return;
 }
+
+=head1 INSTALL
+
+In case the automatic detection fails, one can use some different attemps
+to succeed configuration:
+
+=over 4
+
+=item C<$ENV{PKG_CONFIG_PATH}>
+
+Prepend or append the path where your C<libstatgrab.pc> resides
+
+=item C<$ENV{libstatgrab_CFLAGS}>
+
+Set this to the CFLAGS suitable to compile against C<statgrab.h>
+
+=item C<$ENV{libstatgrab_LIBS}>
+
+Set this to the LINKFLAGS suitable to link against C<libstatgrab.so>
+
+=back
+
+=cut
